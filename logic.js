@@ -1,6 +1,5 @@
-/* logic.js - v14.6: Aggressive Optimizer (Fix Stickiness) */
+/* logic.js - v14.7: Merciless Economist (Fix Family Trap) */
 
-// Навигация
 window.nav = function(p, btn) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
     document.getElementById('p-'+p).classList.add('active');
@@ -24,7 +23,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v14.6: Optimization Active']), 1000);
+        setTimeout(() => this.showToasts(['Система v14.7: Economist Mode']), 1000);
     },
 
     setCat(cat, btn) {
@@ -105,7 +104,6 @@ const app = {
         if (s[19] === '(6)') { req.flex = 2; addExplain("Робототехника"); }
 
         // --- 2. УПРАВЛЕНИЕ БАРЬЕРАМИ (BUS) ---
-        // (Работает корректно, как ты и подтвердил)
         if (cat === 'BUS') {
             if (req.fr) {
                 if (s[3] !== 'Си') { s[3] = 'Си'; msgs.push("Добавлен барьер (Си) для FR"); }
@@ -134,10 +132,8 @@ const app = {
             if (req.oil && type === 'jacket' && !p.oil) return false;
             if (req.chem && type === 'jacket' && !p.chem) return false;
             
-            // Логика FR (Огнестойкость)
             if (req.fr) {
                 const hasBarrier = (s[3] === 'Си');
-                // Материал проходит, если он FR, ИЛИ если это изоляция с барьером
                 if (!p.fr && !(type === 'ins' && hasBarrier)) return false;
             }
             
@@ -155,50 +151,51 @@ const app = {
         if (this.state.validIns.length === 0) msgs.push('НЕТ ИЗОЛЯЦИИ под эти требования!');
         if (this.state.validJacket.length === 0) msgs.push('НЕТ ОБОЛОЧКИ под эти требования!');
 
-        // --- 5. АГРЕССИВНЫЙ ОПТИМИЗАТОР (AUTO-DOWNGRADE) ---
-        // Вот здесь мы чиним залипание
+        // --- 5. ОПТИМИЗАТОР (БЕСПОЩАДНЫЙ) ---
         
         const optimizeMaterial = (currentVal, validList, type) => {
             const curProp = DB.MAT_PROPS[(type==='jacket'?'J_':'')+currentVal];
             if (!curProp) return currentVal; 
 
             let needChange = false;
+            let isDowngrade = false; // Флаг: мы идем на понижение?
             
-            // 1. Невалиден? Менять!
-            if (!validList.includes(currentVal)) needChange = true;
+            // 1. Невалиден?
+            if (!validList.includes(currentVal)) {
+                needChange = true;
+            }
 
-            // 2. Downgrade FR (Выключили FR, но материал остался дорогим)
-            if (!req.fr && curProp.fr) needChange = true;
+            // 2. Downgrade FR (Сняли FR)
+            if (!req.fr && curProp.fr) {
+                needChange = true;
+                isDowngrade = true; // Забываем про семейство!
+            }
             
-            // 3. Downgrade HF (Выключили HF, но материал остался HF)
-            // Исключение: Для BUS изоляцию Пв (Foam PE) не трогаем,
-            // потому что ПВХ (В) там нельзя использовать технически.
+            // 3. Downgrade HF (Сняли HF)
             if (!req.hf && curProp.hf) {
                 if (cat === 'BUS' && type === 'ins' && currentVal === 'Пв') {
-                    needChange = false; // Оставляем Пв
+                    // Пв оставляем (исключение)
+                    needChange = false;
                 } else {
-                    needChange = true; // Меняем на ПВХ
+                    needChange = true;
+                    isDowngrade = true; // Забываем про семейство!
                 }
             }
 
             if (!needChange) return currentVal; 
 
-            // --- ПОДБОР ЗАМЕНЫ ---
-            // Сортировка: Сначала дешевые (Rank 1)
+            // Сортировка: Дешевые (Rank 1) вверху
             const sortedValid = validList.sort((a,b) => {
                 let pA = DB.MAT_PROPS[(type==='jacket'?'J_':'')+a];
                 let pB = DB.MAT_PROPS[(type==='jacket'?'J_':'')+b];
                 return (pA ? pA.rank : 99) - (pB ? pB.rank : 99);
             });
 
-            // а) Пытаемся найти то же семейство (напр. Пк -> П)
-            if (curProp.family) {
+            // а) Семейство ищем ТОЛЬКО если это не даунгрейд (isDowngrade = false)
+            if (curProp.family && !isDowngrade) {
                 const sameFamily = sortedValid.find(c => {
                     let p = DB.MAT_PROPS[(type==='jacket'?'J_':'')+c];
-                    // Ищем то же семейство, но учитываем снятие FR/HF
-                    let match = (p && p.family === curProp.family);
-                    if (!req.fr && p.fr) match = false; // Не берем FR, если не надо
-                    return match;
+                    return p && p.family === curProp.family && (!req.fr ? !p.fr : true);
                 });
                 if (sameFamily) return sameFamily;
             }
@@ -206,20 +203,19 @@ const app = {
             // б) Спец-правило BUS
             if (cat === 'BUS' && type === 'ins' && sortedValid.includes('Пв')) return 'Пв';
 
-            // в) Просто самый дешевый
+            // в) Берем самый дешевый (Rank 1)
             return sortedValid[0];
         };
 
-        // Запуск для Изоляции
+        // Запуск
         if (this.state.validIns.length > 0) {
             const newIns = optimizeMaterial(s[2], this.state.validIns, 'ins');
-            if (newIns !== s[2]) { s[2] = newIns; msgs.push(`Изоляция оптимизирована: ${newIns}`); }
+            if (newIns !== s[2]) { s[2] = newIns; msgs.push(`Изоляция: ${newIns}`); }
         }
 
-        // Запуск для Оболочки
         if (this.state.validJacket.length > 0) {
             const newJacket = optimizeMaterial(s[9], this.state.validJacket, 'jacket');
-            if (newJacket !== s[9]) { s[9] = newJacket; msgs.push(`Оболочка оптимизирована: ${newJacket}`); }
+            if (newJacket !== s[9]) { s[9] = newJacket; msgs.push(`Оболочка: ${newJacket}`); }
         }
         
         // --- 6. ЦВЕТА ---
