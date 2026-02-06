@@ -16,7 +16,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v13.0: Smart Logic Active']), 1000);
+        setTimeout(() => this.showToasts(['Система v14.1: TU Strict Mode']), 1000);
     },
 
     setCat(cat, btn) {
