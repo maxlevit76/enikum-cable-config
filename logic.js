@@ -1,5 +1,6 @@
-/* logic.js - v14.7: Merciless Economist (Fix Family Trap) */
+/* logic.js - v14.8: Smart Notifications (Consolidated Toasts) */
 
+// Навигация
 window.nav = function(p, btn) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
     document.getElementById('p-'+p).classList.add('active');
@@ -23,7 +24,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v14.7: Economist Mode']), 1000);
+        setTimeout(() => this.showToasts(['Система v14.8: UI Polished']), 1000);
     },
 
     setCat(cat, btn) {
@@ -106,7 +107,7 @@ const app = {
         // --- 2. УПРАВЛЕНИЕ БАРЬЕРАМИ (BUS) ---
         if (cat === 'BUS') {
             if (req.fr) {
-                if (s[3] !== 'Си') { s[3] = 'Си'; msgs.push("Добавлен барьер (Си) для FR"); }
+                if (s[3] !== 'Си') { s[3] = 'Си'; msgs.push("Добавлен барьер (Си)"); }
             } else {
                 if (s[3] === 'Си') { s[3] = ''; }
             }
@@ -115,10 +116,10 @@ const app = {
         // --- 3. ГОРИЗОНТАЛЬНАЯ ПОЛИЦИЯ ---
         if (s[19] === '(6)') { 
             if (s[10] === 'К' || s[10] === 'Б') {
-                s[10] = 'КГ'; msgs.push('Броня заменена на гибкую (КГ)');
+                s[10] = 'КГ'; msgs.push('Броня -> КГ (Гибкая)');
             }
-            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[6])) { s[6] = 'Эо'; msgs.push('Экран заменен на оплетку (Эо)'); }
-            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[4])) { s[4] = 'ЭИо'; msgs.push('Экран пар заменен на оплетку (ЭИо)'); }
+            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[6])) { s[6] = 'Эо'; msgs.push('Экран -> Эо (Оплетка)'); }
+            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[4])) { s[4] = 'ЭИо'; msgs.push('Экран пар -> ЭИо (Оплетка)'); }
         }
 
         // --- 4. ФИЛЬТРАЦИЯ МАТЕРИАЛОВ ---
@@ -148,50 +149,31 @@ const app = {
         this.state.validIns = allIns.filter(c => isCompatible(c, 'ins'));
         this.state.validJacket = allJacket.filter(c => isCompatible(c, 'jacket'));
 
-        if (this.state.validIns.length === 0) msgs.push('НЕТ ИЗОЛЯЦИИ под эти требования!');
-        if (this.state.validJacket.length === 0) msgs.push('НЕТ ОБОЛОЧКИ под эти требования!');
+        if (this.state.validIns.length === 0) msgs.push('ОШИБКА: Нет подходящей Изоляции!');
+        if (this.state.validJacket.length === 0) msgs.push('ОШИБКА: Нет подходящей Оболочки!');
 
         // --- 5. ОПТИМИЗАТОР (БЕСПОЩАДНЫЙ) ---
-        
         const optimizeMaterial = (currentVal, validList, type) => {
             const curProp = DB.MAT_PROPS[(type==='jacket'?'J_':'')+currentVal];
             if (!curProp) return currentVal; 
-
             let needChange = false;
-            let isDowngrade = false; // Флаг: мы идем на понижение?
-            
-            // 1. Невалиден?
-            if (!validList.includes(currentVal)) {
-                needChange = true;
-            }
+            let isDowngrade = false; 
 
-            // 2. Downgrade FR (Сняли FR)
-            if (!req.fr && curProp.fr) {
-                needChange = true;
-                isDowngrade = true; // Забываем про семейство!
-            }
-            
-            // 3. Downgrade HF (Сняли HF)
+            if (!validList.includes(currentVal)) needChange = true;
+            if (!req.fr && curProp.fr) { needChange = true; isDowngrade = true; }
             if (!req.hf && curProp.hf) {
-                if (cat === 'BUS' && type === 'ins' && currentVal === 'Пв') {
-                    // Пв оставляем (исключение)
-                    needChange = false;
-                } else {
-                    needChange = true;
-                    isDowngrade = true; // Забываем про семейство!
-                }
+                if (cat === 'BUS' && type === 'ins' && currentVal === 'Пв') { needChange = false; } 
+                else { needChange = true; isDowngrade = true; }
             }
 
             if (!needChange) return currentVal; 
 
-            // Сортировка: Дешевые (Rank 1) вверху
             const sortedValid = validList.sort((a,b) => {
                 let pA = DB.MAT_PROPS[(type==='jacket'?'J_':'')+a];
                 let pB = DB.MAT_PROPS[(type==='jacket'?'J_':'')+b];
                 return (pA ? pA.rank : 99) - (pB ? pB.rank : 99);
             });
 
-            // а) Семейство ищем ТОЛЬКО если это не даунгрейд (isDowngrade = false)
             if (curProp.family && !isDowngrade) {
                 const sameFamily = sortedValid.find(c => {
                     let p = DB.MAT_PROPS[(type==='jacket'?'J_':'')+c];
@@ -199,23 +181,18 @@ const app = {
                 });
                 if (sameFamily) return sameFamily;
             }
-
-            // б) Спец-правило BUS
             if (cat === 'BUS' && type === 'ins' && sortedValid.includes('Пв')) return 'Пв';
-
-            // в) Берем самый дешевый (Rank 1)
             return sortedValid[0];
         };
 
-        // Запуск
         if (this.state.validIns.length > 0) {
             const newIns = optimizeMaterial(s[2], this.state.validIns, 'ins');
-            if (newIns !== s[2]) { s[2] = newIns; msgs.push(`Изоляция: ${newIns}`); }
+            if (newIns !== s[2]) { s[2] = newIns; msgs.push(`Изоляция -> ${newIns}`); }
         }
 
         if (this.state.validJacket.length > 0) {
             const newJacket = optimizeMaterial(s[9], this.state.validJacket, 'jacket');
-            if (newJacket !== s[9]) { s[9] = newJacket; msgs.push(`Оболочка: ${newJacket}`); }
+            if (newJacket !== s[9]) { s[9] = newJacket; msgs.push(`Оболочка -> ${newJacket}`); }
         }
         
         // --- 6. ЦВЕТА ---
@@ -225,9 +202,7 @@ const app = {
         if (s[21] === 'i') targetColor = 'Синий'; 
         if (cat === 'BUS' && s[23] === '[PB]') targetColor = 'Фиолетовый'; 
         
-        if (s[24] !== 'Спец' && s[24] !== 'Желтый' && s[24] !== 'Красный') {
-            s[24] = targetColor;
-        }
+        if (s[24] !== 'Спец' && s[24] !== 'Желтый' && s[24] !== 'Красный') { s[24] = targetColor; }
 
         this.state.msgs = msgs;
     },
@@ -420,14 +395,26 @@ const app = {
     showToasts(msgs) {
         const c = document.getElementById('toasts');
         c.innerHTML = '';
-        msgs.forEach(m => {
-            const t = document.createElement('div');
-            t.className = 'toast';
-            if(m.includes('НЕТ') || m.includes('ВНИМАНИЕ')) t.classList.add('danger');
-            t.innerHTML = `<i class="fas fa-info-circle"></i> <span>${m}</span>`;
-            c.appendChild(t);
-        });
-        setTimeout(() => c.innerHTML = '', 4000);
+        if(!msgs || !msgs.length) return;
+
+        const t = document.createElement('div');
+        t.className = 'toast';
+        const isDanger = msgs.some(m => m.includes('ОШИБКА'));
+        if(isDanger) t.classList.add('danger');
+
+        let content = '';
+        if(msgs.length === 1) {
+            content = `<span>${msgs[0]}</span>`;
+        } else {
+            content = `<div style="display:flex; flex-direction:column; align-items:flex-start;">`;
+            msgs.forEach(m => content += `<div style="margin-bottom:2px;">• ${m}</div>`);
+            content += `</div>`;
+        }
+        
+        t.innerHTML = `<i class="fas fa-info-circle" style="margin-top:${msgs.length>1?'4px':'0'}"></i> ${content}`;
+        c.appendChild(t);
+        const time = 3000 + (msgs.length * 1000);
+        setTimeout(() => c.innerHTML = '', time);
     }
 };
 
