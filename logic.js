@@ -1,4 +1,4 @@
-/* logic.js - v14.4: BUS Force Barrier & Robust Anti-Stick */
+/* logic.js - v14.5: Hard Police (Auto-Downgrade & Barrier Cleanup) */
 
 // Навигация
 window.nav = function(p, btn) {
@@ -24,7 +24,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v14.4: Logic Stable']), 1000);
+        setTimeout(() => this.showToasts(['Система v14.5: Hard Police Active']), 1000);
     },
 
     setCat(cat, btn) {
@@ -88,7 +88,7 @@ const app = {
         this.state.explanations = []; 
         const addExplain = (txt) => this.state.explanations.push(txt);
 
-        // 1. ТРЕБОВАНИЯ
+        // --- 1. СБОР ТРЕБОВАНИЙ ---
         const req = { minT: -50, hf: false, fr: false, oil: false, chem: false, uv: false, flex: 1 };
         
         const fireCode = s[11] || "";
@@ -104,17 +104,24 @@ const app = {
         if (s[19] === '(5)') { req.flex = 1; addExplain("Гибкий монтаж"); }
         if (s[19] === '(6)') { req.flex = 2; addExplain("Робототехника"); }
 
-        // --- 2. ПРИНУДИТЕЛЬНАЯ ЛОГИКА (FORCE) ---
-        
-        // BUS + FR = Обязательный барьер Си
-        if (cat === 'BUS' && req.fr) {
-            if (s[3] !== 'Си') {
-                s[3] = 'Си';
-                msgs.push("Добавлен барьер (Си) для защиты шины данных");
+        // --- 2. УПРАВЛЕНИЕ БАРЬЕРАМИ (BUS) ---
+        // Жесткая привязка барьера к FR для BUS
+        if (cat === 'BUS') {
+            if (req.fr) {
+                if (s[3] !== 'Си') {
+                    s[3] = 'Си';
+                    msgs.push("Добавлен барьер (Си) для защиты шины");
+                }
+            } else {
+                // Если FR выключили - убираем барьер
+                if (s[3] === 'Си') {
+                    s[3] = '';
+                    // msgs.push("Убран барьер (нет FR)"); // Можно раскомментировать, если нужно уведомление
+                }
             }
         }
 
-        // --- 3. ГОРИЗОНТАЛЬНАЯ ПОЛИЦИЯ (ЗАПРЕТЫ) ---
+        // --- 3. ГОРИЗОНТАЛЬНАЯ ПОЛИЦИЯ ---
         if (s[19] === '(6)') { 
             if (s[10] === 'К' || s[10] === 'Б') {
                 s[10] = 'КГ'; msgs.push('Броня заменена на гибкую (КГ)');
@@ -134,11 +141,10 @@ const app = {
             if (req.oil && type === 'jacket' && !p.oil) return false;
             if (req.chem && type === 'jacket' && !p.chem) return false;
             
-            // ЛОГИКА ОГНЕСТОЙКОСТИ (FR)
+            // Логика FR:
             if (req.fr) {
-                // Материал проходит, если он сам FR (p.fr)
-                // ИЛИ если это Изоляция и есть Барьер (Си)
                 const hasBarrier = (s[3] === 'Си');
+                // Материал проходит, если он FR, ИЛИ если это изоляция с барьером
                 if (!p.fr && !(type === 'ins' && hasBarrier)) return false;
             }
             
@@ -156,40 +162,68 @@ const app = {
         if (this.state.validIns.length === 0) msgs.push('НЕТ ИЗОЛЯЦИИ под эти требования!');
         if (this.state.validJacket.length === 0) msgs.push('НЕТ ОБОЛОЧКИ под эти требования!');
 
-        // --- 5. SMART ANTI-STICK (Переключение) ---
-        const getBestReplacement = (currentVal, validList, type) => {
-            // Сортировка: Дешевые (Rank 1) -> Дорогие
+        // --- 5. ОПТИМИЗАТОР (AUTO-SWITCH & DOWNGRADE) ---
+        
+        const optimizeMaterial = (currentVal, validList, type) => {
+            // 1. Если текущий невалиден - меняем
+            // 2. Если текущий "Слишком хорош" (напр. FR когда не нужно) - меняем на стандарт
+            
+            const curProp = DB.MAT_PROPS[(type==='jacket'?'J_':'')+currentVal];
+            if (!curProp) return currentVal; // Защита
+
+            let needChange = false;
+            
+            // Проверка валидности
+            if (!validList.includes(currentVal)) needChange = true;
+
+            // Проверка "Избыточности" (Downgrade Logic)
+            // Если FR выключен, а материал FR -> ищем замену
+            if (!req.fr && curProp.fr) needChange = true;
+            // Если HF выключен, а материал HF -> ищем замену (если есть дешевле)
+            if (!req.hf && curProp.hf && type==='jacket') {
+                // Для оболочек HF дороже, поэтому при снятии HF пытаемся уйти на ПВХ
+                // Для изоляции сложнее (Пв лучше П), поэтому там аккуратнее
+                needChange = true; 
+            }
+
+            if (!needChange) return currentVal; // Оставляем как есть
+
+            // --- АЛГОРИТМ ПОДБОРА ЗАМЕНЫ ---
+            
+            // Сортируем валидные по Рангу (Сначала дешевые)
             const sortedValid = validList.sort((a,b) => {
                 let pA = DB.MAT_PROPS[(type==='jacket'?'J_':'')+a];
                 let pB = DB.MAT_PROPS[(type==='jacket'?'J_':'')+b];
                 return (pA ? pA.rank : 99) - (pB ? pB.rank : 99);
             });
 
-            // Пытаемся найти то же семейство (PVC -> PVC)
-            let curProp = DB.MAT_PROPS[(type==='jacket'?'J_':'')+currentVal];
-            let currentFamily = curProp ? curProp.family : null;
-
-            if (currentFamily) {
+            // 1. Попытка сохранить Семейство (Family Stickiness)
+            // Пример: Было Пк (HF+FR), стало без FR -> ищем П (HF)
+            // Пример: Было Вк (PVC+FR), стало без FR -> ищем В (PVC)
+            if (curProp.family) {
                 const sameFamily = sortedValid.find(c => {
                     let p = DB.MAT_PROPS[(type==='jacket'?'J_':'')+c];
-                    return p && p.family === currentFamily;
+                    return p && p.family === curProp.family;
                 });
                 if (sameFamily) return sameFamily;
             }
 
-            // Иначе спецправила или дефолт
+            // 2. Спец-правило для BUS (Приоритет Пв)
             if (cat === 'BUS' && type === 'ins' && sortedValid.includes('Пв')) return 'Пв';
-            return sortedValid[0]; // Самый дешевый
+
+            // 3. Fallback: Берем самый дешевый валидный
+            return sortedValid[0];
         };
 
-        if (!this.state.validIns.includes(s[2]) && this.state.validIns.length > 0) {
-            const newVal = getBestReplacement(s[2], this.state.validIns, 'ins');
-            if (newVal) { s[2] = newVal; msgs.push(`Изоляция изменена на ${s[2]}`); }
+        // Запускаем оптимизатор
+        if (this.state.validIns.length > 0) {
+            const newIns = optimizeMaterial(s[2], this.state.validIns, 'ins');
+            if (newIns !== s[2]) { s[2] = newIns; }
         }
 
-        if (!this.state.validJacket.includes(s[9]) && this.state.validJacket.length > 0) {
-            const newVal = getBestReplacement(s[9], this.state.validJacket, 'jacket');
-            if (newVal) { s[9] = newVal; msgs.push(`Оболочка изменена на ${s[9]}`); }
+        if (this.state.validJacket.length > 0) {
+            const newJacket = optimizeMaterial(s[9], this.state.validJacket, 'jacket');
+            if (newJacket !== s[9]) { s[9] = newJacket; }
         }
         
         // --- 6. ЦВЕТА ---
