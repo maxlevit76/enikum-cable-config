@@ -10,23 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Стили для Энциклопедии (Справочника) */
-        .wiki-container { background: #fff; padding: 25px; border-radius: 10px; margin-top: 30px; border: 1px solid #DEE2E6; color: #333; }
-        .wiki-header { font-family: 'Oswald'; color: #F7941D; font-size: 22px; text-transform: uppercase; margin-bottom: 5px; line-height: 1.2; }
-        .wiki-subtitle { font-size: 14px; color: #6C757D; margin-bottom: 25px; border-bottom: 1px solid #EEE; padding-bottom: 15px; }
-        .cat-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .cat-item { padding: 15px; border-radius: 8px; border: 1px solid #E9ECEF; font-size: 13px; border-left: 4px solid #DEE2E6; }
-        .cat-item.bus { border-left-color: #0D6EFD; }
-        .cat-item.signal { border-left-color: #198754; }
-        .cat-item.control { border-left-color: #F7941D; }
-        .cat-title { font-weight: bold; text-transform: uppercase; margin-bottom: 8px; font-size: 14px; display: block; }
-        .wiki-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 20px 0; background: #fff; }
-        .wiki-table th { background: #343A40; color: #fff; padding: 10px; border: 1px solid #454D55; text-align: left; text-transform: uppercase; font-size: 11px; }
-        .wiki-table td { padding: 12px 10px; border: 1px solid #DEE2E6; vertical-align: top; line-height: 1.4; }
-        .idx-tag { font-family: monospace; font-weight: bold; background: #F8F9FA; padding: 2px 6px; border-radius: 4px; border: 1px solid #DEE2E6; }
-        .fire-head { color: #DC3545; font-family: 'Oswald'; font-size: 18px; margin-top: 30px; border-bottom: 2px solid #DC3545; padding-bottom: 5px; }
-    </style>
 </head>
 <body>
 
@@ -67,90 +50,67 @@
 
 <div id="p-matrix" class="page">
     <div class="container">
-        <h3 style="font-family:'Oswald'; margin-bottom: 15px;">МАТРИЦА СОВМЕСТИМОСТИ</h3>
-        <div class="matrix-scroll-wrap">
-            <div id="summaryTableArea"></div>
-        </div>
-
-        <div class="wiki-container">
-            <div class="wiki-header">АРХИТЕКТУРА КАБЕЛЬНЫХ ЛИНИЙ В ПРОМЫШЛЕННОЙ АВТОМАТИЗАЦИИ</div>
-            <div class="wiki-subtitle">Физические основы категоризации: BUS, SIGNAL, CONTROL</div>
+        <h3 style="font-family:'Oswald'; margin-bottom:15px;">МАТРИЦА СОВМЕСТИМОСТИ</h3>
+        <div class="matrix-scroll-wrap"><div id="summaryTableArea"></div></div>
+        
+        <div style="background:#fff; padding:25px; border-radius:8px; border:1px solid #dee2e6; margin-top:30px; color:#333;">
+            <div style="font-family:'Oswald'; color:#F7941D; font-size:24px; text-transform:uppercase; margin-bottom:10px;">АРХИТЕКТУРА КАБЕЛЬНЫХ ЛИНИЙ В ПРОМЫШЛЕННОЙ АВТОМАТИЗАЦИИ</div>
+            <div style="color:#666; font-size:14px; margin-bottom:25px; border-bottom:1px solid #eee; padding-bottom:15px;">Физические основы категоризации: BUS, SIGNAL, CONTROL [cite: 342]</div>
             
-            <p style="font-size: 14px; line-height: 1.5;">В номенклатуре продукции ЭНИКУМ принято условное разделение кабелей на три функциональные категории. Данная классификация продиктована не маркетингом, а фундаментальными законами электродинамики.</p>
+            <p style="font-size:14px; line-height:1.6; margin-bottom:20px;">В номенклатуре продукции ЭНИКУМ принято условное разделение кабелей на три функциональные категории. Данная классификация продиктована не маркетингом, а фундаментальными законами электродинамики. [cite: 342]</p>
 
-            <div class="cat-info-grid">
-                <div class="cat-item bus">
-                    <span class="cat-title" style="color:#0D6EFD;">1. Категория BUS (Интерфейсные)</span>
-                    <b>Уровень:</b> Level 1 (Controller-to-Controller).<br>
-                    <b>Физика:</b> Высокочастотный цифровой поток (МГц), передача фронтами импульсов. Работает как длинная линия.<br>
-                    <b>Z₀:</b> 100 / 120 / 150 Ом.
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:30px;">
+                <div style="border-left:4px solid #0D6EFD; padding-left:15px; background:#f8faff; padding:10px;">
+                    <b style="color:#0D6EFD; text-transform:uppercase; display:block; margin-bottom:5px;">1. BUS (Интерфейсные) [cite: 344]</b>
+                    <span style="font-size:12px;">Level 1. Высокочастотный цифровой поток (МГц). Работает как длинная линия. $Z_0$: 100/120/150 Ом. [cite: 344, 345]</span>
                 </div>
-                <div class="cat-item signal">
-                    <span class="cat-title" style="color:#198754;">2. Категория SIGNAL (Монтажные)</span>
-                    <b>Уровень:</b> Level 0 (Sensor-to-PLC).<br>
-                    <b>Физика:</b> Аналог (4-20 мА, 0-10В) или дискретика. Важна точность амплитуды.<br>
-                    <b>EMI:</b> Требует качественного экранирования.
+                <div style="border-left:4px solid #198754; padding-left:15px; background:#f8fff9; padding:10px;">
+                    <b style="color:#198754; text-transform:uppercase; display:block; margin-bottom:5px;">2. SIGNAL (Монтажные) [cite: 347]</b>
+                    <span style="font-size:12px;">Level 0. Аналог (4-20 мА) или дискретика. Важна точность амплитуды и EMI-экранирование. [cite: 347, 348]</span>
                 </div>
-                <div class="cat-item control">
-                    <span class="cat-title" style="color:#F7941D;">3. Категория CONTROL (Управление)</span>
-                    <b>Уровень:</b> Силовое управление, вторичная коммутация.<br>
-                    <b>Физика:</b> Энергия (Power Control).<br>
-                    <b>Напряжение:</b> Рабочее до 660В, изоляция до 1000В.
+                <div style="border-left:4px solid #F7941D; padding-left:15px; background:#fffaf5; padding:10px;">
+                    <b style="color:#F7941D; text-transform:uppercase; display:block; margin-bottom:5px;">3. CONTROL (Управление) [cite: 351]</b>
+                    <span style="font-size:12px;">Силовое управление. Энергия (Power Control). Стойкость к выбросам ЭДС. До 660В. [cite: 351, 352, 363]</span>
                 </div>
             </div>
 
-            <h3 style="font-family:'Oswald'; margin-top: 40px;">ДЕТАЛЬНОЕ ОПИСАНИЕ ИНДЕКСОВ (1-24)</h3>
-            <table class="wiki-table">
-                <thead>
-                    <tr>
-                        <th style="width: 80px; text-align: center;">ID</th>
-                        <th>Описание из Технических Условий (ТУ)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="text-center"><span class="idx-tag">Вз</span></td>
-                        <td><b>Взрывозащита.</b> Применяется для объектов и помещений с риском возникновения взрывоопасных сред (газ, пар, туман). Обеспечивает продольную и радиальную герметичность.</td>
-                    </tr>
-                    <tr>
-                        <td class="text-center"><span class="idx-tag">Пв/Пс</span></td>
-                        <td><b>Высокочастотная изоляция.</b> Вспененный или сшитый полиэтилен. Обладает низкой диэлектрической проницаемостью, что критично для сохранения формы импульса в сетях RS-485 и Profibus.</td>
-                    </tr>
-                    <tr>
-                        <td class="text-center"><span class="idx-tag">Тп</span></td>
-                        <td><b>Термоэластопласт.</b> Сочетает свойства резины и термопласта. Обеспечивает исключительную гибкость и работу при температурах до +100°С.</td>
-                    </tr>
-                    <tr>
-                        <td class="text-center"><span class="idx-tag">Ф</span></td>
-                        <td><b>Фторопласт (FEP).</b> Сополимер фторопласта для экстремальных условий. Стойкость к кислотам, щелочам и температурам до +250°С.</td>
-                    </tr>
-                </tbody>
+            <div style="font-family:'Oswald'; color:#333; font-size:18px; text-transform:uppercase; border-bottom:2px solid #F7941D; padding-bottom:5px; margin-top:40px;">Описание индексов (ТУ) [cite: 366]</div>
+            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:15px;">
+                <tr>
+                    <td style="padding:10px; border:1px solid #dee2e6; background:#f8f9fa; width:80px; font-weight:bold; text-align:center;">Вз [cite: 367]</td>
+                    <td style="padding:10px; border:1px solid #dee2e6;">Взрывозащита. Продольная и радиальная герметичность для взрывоопасных зон. [cite: 367]</td>
+                </tr>
+                <tr>
+                    <td style="padding:10px; border:1px solid #dee2e6; background:#f8f9fa; font-weight:bold; text-align:center;">Пв/Пс [cite: 374, 375]</td>
+                    <td style="padding:10px; border:1px solid #dee2e6;">Изоляция с низкой емкостью для RS-485, Profibus, Fieldbus Foundation. [cite: 374, 375]</td>
+                </tr>
+                <tr>
+                    <td style="padding:10px; border:1px solid #dee2e6; background:#f8f9fa; font-weight:bold; text-align:center;">Тп [cite: 380]</td>
+                    <td style="padding:10px; border:1px solid #dee2e6;">Термоэластопласт. Гибкость и эксплуатация до +100°С. [cite: 380, 381]</td>
+                </tr>
             </table>
 
-            <div class="fire-head">ПОЖАРНАЯ БЕЗОПАСНОСТЬ (ФЗ-123)</div>
-            <table class="wiki-table">
-                <thead>
-                    <tr>
-                        <th>Индекс</th>
-                        <th>Технические характеристики и область применения</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="font-weight: bold; width: 120px;">нг(А)-LS</td>
-                        <td>Low Smoke. Пониженное дымо- и газовыделение. Стандарт для офисов и промышленных объектов.</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold;">нг(А)-HF</td>
-                        <td>Halogen Free. Не выделяет коррозионно-активных газообразных продуктов при горении. Для мест массового скопления людей.</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold;">нг(А)-FR</td>
-                        <td>Fire Resistant. Огнестойкое исполнение. Сохраняет работоспособность цепи в условиях пожара (до 180 мин).</td>
-                    </tr>
-                </tbody>
+            <div style="font-family:'Oswald'; color:#DC3545; font-size:18px; text-transform:uppercase; border-bottom:2px solid #DC3545; padding-bottom:5px; margin-top:40px;">Пожарная безопасность (ФЗ-123) [cite: 449]</div>
+            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:15px;">
+                <tr style="background:#f8f9fa; font-weight:bold;">
+                    <td style="padding:8px; border:1px solid #dee2e6;">Индекс [cite: 450]</td>
+                    <td style="padding:8px; border:1px solid #dee2e6;">Характеристики [cite: 450]</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; border:1px solid #dee2e6;"><b>нг(А)-LS</b> [cite: 450]</td>
+                    <td style="padding:8px; border:1px solid #dee2e6;">Пониженное дымо- и газовыделение. [cite: 450]</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; border:1px solid #dee2e6;"><b>нг(А)-HF</b> [cite: 453]</td>
+                    <td style="padding:8px; border:1px solid #dee2e6;">Без галогенов, отсутствие коррозионных газов. [cite: 453]</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; border:1px solid #dee2e6;"><b>нг(А)-FR</b> [cite: 455]</td>
+                    <td style="padding:8px; border:1px solid #dee2e6;">Огнестойкий (сохранение работоспособности в огне). [cite: 455]</td>
+                </tr>
             </table>
         </div>
+        <div id="detailedSpecs"></div>
     </div>
 </div>
 
@@ -168,12 +128,32 @@
             </div>
             <div style="background:#F8F9FA; padding:20px; border-radius:4px; margin-bottom:30px;">
                 <div id="pdfSkuMain" style="font-family:'Oswald'; font-size:24px; color:#1D1D1B;">...</div>
-                <div id="pdfIcons" style="display:flex; gap:6px; margin-top:12px;"></div>
+                <div id="pdfIcons" style="display:flex; gap:6px; margin-top:12px; flex-wrap:wrap;"></div>
             </div>
-            <div id="pdfSpecsTableArea">
-                <table style="width:100%; font-size:11px; border-collapse:collapse; border-top:2px solid #333;">
-                    <tbody id="pdfSpecsTable"></tbody>
-                </table>
+            <div style="display:flex; gap:40px; margin-bottom:30px;">
+                <div style="flex:3;">
+                    <h4 style="color:#F7941D; font-family:'Oswald'; text-transform:uppercase; font-size:16px; margin:0 0 15px 0; border-bottom:1px solid #EEE; padding-bottom:5px;">Назначение</h4>
+                    <div id="pdfDest" style="font-size:12px; line-height:1.6; color:#333;"></div>
+                </div>
             </div>
+            <table style="width:100%; font-size:11px; border-collapse:collapse; border-top:2px solid #333;">
+                <tbody id="pdfSpecsTable"></tbody>
+            </table>
         </div>
     </div>
+    <div class="fab-download" onclick="app.downloadPDF()"><i class="fas fa-file-pdf"></i></div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<div class="btm-nav">
+    <div class="nav-btn active" onclick="nav('conf', this)"><i class="fas fa-sliders-h"></i> Конфиг</div>
+    <div class="nav-btn" onclick="nav('matrix', this)"><i class="fas fa-book"></i> Справка</div>
+    <div class="nav-btn" onclick="nav('pdf', this)"><i class="fas fa-file-alt"></i> PDF</div>
+</div>
+
+<script src="database.js"></script>
+<script src="logic.js"></script>
+
+</body>
+</html>
