@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ЭНИКУМ Конфигуратор v11.0</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-header">
+    <div class="header-top">
+        <div class="logo"><span>Э</span>НИКУМ <span class="version-badge">v11.0 MODULAR</span></div>
+        <div style="font-size:11px; color:#ADB5BD;">Energocomplex Engineering</div>
+    </div>
+    <div class="sku-box">
+        <div class="sku-label">
+            <span>АРТИКУЛ</span>
+            <div class="reset-btn" onclick="app.resetAll()"><i class="fas fa-undo"></i> Сброс</div>
+        </div>
+        <div class="sku-val" id="skuDisplay">...</div>
+        <div class="icon-dashboard" id="headerIcons"></div>
+    </div>
+</div>
+
+<div id="p-conf" class="page active">
+    <div class="cat-tabs">
+        <div class="cat-btn active" onclick="app.setCat('BUS', this)"><i class="fas fa-network-wired"></i> BUS</div>
+        <div class="cat-btn" onclick="app.setCat('SIGNAL', this)"><i class="fas fa-wave-square"></i> SIGNAL</div>
+        <div class="cat-btn" onclick="app.setCat('CONTROL', this)"><i class="fas fa-bolt"></i> CONTROL</div>
+    </div>
+    
+    <div id="sysAlert" class="sys-alert-block">
+        <div style="font-family:'Oswald'; font-weight:bold; margin-bottom:5px; text-transform:uppercase;"><i class="fas fa-clipboard-check"></i> Инженерный контроль</div>
+        <div id="sysAlertContent"></div>
+    </div>
+
+    <div class="container" id="formArea"></div>
+    
+    <div class="app-footer">
+        <div>© 2025 ENICUM Configuration Tool</div>
+        <div>support@enicum.ru</div>
+    </div>
+</div>
+
+<div id="p-matrix" class="page">
+    <div class="container">
+        <h3 style="font-family:'Oswald';">МАТРИЦА СОВМЕСТИМОСТИ</h3>
+        <div class="matrix-scroll-wrap"><div id="summaryTableArea"></div></div>
+        <div id="detailedSpecs"></div>
+    </div>
+</div>
+
+<div id="p-pdf" class="page">
+    <div class="pdf-preview-wrap" id="pdfExportTarget">
+        <div class="pdf-content">
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 3px solid #F7941D; padding-bottom: 15px; margin-bottom: 30px;">
+                <div>
+                    <div style="font-family:'Oswald'; font-size:36px; line-height:1; color:#1D1D1B;">ЭНИКУМ</div>
+                    <div style="font-size:12px; color:#777; letter-spacing:1px; margin-top:5px;">ЗАВОД СПКБ ТЕХНО</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-weight:bold; font-size:14px;">ТУ 27.32.13-001-33185018-2023</div>
+                    <div style="font-size:11px; color:#777;">Сертификат ЕАС / Газпромсерт</div>
+                </div>
+            </div>
+            <div style="background:#F8F9FA; padding:20px; border-radius:4px; margin-bottom:30px;">
+                <div style="font-size:10px; color:#999; text-transform:uppercase; font-weight:bold; margin-bottom:5px;">Код заказа</div>
+                <div id="pdfSkuMain" style="font-family:'Oswald'; font-size:24px; line-height:1.2; word-break:break-all; color:#1D1D1B;">...</div>
+                <div id="pdfIcons" style="display:flex; gap:6px; margin-top:12px; flex-wrap:wrap;"></div>
+            </div>
+            <div id="pdfAlerts" style="margin-bottom:20px; font-size:11px; color:#856404; display:none;"></div>
+            <div style="display:flex; gap:40px; margin-bottom:30px;">
+                <div style="flex:3;">
+                    <h4 style="color:#F7941D; font-family:'Oswald'; text-transform:uppercase; font-size:16px; margin:0 0 15px 0; border-bottom:1px solid #EEE; padding-bottom:5px;">Назначение</h4>
+                    <div id="pdfDest" style="font-size:12px; line-height:1.6; color:#333; text-align:justify;"></div>
+                    <h4 style="color:#F7941D; font-family:'Oswald'; text-transform:uppercase; font-size:16px; margin:25px 0 15px 0; border-bottom:1px solid #EEE; padding-bottom:5px;">Конструкция</h4>
+                    <div id="pdfConstr" style="font-size:12px; line-height:1.6; color:#333;"></div>
+                </div>
+                <div style="flex:2;">
+                    <div style="font-size:11px; line-height:1.5;">
+                        <div style="display:flex; justify-content:space-between; border-bottom:1px solid #EEE; padding:5px 0;">
+                            <span style="color:#777;">Т. экспл.</span><span style="font-weight:bold;" id="pdfTempExp"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <table style="width:100%; font-size:11px; border-collapse:collapse; border-top:2px solid #333;">
+                <tbody id="pdfSpecsTable"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="fab-download" onclick="app.downloadPDF()"><i class="fas fa-file-pdf"></i></div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<div class="btm-nav">
+    <div class="nav-btn active" onclick="nav('conf', this)"><i class="fas fa-sliders-h"></i> Конфиг</div>
+    <div class="nav-btn" onclick="nav('matrix', this)"><i class="fas fa-book"></i> Справка</div>
+    <div class="nav-btn" onclick="nav('pdf', this)"><i class="fas fa-file-alt"></i> PDF</div>
+</div>
+
+<script src="database.js"></script>
+<script src="logic.js"></script>
+
+</body>
+</html>
