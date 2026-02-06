@@ -1,176 +1,222 @@
-/* database.js - v14.22: Light (No text, logic only) */
+/* database.js - База знаний ЭНИКУМ v13.0 (Backup v13 Stable) */
 
 const DB = {
-    // 1. Groups
-    GROUPS: [
-        { t: "1. ТИП И БЕЗОПАСНОСТЬ", ids: [23, 11, 1] },
-        { t: "2. КОНСТРУКЦИЯ КАБЕЛЯ", ids: [2, 3, 4, 5, 6, 7, 8, 9, 10] },
-        { t: "3. ПАРАМЕТРЫ ЖИЛЫ", ids: [18, 19, 20, 22] }, 
-        { t: "4. ВНЕШНИЕ ФАКТОРЫ", ids: [12, 13, 14, 15, 16, 17] },
-        { t: "5. ЦВЕТОВАЯ МАРКИРОВКА", ids: [21, 24] }
-    ],
+    // ============================================================
+    // 1. ФИЗИКА МАТЕРИАЛОВ (СВОЙСТВА И ОГРАНИЧЕНИЯ)
+    // ============================================================
+    // ============================================================
+    // 1. ФИЗИКА МАТЕРИАЛОВ (v14.3: Added FR & Family to Jackets)
+    // ============================================================
+    MAT_PROPS: {
+        // --- ИЗОЛЯЦИЯ (Insulation) ---
+        'В':   { minT: -50, maxT: 70,  hf: false, fr: false, oil: true,  chem: false, flex_grade: 1, rank: 1, family: 'PVC' },
+        'Вк':  { minT: -50, maxT: 70,  hf: false, fr: true,  oil: true,  chem: false, flex_grade: 0, rank: 1, family: 'PVC' },
+        
+        'П':   { minT: -50, maxT: 70,  hf: true,  fr: false, oil: false, chem: false, flex_grade: 1, rank: 2, family: 'HF' },
+        'Пк':  { minT: -50, maxT: 70,  hf: true,  fr: true,  oil: false, chem: false, flex_grade: 0, rank: 2, family: 'HF' },
+        
+        'Пп':  { minT: -60, maxT: 80,  hf: true,  fr: false, oil: false, chem: false, flex_grade: 1, rank: 3, family: 'PO' },
+        'Ппк': { minT: -60, maxT: 80,  hf: true,  fr: true,  oil: false, chem: false, flex_grade: 0, rank: 3, family: 'PO' },
+        
+        'Пс':  { minT: -60, maxT: 90,  hf: true,  fr: false, oil: false, chem: false, flex_grade: 0, rank: 3, family: 'XLPE' },
+        'Пск': { minT: -60, maxT: 90,  hf: true,  fr: true,  oil: false, chem: false, flex_grade: 0, rank: 3, family: 'XLPE' },
+        
+        'Пв':  { minT: -60, maxT: 80,  hf: false, fr: false, oil: false, chem: false, flex_grade: 0, rank: 2, family: 'FPE' }, // Special
+        
+        'Пб':  { minT: -50, maxT: 125, hf: true,  fr: false, oil: true,  chem: true,  flex_grade: 1, rank: 4, family: 'XL-HF' },
+        'Пбк': { minT: -50, maxT: 125, hf: true,  fr: true,  oil: true,  chem: true,  flex_grade: 1, rank: 4, family: 'XL-HF' },
+        
+        'Тп':  { minT: -60, maxT: 125, hf: true,  fr: false, oil: true,  chem: true,  flex_grade: 2, rank: 4, family: 'TPE' },
+        
+        'У':   { minT: -60, maxT: 90,  hf: true,  fr: false, oil: true,  chem: true,  flex_grade: 2, rank: 4, family: 'PUR' },
+        
+        'Р':   { minT: -60, maxT: 200, hf: true,  fr: true,  oil: false, chem: true,  flex_grade: 2, rank: 5, family: 'SIL' },
+        'РПс': { minT: -60, maxT: 200, hf: true,  fr: true,  oil: false, chem: true,  flex_grade: 2, rank: 5, family: 'SIL' },
+        'РПп': { minT: -60, maxT: 200, hf: true,  fr: true,  oil: false, chem: true,  flex_grade: 2, rank: 5, family: 'SIL' },
+        
+        'Ф':   { minT: -60, maxT: 250, hf: true,  fr: false, oil: true,  chem: true,  flex_grade: 1, rank: 6, family: 'FEP' },
 
-    // 2. Indices (Codes Only)
+        // --- ОБОЛОЧКИ (Jackets) - J_prefix ---
+        // Важно: fr: true здесь означает "может быть в составе FR кабеля"
+        'J_В':  { minT: -50, maxT: 70,  hf: false, fr: true, oil: true,  uv: false, flex_grade: 1, rank: 1, family: 'PVC' },
+        'J_П':  { minT: -50, maxT: 70,  hf: true,  fr: true, oil: false, uv: false, flex_grade: 1, rank: 2, family: 'HF' },
+        'J_Пэ': { minT: -60, maxT: 80,  hf: false, fr: false, oil: false, uv: true,  flex_grade: 0, rank: 2, family: 'PE' },
+        
+        'J_У':  { minT: -60, maxT: 90,  hf: true,  fr: false, oil: true,  uv: true,  flex_grade: 2, rank: 4, family: 'PUR' },
+        'J_ПУ': { minT: -60, maxT: 90,  hf: true,  fr: true,  oil: true,  uv: true,  flex_grade: 2, rank: 4, family: 'PUR' },
+        
+        'J_Р':  { minT: -60, maxT: 200, hf: true,  fr: true,  oil: false, uv: true,  flex_grade: 2, rank: 5, family: 'SIL' },
+        'J_Тп': { minT: -60, maxT: 100, hf: true,  fr: false, oil: true,  uv: true,  flex_grade: 2, rank: 4, family: 'TPE' },
+        'J_Пб': { minT: -60, maxT: 150, hf: true,  fr: false, oil: true,  uv: true,  flex_grade: 1, rank: 3, family: 'XL-HF' },
+        'J_Ф':  { minT: -60, maxT: 250, hf: true,  fr: false, oil: true,  uv: true,  flex_grade: 1, rank: 6, family: 'FEP' }
+    },
+
+    // ============================================================
+    // 2. ИНДЕКСЫ (ORIGINAL SHORT NAMES)
+    // ============================================================
     INDICES: [
-        { id:1, n:"Взрывозащита", opts:[{c:"", l:"Нет (Общепром)", hint:"Общепром"}, {c:"Вз", l:"Вз - Взрывозащита", hint:"Для взрывоопасных зон"}]},
+        { id:1, n:"Взрывозащита", opts:[
+            {c:"", l:"Нет (Общепром)", wiki:"[ТУ 1.2.1] Общепромышленное исполнение."},
+            {c:"Вз", l:"Вз", wiki:"[ТУ 1.6.6] Взрывозащищенное исполнение. Конструкция с экструдированным заполнением."}
+        ]},
         { id:2, n:"Изоляция ТПЖ", opts:[
-            {c:"В", l:"В - ПВХ пластикат", hint:"PVC"}, {c:"П", l:"П - Полимер (HF)", hint:"HF"}, 
-            {c:"Пб", l:"Пб - Сшитый полимер", hint:"HF Pro"}, {c:"Пс", l:"Пс - Сшитый ПЭ", hint:"XLPE"}, 
-            {c:"Пв", l:"Пв - Вспененный ПЭ", hint:"FPE"}, {c:"Пп", l:"Пп - Полиолефин", hint:"PO"}, 
-            {c:"Р", l:"Р - Силикон", hint:"SiR"}, {c:"Тп", l:"Тп - Термоэластопласт", hint:"TPE"}, 
-            {c:"Ф", l:"Ф - Фторопласт", hint:"FEP"}, 
-            {c:"Вк", l:"Вк - Слюда + ПВХ", hint:"Mica/PVC", wiki:"огнестойк"},
-            {c:"Пк", l:"Пк - Слюда + Полимер", hint:"Mica/HF", wiki:"огнестойк"},
-            {c:"Пбк", l:"Пбк - Слюда + Сшитый", hint:"Mica/XL-HF", wiki:"огнестойк"},
-            {c:"Пск", l:"Пск - Слюда + XLPE", hint:"Mica/XLPE", wiki:"огнестойк"},
-            {c:"РПс", l:"РПс - Силикон + XLPE", hint:"SiR/XLPE", wiki:"огнестойк"}, 
-            {c:"РПп", l:"РПп - Силикон + PO", hint:"SiR/PO", wiki:"огнестойк"}
+            {c:"В", l:"В (PVC)", wiki:"[ТУ 1.3.2.1] Поливинилхлоридный пластикат."},
+            {c:"Вк", l:"Вк (PVC+Mica)", wiki:"[ТУ 1.3.2.2] Огнестойкая: Слюдосодержащие ленты + ПВХ пластикат (FE180)."},
+            {c:"П", l:"П (HF)", wiki:"[ТУ 1.3.2.1] Полимерная композиция, не содержащая галогенов (Halogen Free)."}, 
+            {c:"Пк", l:"Пк (HF+Mica)", wiki:"[ТУ 1.3.2.2] Огнестойкая: Слюдосодержащие ленты + Полимерная композиция HF (FE180)."},
+            {c:"Пв", l:"Пв (FPE)", wiki:"[ТУ 1.3.2.1] Вспененный полиэтилен. Низкая емкость и затухание."},
+            {c:"Пп", l:"Пп (PO)", wiki:"[ТУ 1.3.2.1] Сплошная полиолефиновая композиция."},
+            {c:"Ппк", l:"Ппк (PO+Mica)", wiki:"[ТУ 1.3.2.2] Огнестойкая: Слюда + Полиолефин."},
+            {c:"Пс", l:"Пс (XLPE)", wiki:"[ТУ 1.3.2.1] Сшитый полиэтилен (Cross-linked PE)."}, 
+            {c:"Пск", l:"Пск (XLPE+Mica)", wiki:"[ТУ 1.3.2.2] Огнестойкая: Слюда + Сшитый полиэтилен."},
+            {c:"Тп", l:"Тп (TPE)", wiki:"[ТУ 1.3.2.1] Термоэластопласт. Высокая гибкость."},
+            {c:"Р", l:"Р (SIL)", wiki:"[ТУ 1.3.2.1] Кремнийорганическая (силиконовая) резина. Термостойкость до +200°С."},
+            {c:"РПс", l:"РПс (Ceramic)", wiki:"[ТУ 1.3.2.3] Керамообразующая резина + сшитый полиолефин."},
+            {c:"РПп", l:"РПп (Ceramic)", wiki:"[ТУ 1.3.2.3] Керамообразующая резина + полиолефин."},
+            {c:"Ф", l:"Ф (FEP)", wiki:"[ТУ 1.3.2.1] Фторопласт (FEP/PFA). Высокая химстойкость."}
         ]},
-        { id:3, n:"Барьер Пары", opts:[{c:"", l:"Нет", hint:"Нет"}, {c:"Си", l:"Си - Огнестойкий", hint:"Слюда"}]},
+        { id:3, n:"Барьер Пары", opts:[
+            {c:"", l:"Нет", wiki:""}, 
+            {c:"Си", l:"Си", wiki:"[ТУ 1.3.3.1] Индивидуальная обмотка пары слюдосодержащей лентой."}
+        ]},
         { id:4, n:"Экран Пары", opts:[
-            {c:"", l:"Нет", hint:"Нет"}, {c:"ЭИм", l:"ЭИм - Лента (Cu)", hint:"Cu-Tape"}, 
-            {c:"ЭИмо", l:"ЭИмо - Лента + Оплетка", hint:"Double"}, {c:"ЭИкм", l:"ЭИкм - Тройной", hint:"Triple"},
-            {c:"ЭИа", l:"ЭИа - Лента (Al)", hint:"Al-Tape"}, {c:"ЭИал", l:"ЭИал - Лента + Оплетка", hint:"Al+Cu"}, 
-            {c:"ЭИкл", l:"ЭИкл - Тройной (Sn)", hint:"Triple Sn"},
-            {c:"ЭИо", l:"ЭИо - Оплетка (Cu)", hint:"Braid"}, {c:"ЭИл", l:"ЭИл - Оплетка (Sn)", hint:"Sn-Braid"},
-            {c:"ЭИн", l:"ЭИн - Оплетка (Ni)", hint:"Ni-Braid"}
+            {c:"", l:"Нет", wiki:""}, 
+            {c:"ЭИа", l:"ЭИа", wiki:"[ТУ 1.3.3.2] Алюмофольгированная пленка с контактным проводником."},
+            {c:"ЭИм", l:"ЭИм", wiki:"[ТУ 1.3.3.2] Медная лента."},
+            {c:"ЭИмо", l:"ЭИмо", wiki:"[ТУ 1.3.3.2] Комбинированный: Медная лента + Оплетка медной проволокой."},
+            {c:"ЭИкл", l:"ЭИкл", wiki:"[ТУ 1.3.3.2] Тройной экран (S-F-S)."},
+            {c:"ЭИо", l:"ЭИо", wiki:"[ТУ 1.3.3.2] Оплетка из медной проволоки."},
+            {c:"ЭИл", l:"ЭИл", wiki:"[ТУ 1.3.3.2] Оплетка из медной луженой проволоки."}
         ]},
-        { id:5, n:"Барьер Общий", opts:[{c:"", l:"Нет", hint:"Нет"}, {c:"С", l:"С - Огнестойкий", hint:"Слюда"}]},
+        { id:5, n:"Барьер Общий", opts:[
+            {c:"", l:"Нет", wiki:""}, 
+            {c:"С", l:"С", wiki:"[ТУ 1.3.5] Общая обмотка сердечника слюдосодержащими лентами."}
+        ]},
         { id:6, n:"Экран Общий", opts:[
-            {c:"", l:"Нет", hint:"Нет"}, {c:"Эм", l:"Эм - Лента (Cu)", hint:"Cu-Tape"}, 
-            {c:"Эмо", l:"Эмо - Лента + Оплетка", hint:"Double"}, {c:"Экм", l:"Экм - Тройной", hint:"Triple"}, 
-            {c:"Эа", l:"Эа - Лента (Al)", hint:"Al-Tape"}, {c:"Эал", l:"Эал - Лента + Оплетка", hint:"Al+Cu"}, 
-            {c:"Экл", l:"Экл - Тройной (Sn)", hint:"Triple Sn"}, {c:"Эо", l:"Эо - Оплетка (Cu)", hint:"Braid"}, 
-            {c:"Эл", l:"Эл - Оплетка (Sn)", hint:"Sn-Braid"}, {c:"Эн", l:"Эн - Оплетка (Ni)", hint:"Ni-Braid"}
+            {c:"", l:"Нет", wiki:""}, 
+            {c:"Эа", l:"Эа", wiki:"[ТУ 1.3.6] Общий экран из алюмофольгированной пленки."},
+            {c:"Эм", l:"Эм", wiki:"[ТУ 1.3.6] Общий экран из медной ленты."},
+            {c:"Экл", l:"Экл", wiki:"[ТУ 1.3.6] Тройной общий экран (S-F-S)."}, 
+            {c:"Эо", l:"Эо", wiki:"[ТУ 1.3.6] Общий экран в виде оплетки."},
+            {c:"Эл", l:"Эл", wiki:"[ТУ 1.3.6] Общий экран в виде оплетки из медной луженой проволоки."}
         ]},
-        { id:7, n:"Водоблокировка", opts:[{c:"", l:"Нет", hint:"Сухое"}, {c:"в", l:"в - Водоблокировка", hint:"Лента"}]},
-        { id:8, n:"Заполнение", opts:[{c:"", l:"Нет", hint:"Нет"}, {c:"з", l:"з - Заполнение", hint:"Экструзия"}]},
+        { id:7, n:"Водоблокировка", opts:[{c:"", l:"Нет", wiki:""}, {c:"в", l:"в", wiki:"[ТУ 1.3.7] Водоблокирующая лента."}]},
+        { id:8, n:"Заполнение", opts:[{c:"", l:"Нет", wiki:""}, {c:"з", l:"з", wiki:"[ТУ 1.3.8] Экструдированное заполнение."}]},
         { id:9, n:"Оболочка", opts:[
-            {c:"В", l:"В - ПВХ пластикат", hint:"PVC"}, {c:"П", l:"П - Полимер (HF)", hint:"HF"}, 
-            {c:"Пэ", l:"Пэ - Полиэтилен", hint:"PE (UV)"}, {c:"Пб", l:"Пб - Сшитый полимер", hint:"XL-HF"}, 
-            {c:"У", l:"У - Полиуретан", hint:"PUR"}, {c:"ПУ", l:"ПУ - Полиуретан (HF)", hint:"PUR-HF"}, 
-            {c:"Р", l:"Р - Силикон", hint:"SiR"}, {c:"Тп", l:"Тп - Термоэластопласт", hint:"TPE"},
-            {c:"Ф", l:"Ф - Фторопласт", hint:"FEP"}
+            {c:"В", l:"В (PVC)", wiki:"[ТУ 1.3.9] ПВХ пластикат."},
+            {c:"П", l:"П (HF)", wiki:"[ТУ 1.3.9] Безгалогенная полимерная композиция."},
+            {c:"Пэ", l:"Пэ (PE)", wiki:"[ТУ 1.3.9] Светостабилизированный полиэтилен."},
+            {c:"У", l:"У (PUR)", wiki:"[ТУ 1.3.9] Полиуретан (TPU)."}, 
+            {c:"Р", l:"Р (SIL)", wiki:"[ТУ 1.3.9] Кремнийорганическая резина."}
         ]},
         { id:10, n:"Броня", opts:[
-            {c:"", l:"Нет", hint:"Нет"}, {c:"КГ", l:"КГ - Гибкая оплетка", hint:"Indoor"}, 
-            {c:"К", l:"К - Оплетка в шланге", hint:"Outdoor"}, {c:"Б", l:"Б - Ленты", hint:"Armored"}, 
-            {c:"Кп", l:"Кп - Повив проволок", hint:"Heavy"}, {c:"КБ", l:"КБ - Комбинированная", hint:"Double"}
+            {c:"", l:"Нет", wiki:""}, 
+            {c:"К", l:"К", wiki:"[ТУ 1.3.10] Панцирная: Повив из стальных оцинкованных проволок."},
+            {c:"КГ", l:"КГ", wiki:"[ТУ 1.3.10] Гибкая: Оплетка из стальных оцинкованных проволок."},
+            {c:"Б", l:"Б", wiki:"[ТУ 1.3.10] Ленточная: Стальные оцинкованные ленты."},
+            {c:"КБ", l:"КБ", wiki:"[ТУ 1.3.10] Комбинированная: Оплетка + Ленты."}
         ]},
         { id:11, n:"Пожарная безоп.", opts:[
-            {c:"нг(А)", l:"нг(А)", hint:"Cat A"}, {c:"нг(А)-LS", l:"нг(А)-LS", hint:"Low Smoke"}, 
-            {c:"нг(А)-HF", l:"нг(А)-HF", hint:"Halogen Free"}, {c:"нг(А)-LSLTx", l:"нг(А)-LSLTx", hint:"Low Toxic"}, 
-            {c:"нг(А)-FRLS", l:"нг(А)-FRLS", hint:"Fire Res LS", wiki:"огнестойк"}, 
-            {c:"нг(А)-FRHF", l:"нг(А)-FRHF", hint:"Fire Res HF", wiki:"огнестойк"}, 
-            {c:"нг(А)-FRLSLTx", l:"нг(А)-FRLSLTx", hint:"Fire Res LTx", wiki:"огнестойк"}
+            {c:"нг(А)", l:"нг(А)", wiki:"[ТУ 1.2.1] Не распространяет горение при групповой прокладке (Кат. А)."}, 
+            {c:"нг(А)-LS", l:"нг(А)-LS", wiki:"[ТУ 2.3.5] Low Smoke. Низкое дымо- и газовыделение."},
+            {c:"нг(А)-HF", l:"нг(А)-HF", wiki:"[ТУ 2.3.4] Halogen Free. Без галогенов."},
+            {c:"нг(А)-FRLS", l:"нг(А)-FRLS", wiki:"[ТУ 2.3.3] Fire Resistant + LS. Огнестойкость 180 мин."},
+            {c:"нг(А)-FRHF", l:"нг(А)-FRHF", wiki:"[ТУ 2.3.3] Fire Resistant + HF. Огнестойкость 180 мин."},
+            {c:"нг(А)-LSLTx", l:"нг(А)-LSLTx", wiki:"[ТУ 2.3.5] Low Toxic. Низкая токсичность."},
+            {c:"нг(А)-FRLSLTx", l:"нг(А)-FRLSLTx", wiki:"[ТУ 1.2.1] FR + LS + LTx. Максимальная безопасность."}
         ]},
         { id:12, n:"Климат", opts:[
-            {c:"", l:"УХЛ (Стандарт)", hint:"-50C"}, {c:"-ХЛ", l:"-ХЛ (Холодный)", hint:"-65C"}, 
-            {c:"-ЭХЛ", l:"-ЭХЛ (Экстрем.)", hint:"-70C"}, {c:"-Т", l:"-Т (Тропики)", hint:"Tropics"},
-            {c:"-М", l:"-М (Морской)", hint:"Marine"}
+            {c:"", l:"УХЛ (-50)", wiki:"[ТУ 1.2.1] Умеренно-холодный."}, 
+            {c:"-ХЛ", l:"-ХЛ (-60)", wiki:"[ТУ 1.6.2] Холодный климат."},
+            {c:"-ЭХЛ", l:"-ЭХЛ (-70)", wiki:"[ТУ 1.6.2] Экстремально холодный."},
+            {c:"-Т", l:"-Т (Тропики)", wiki:"[ТУ 1.6.4] Тропическое исполнение."}
         ]},
-        { id:13, n:"Маслостойкость", opts:[{c:"", l:"Нет", hint:"Std"}, {c:"-МБ", l:"-МБ (Маслобензо)", hint:"Oil Res"}]},
-        { id:14, n:"Химстойкость", opts:[{c:"", l:"Нет", hint:"Std"}, {c:"-ХС", l:"-ХС (Химстойкий)", hint:"Chem Res"}]},
+        { id:13, n:"Маслостойкость", opts:[{c:"", l:"Нет", wiki:""}, {c:"-МБ", l:"-МБ", wiki:"[ТУ 1.6.5] Стойкость к маслам."}]},
+        { id:14, n:"Химстойкость", opts:[{c:"", l:"Нет", wiki:""}, {c:"-ХС", l:"-ХС", wiki:"[ТУ 1.6.10] Стойкость к кислотам."}]},
         { id:15, n:"Термостойкость", opts:[
-            {c:"", l:"Нет", hint:"Std"}, {c:"-ТС-125", l:"-ТС-125", hint:"+125C"}, 
-            {c:"-ТС-150", l:"-ТС-150", hint:"+150C"}, {c:"-ТС-200", l:"-ТС-200", hint:"+200C"},
-            {c:"-ТС-250", l:"-ТС-250", hint:"+250C"}
+            {c:"", l:"Нет (70°С)", wiki:"Стандартная t° эксплуатации."},
+            {c:"-ТС-125", l:"-125 (125°С)", wiki:"[ТУ 1.6.1] Повышенная теплостойкость."},
+            {c:"-ТС-150", l:"-150 (150°С)", wiki:"[ТУ 1.6.1] Высокая теплостойкость."},
+            {c:"-ТС-200", l:"-200 (200°С)", wiki:"[ТУ 1.6.1] Экстремальная теплостойкость."},
+            {c:"-ТС-250", l:"-250 (250°С)", wiki:"[ТУ 1.6.1] Максимальная теплостойкость."}
         ]},
-        { id:16, n:"УФ / Улица", opts:[{c:"", l:"Нет", hint:"Indoor"}, {c:"-УФ", l:"-УФ (Улица)", hint:"UV Res"}]},
-        { id:17, n:"Грызуны", opts:[{c:"", l:"Нет", hint:"No"}, {c:"-ГТ", l:"-ГТ (Репеллент)", hint:"Anti-Rodent"}]},
-        { id:18, n:"Геометрия", opts:[
-            {c:"NxS", l:"Пучок (NxS)", hint:"Жилы"}, {c:"Nx2xS", l:"Пары (Nx2xS)", hint:"Пары"}, 
-            {c:"Nx3xS", l:"Тройки (Nx3xS)", hint:"Тройки"}, {c:"Nx4xS", l:"Четверки (Nx4xS)", hint:"Четверки"}
+        { id:16, n:"УФ / Улица", opts:[{c:"", l:"Нет", wiki:""}, {c:"-УФ", l:"-УФ", wiki:"[ТУ 1.6.7] Стойкость к солнечному излучению (УФ)."}]},
+        { id:17, n:"Грызуны", opts:[{c:"", l:"Нет", wiki:""}, {c:"-ГТ", l:"-ГТ", wiki:"[ТУ 1.2.1] Защита от грызунов."}]},
+        { id:18, n:"Геометрия", opts:[{c:"NxS", l:"NxS", wiki:""}, {c:"Nx2xS", l:"Nx2xS", wiki:""}, {c:"Nx3xS", l:"Nx3xS", wiki:""}]},
+        { id:19, n:"Гибкость (ГОСТ 22483)", opts:[
+            {c:"(1)", l:"(1) - Монолит", wiki:"[ТУ 1.2.1] Класс 1 (Solid)."}, 
+            {c:"(3)", l:"(3) - Монтаж", wiki:"[ТУ 1.2.1] Класс 3. Облегченный монтаж."},
+            {c:"(4)", l:"(4) - Вибро", wiki:"[ТУ 1.5.4] Класс 4. Вибростойкий."},
+            {c:"(5)", l:"(5) - Гибкий", wiki:"[ТУ 1.5.2] Класс 5 (Flex)."}, 
+            {c:"(6)", l:"(6) - Робот", wiki:"[ТУ 1.5.2] Класс 6 (Super Flex)."}
         ]},
-        { id:19, n:"Гибкость (ГОСТ)", opts:[
-            {c:"(1)", l:"(1) - 1 класс", hint:"Rigid"}, {c:"(3)", l:"(3) - 3 класс", hint:"Flex"}, 
-            {c:"(4)", l:"(4) - 4 класс", hint:"Flex+"}, {c:"(5)", l:"(5) - 5 класс", hint:"Extra Flex"}, 
-            {c:"(6)", l:"(6) - 6 класс", hint:"Robot"}
+        { id:20, n:"Покрытие жилы", opts:[{c:"", l:"Cu (Медь)", wiki:""}, {c:"л", l:"л (Sn)", wiki:"Медная луженая проволока."},
+            {c:"н", l:"н (Ni)", wiki:"Медная никелированная проволока."}
         ]},
-        { id:20, n:"Покрытие жилы", opts:[{c:"", l:"Медная (Cu)", hint:"Cu"}, {c:"л", l:"л (Sn) - Луженая", hint:"Sn"}, {c:"н", l:"н (Ni) - Никелир.", hint:"Ni"}]},
-        { id:21, n:"Искробезоп.", opts:[{c:"", l:"Нет", hint:"General"}, {c:"i", l:"i - Ex-i цепь", hint:"Ex-i"}]},
-        { id:22, n:"Напряжение", opts:[{c:"-300", l:"-300 В", hint:"300V"}, {c:"-500", l:"-500 В", hint:"500V"}, {c:"-660", l:"-660 В", hint:"660V"}]},
-        { id:23, n:"Протокол", opts:[
-            {c:"", l:"Нет", hint:"Univ"}, {c:"[485]", l:"[485] - RS-485", hint:"RS-485"}, 
-            {c:"[PB]", l:"[PB] - Profibus", hint:"Profibus"}, {c:"[FF]", l:"[FF] - Fieldbus", hint:"Fieldbus"}
+        { id:21, n:"Искробезоп.", opts:[{c:"", l:"Нет", wiki:""}, {c:"i", l:"Ex-i", wiki:"[ТУ 1.2.1] Искробезопасная цепь."}]},
+        { id:22, n:"Напряжение", opts:[{c:"-300", l:"300В", wiki:""}, {c:"-500", l:"500В", wiki:""}, {c:"-660", l:"660В", wiki:""}]},
+        { id:23, n:"Протокол", opts:[{c:"", l:"Нет", wiki:""}, {c:"[485]", l:"[485] - RS-485", wiki:""}, {c:"[PB]", l:"[PB] - Profibus", wiki:""},
+            {c:"[FF/PA]", l:"[FF] - Foundation", wiki:""}
         ]},
-        { id:24, n:"Цвет оболочки", opts:[
-            {c:"Серый", l:"Серый", hint:"RAL 7035"}, {c:"Черный", l:"Черный", hint:"RAL 9005"}, 
-            {c:"Синий", l:"Синий", hint:"Ex-i"}, {c:"Оранжевый", l:"Оранжевый", hint:"Orange", wiki:"огнестойк"}, 
-            {c:"Красный", l:"Красный", hint:"Fire", wiki:"огнестойк"}, {c:"Фиолетовый", l:"Фиолетовый", hint:"PB"}, 
-            {c:"Желтый", l:"Желтый", hint:"Warn"}, {c:"Спец", l:"Спеццвет", hint:"Custom"}
+        { id:24, n:"Цвет", opts:[
+            {c:"Серый", l:"Серый", wiki:""}, 
+            {c:"Черный", l:"Черный", wiki:""}, 
+            {c:"Синий", l:"Синий", wiki:""}, 
+            {c:"Оранжевый", l:"Оранжевый", wiki:""}, 
+            {c:"Красный", l:"Красный", wiki:""}, 
+            {c:"Фиолетовый", l:"Фиолетовый", wiki:""}, 
+            {c:"Желтый", l:"Желтый", wiki:""}, 
+            {c:"Спец", l:"Спеццвет", wiki:""}
         ]}
     ],
 
-    // 3. Properties
-    MAT_PROPS: {
-        "В": { minT: -50, hf: false, fr: false, oil: false, chem: false, flex_grade: 1, rank: 1, family: "PVC" },
-        "П": { minT: -60, hf: true, fr: false, oil: false, chem: true, flex_grade: 1, rank: 2, family: "Polymer" },
-        "Пв": { minT: -60, hf: true, fr: false, oil: false, chem: true, flex_grade: 1, rank: 2, family: "FPE" },
-        "Пс": { minT: -60, hf: true, fr: false, oil: false, chem: true, flex_grade: 1, rank: 3, family: "XLPE" },
-        "Пб": { minT: -60, hf: true, fr: false, oil: true, chem: true, flex_grade: 1, rank: 3, family: "XLPE" },
-        "Пп": { minT: -60, hf: true, fr: false, oil: false, chem: true, flex_grade: 1, rank: 2, family: "PO" },
-        "Тп": { minT: -60, hf: true, fr: false, oil: true, chem: true, flex_grade: 2, rank: 3, family: "TPE" },
-        "У": { minT: -70, hf: false, fr: false, oil: true, chem: true, flex_grade: 3, rank: 4, family: "PUR" },
-        "ПУ": { minT: -70, hf: true, fr: false, oil: true, chem: true, flex_grade: 3, rank: 4, family: "PUR" },
-        "Р": { minT: -60, hf: true, fr: true, oil: false, chem: true, flex_grade: 2, rank: 5, family: "Silicon" },
-        "Ф": { minT: -70, hf: true, fr: true, oil: true, chem: true, flex_grade: 1, rank: 6, family: "FEP" },
-        "Вк": { minT: -50, hf: false, fr: true, oil: false, chem: false, flex_grade: 1, rank: 1 },
-        "Пк": { minT: -60, hf: true, fr: true, oil: false, chem: true, flex_grade: 1, rank: 2 },
-        "Пбк": { minT: -60, hf: true, fr: true, oil: true, chem: true, flex_grade: 1, rank: 3 },
-        "Пск": { minT: -60, hf: true, fr: true, oil: false, chem: true, flex_grade: 1, rank: 3 },
-        "РПс": { minT: -60, hf: true, fr: true, oil: false, chem: true, flex_grade: 1, rank: 5 },
-        "РПп": { minT: -60, hf: true, fr: true, oil: false, chem: true, flex_grade: 1, rank: 5 },
-        "J_В": { minT: -50, hf: false, fr: false, oil: false, chem: false, flex_grade: 1, rank: 1, family: "PVC" },
-        "J_П": { minT: -60, hf: true, fr: false, oil: false, chem: true, flex_grade: 1, rank: 2, family: "Polymer" },
-        "J_Пэ": { minT: -60, hf: true, fr: false, oil: false, chem: true, flex_grade: 1, rank: 2, family: "PE" },
-        "J_Пб": { minT: -60, hf: true, fr: false, oil: true, chem: true, flex_grade: 1, rank: 3, family: "XLPE" },
-        "J_У": { minT: -70, hf: false, fr: false, oil: true, chem: true, flex_grade: 3, rank: 4, family: "PUR" },
-        "J_ПУ": { minT: -70, hf: true, fr: false, oil: true, chem: true, flex_grade: 3, rank: 4, family: "PUR" },
-        "J_Р": { minT: -60, hf: true, fr: true, oil: false, chem: true, flex_grade: 2, rank: 5, family: "Silicon" },
-        "J_Тп": { minT: -60, hf: true, fr: false, oil: true, chem: true, flex_grade: 2, rank: 3, family: "TPE" },
-        "J_Ф": { minT: -70, hf: true, fr: true, oil: true, chem: true, flex_grade: 1, rank: 6, family: "FEP" }
-    },
-
-    // 4. Limits
+    // ============================================================
+    // 3. ЛИМИТЫ (ДЕФОЛТЫ)
+    // ============================================================
     LIMITS: {
-        BUS: {
-            volt: "-300",
-            defaults: {1:"", 2:"Пв", 4:"ЭИал", 9:"В", 11:"нг(А)-LS", 18:"1х2х0.60", 23:"[485]"},
-            types: ["x2x"],
-            proto: {
-                "[485]": { N: [1,2,3,4,5,6,8,10], S: ["0.60","0.78"] },
-                "[PB]": { N: [1], S: ["0.64"] },
-                "[FF]": { N: [1], S: ["0.80","1.0","1.5"] },
-                "": { N: [1,2,4], S: ["0.60","0.78"] }
-            },
-            valid_S: ["0.60", "0.64", "0.78", "0.80", "1.0", "1.5"]
+        'BUS': { 
+            volt: '-300', types: ['x2x'], 
+            proto: { 
+                '[485]': { S:['0.60','0.75','1.0','1.5'], N:[1,2,3,4] }, 
+                '[PB]': { S:['0.64'], N:[1,2] }, 
+                '[FF/PA]': { S:['0.80','1.0','1.5','2.5'], N:[1] }, 
+                '': { S:['0.50','0.75','1.0','1.5'], N:[1,2,4] } 
+            }, 
+            defaults: { 2:'Пв', 6:'Экл', 9:'В', 11:'нг(А)-LS', 22:'-300', 23:'[485]', 24:'Серый' } 
         },
-        SIGNAL: {
-            volt: "-500",
-            defaults: {1:"", 2:"В", 6:"Эа", 9:"В", 11:"нг(А)-LS", 18:"2х2х0.75"},
-            types: ["x","x2x","x3x"],
-            valid_S: ["0.5","0.75","1.0","1.5","2.5"],
-            get_valid_N: (s, t) => {
-                if(t === 'x') return [2,3,4,5,7,10,12,14,19,24,27,30,37];
-                return [1,2,4,5,6,8,10,12,16,20,24];
-            }
+        'SIGNAL': { 
+            volt: '-500', types: ['x2x', 'x3x', 'x'], 
+            valid_S: ['0.50','0.75','1.0','1.2','1.5','2.5'], 
+            defaults: { 2:'В', 6:'Эа', 9:'В', 11:'нг(А)-LS', 22:'-500', 24:'Серый' }, 
+            get_valid_N: (s, type) => { 
+                const std = [1,2,3,4,5,7,8,10,12,14,19,24,27,30,37]; 
+                let max = (type === 'x' ? (s >= 2.5 ? 19 : 37) : (s >= 2.5 ? 10 : (s >= 1.5 ? 19 : 24))); 
+                return std.filter(n => n <= max); 
+            } 
         },
-        CONTROL: {
-            volt: "-660",
-            defaults: {1:"", 2:"В", 9:"В", 11:"нг(А)", 18:"5x1.5"},
-            types: ["x", "vfd"],
-            valid_S: ["0.75","1.0","1.5","2.5","4.0","6.0"],
-            get_valid_N: (s, t) => {
-                if(t==='vfd') return [1];
-                return [3,4,5,7,10,14,19,24,30,37];
-            },
-            vfd_map: { "1.5":"3x1.5+3x0.25", "2.5":"3x2.5+3x0.5", "4.0":"3x4.0+3x0.75", "6.0":"3x6.0+3x1.0" }
+        'CONTROL': { 
+            volt: '-660', types: ['x', 'vfd'], 
+            valid_S: ['0.75','1.0','1.2','1.5','2.5','4.0','6.0'], 
+            defaults: { 2:'В', 6:'', 9:'В', 11:'нг(А)-LS', 22:'-660', 24:'Серый' }, 
+            vfd_map: {'1.5':'3х1.5+3х0.75', '2.5':'3х2.5+3х1.0', '4.0':'3х4.0+3х1.5', '6.0':'3х6.0+3х1.5'}, 
+            get_valid_N: (s, type) => { 
+                if(type==='vfd') return [1]; 
+                let max = (s>=2.5) ? 19 : 37; 
+                if(s>=4.0) return [2,3,4,5,7,10]; 
+                return [2,3,4,5,7,10,12,14,19,24,27,30,37].filter(n => n <= max); 
+            } 
         }
     },
     
-    GEO_TYPES: [
-        {c:"x", l:"Жилы (NxS)"}, {c:"x2x", l:"Пары (Nx2xS)"},
-        {c:"x3x", l:"Тройки (Nx3xS)"}, {c:"vfd", l:"VFD (Эл. двигатель)"}
-    ]
+    GROUPS: [
+        { t: "1. ТИП И БЕЗОПАСНОСТЬ", ids: [23, 11, 1, 8, 21] }, 
+        { t: "2. СРЕДА ЭКСПЛУАТАЦИИ", ids: [12, 13, 14, 15, 16, 17] }, 
+        { t: "3. КОНСТРУКЦИЯ", ids: [19, 4, 6, 10, 7, 5, 3] }, 
+        { t: "4. ГЕОМЕТРИЯ ЖИЛ", ids: [18, 20] }, 
+        { t: "5. МАТЕРИАЛЫ И ЦВЕТ", ids: [2, 9, 24] }
+    ],
+    GEO_TYPES: [{c:'x2x', l:'ВИТЫЕ ПАРЫ'}, {c:'x3x', l:'ТРОЙКИ'}, {c:'x', l:'ЖИЛЫ'}, {c:'vfd', l:'VFD (3+3)'}],
+
+    // 4. TWIN CATALOG (PLACEHOLDER)
+    TWIN_DB: {}
 };
