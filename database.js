@@ -7,74 +7,51 @@ const DB = {
     // rank: 1 (Budget) -> 6 (Premium)
     // flex_grade: 0=Rigid, 1=Std, 2=Robot (Super Flex)
     
+    // ============================================================
+    // 1. ФИЗИКА МАТЕРИАЛОВ (v14.3: Added FR & Family to Jackets)
+    // ============================================================
     MAT_PROPS: {
-        // --- СТАНДАРТНАЯ ИЗОЛЯЦИЯ ---
-        'В': { 
-            minT: -50, maxT: 70, hf: false, dielectric: 'poor', fr: false, oil: true, chem: false, flex_grade: 1, rank: 1, family: 'PVC' 
-        },
-        'П': { 
-            minT: -50, maxT: 70, hf: true, dielectric: 'poor', fr: false, oil: false, chem: false, flex_grade: 1, rank: 2, family: 'HF' 
-        },
-        'Пп': { 
-            minT: -60, maxT: 80, hf: true, dielectric: 'good', fr: false, oil: false, chem: false, flex_grade: 1, rank: 3, family: 'PO' 
-        },
-        'Пс': { 
-            minT: -60, maxT: 90, hf: true, dielectric: 'good', fr: false, oil: false, chem: false, flex_grade: 0, rank: 3, family: 'XLPE' 
-        },
-        'Пв': { 
-            minT: -60, maxT: 80, hf: false, dielectric: 'best', fr: false, oil: false, chem: false, flex_grade: 0, rank: 2, family: 'FPE' 
-        }, // Low Cap for RS-485
+        // --- ИЗОЛЯЦИЯ (Insulation) ---
+        'В':   { minT: -50, maxT: 70,  hf: false, fr: false, oil: true,  chem: false, flex_grade: 1, rank: 1, family: 'PVC' },
+        'Вк':  { minT: -50, maxT: 70,  hf: false, fr: true,  oil: true,  chem: false, flex_grade: 0, rank: 1, family: 'PVC' },
         
-        // --- СПЕЦИАЛЬНЫЕ МАТЕРИАЛЫ (ГИБКОСТЬ / ХИМИЯ) ---
-        'Тп': { 
-            minT: -60, maxT: 125, hf: true, dielectric: 'good', fr: false, oil: true, chem: true, flex_grade: 2, rank: 4, family: 'TPE' 
-        },
-        'У': { 
-            minT: -60, maxT: 90, hf: true, dielectric: 'good', fr: false, oil: true, chem: true, flex_grade: 2, rank: 4, family: 'PUR' 
-        },
-        'Р': { 
-            minT: -60, maxT: 200, hf: true, dielectric: 'good', fr: false, oil: false, chem: true, flex_grade: 2, rank: 5, family: 'SIL' 
-        },
-        'Ф': { 
-            minT: -60, maxT: 250, hf: true, dielectric: 'best', fr: false, oil: true, chem: true, flex_grade: 1, rank: 6, family: 'FEP' 
-        },
+        'П':   { minT: -50, maxT: 70,  hf: true,  fr: false, oil: false, chem: false, flex_grade: 1, rank: 2, family: 'HF' },
+        'Пк':  { minT: -50, maxT: 70,  hf: true,  fr: true,  oil: false, chem: false, flex_grade: 0, rank: 2, family: 'HF' },
+        
+        'Пп':  { minT: -60, maxT: 80,  hf: true,  fr: false, oil: false, chem: false, flex_grade: 1, rank: 3, family: 'PO' },
+        'Ппк': { minT: -60, maxT: 80,  hf: true,  fr: true,  oil: false, chem: false, flex_grade: 0, rank: 3, family: 'PO' },
+        
+        'Пс':  { minT: -60, maxT: 90,  hf: true,  fr: false, oil: false, chem: false, flex_grade: 0, rank: 3, family: 'XLPE' },
+        'Пск': { minT: -60, maxT: 90,  hf: true,  fr: true,  oil: false, chem: false, flex_grade: 0, rank: 3, family: 'XLPE' },
+        
+        'Пв':  { minT: -60, maxT: 80,  hf: false, fr: false, oil: false, chem: false, flex_grade: 0, rank: 2, family: 'FPE' }, // Special
+        
+        'Пб':  { minT: -50, maxT: 125, hf: true,  fr: false, oil: true,  chem: true,  flex_grade: 1, rank: 4, family: 'XL-HF' },
+        'Пбк': { minT: -50, maxT: 125, hf: true,  fr: true,  oil: true,  chem: true,  flex_grade: 1, rank: 4, family: 'XL-HF' },
+        
+        'Тп':  { minT: -60, maxT: 125, hf: true,  fr: false, oil: true,  chem: true,  flex_grade: 2, rank: 4, family: 'TPE' },
+        
+        'У':   { minT: -60, maxT: 90,  hf: true,  fr: false, oil: true,  chem: true,  flex_grade: 2, rank: 4, family: 'PUR' },
+        
+        'Р':   { minT: -60, maxT: 200, hf: true,  fr: true,  oil: false, chem: true,  flex_grade: 2, rank: 5, family: 'SIL' },
+        'РПс': { minT: -60, maxT: 200, hf: true,  fr: true,  oil: false, chem: true,  flex_grade: 2, rank: 5, family: 'SIL' },
+        'РПп': { minT: -60, maxT: 200, hf: true,  fr: true,  oil: false, chem: true,  flex_grade: 2, rank: 5, family: 'SIL' },
+        
+        'Ф':   { minT: -60, maxT: 250, hf: true,  fr: false, oil: true,  chem: true,  flex_grade: 1, rank: 6, family: 'FEP' },
 
-        // --- ОГНЕСТОЙКАЯ ИЗОЛЯЦИЯ (FR) ---
-        'Вк': { 
-            minT: -50, maxT: 70, hf: false, dielectric: 'poor', fr: true, oil: true, chem: false, flex_grade: 0, rank: 1, family: 'PVC' 
-        },
-        'Пк': { 
-            minT: -50, maxT: 70, hf: true, dielectric: 'poor', fr: true, oil: false, chem: false, flex_grade: 0, rank: 2, family: 'HF' 
-        },
-        'Ппк': { 
-            minT: -60, maxT: 80, hf: true, dielectric: 'good', fr: true, oil: false, chem: false, flex_grade: 0, rank: 3, family: 'PO' 
-        },
-        'Пск': { 
-            minT: -60, maxT: 90, hf: true, dielectric: 'good', fr: true, oil: false, chem: false, flex_grade: 0, rank: 3, family: 'XLPE' 
-        },
-        'Пб': { 
-            minT: -50, maxT: 125, hf: true, dielectric: 'good', fr: true, oil: true, chem: true, flex_grade: 1, rank: 4, family: 'HF' 
-        },
-        'Пбк': { 
-            minT: -50, maxT: 125, hf: true, dielectric: 'good', fr: true, oil: true, chem: true, flex_grade: 1, rank: 4, family: 'HF' 
-        },
-        'РПс': { 
-            minT: -60, maxT: 200, hf: true, dielectric: 'good', fr: true, oil: false, chem: true, flex_grade: 2, rank: 5, family: 'SIL' 
-        },
-        'РПп': { 
-            minT: -60, maxT: 200, hf: true, dielectric: 'good', fr: true, oil: false, chem: true, flex_grade: 2, rank: 5, family: 'SIL' 
-        },
-
-        // --- ОБОЛОЧКИ (JACKETS) ---
-        'J_В': { minT: -50, maxT: 70, hf: false, oil: true, uv: false, flex_grade: 1, rank: 1 }, // PVC
-        'J_П': { minT: -50, maxT: 70, hf: true, oil: false, uv: false, flex_grade: 1, rank: 2 }, // HF
-        'J_Пэ':{ minT: -60, maxT: 80, hf: false, oil: false, uv: true, flex_grade: 0, rank: 2 }, // PE
-        'J_У': { minT: -60, maxT: 90, hf: true, oil: true, uv: true, flex_grade: 2, rank: 4 }, // PUR
-        'J_ПУ':{ minT: -60, maxT: 90, hf: true, oil: true, uv: true, flex_grade: 2, rank: 4 }, // HF-PUR
-        'J_Р': { minT: -60, maxT: 200, hf: true, oil: false, uv: true, flex_grade: 2, rank: 5 }, // SIL
-        'J_Тп':{ minT: -60, maxT: 100, hf: true, oil: true, uv: true, flex_grade: 2, rank: 4 }, // TPE
-        'J_Пб':{ minT: -60, maxT: 150, hf: true, oil: true, uv: true, flex_grade: 1, rank: 3 }, // XL-HF
-        'J_Ф': { minT: -60, maxT: 250, hf: true, oil: true, uv: true, flex_grade: 1, rank: 6 }  // FEP
+        // --- ОБОЛОЧКИ (Jackets) - J_prefix ---
+        // Важно: fr: true здесь означает "может быть в составе FR кабеля"
+        'J_В':  { minT: -50, maxT: 70,  hf: false, fr: true, oil: true,  uv: false, flex_grade: 1, rank: 1, family: 'PVC' },
+        'J_П':  { minT: -50, maxT: 70,  hf: true,  fr: true, oil: false, uv: false, flex_grade: 1, rank: 2, family: 'HF' },
+        'J_Пэ': { minT: -60, maxT: 80,  hf: false, fr: false, oil: false, uv: true,  flex_grade: 0, rank: 2, family: 'PE' },
+        
+        'J_У':  { minT: -60, maxT: 90,  hf: true,  fr: false, oil: true,  uv: true,  flex_grade: 2, rank: 4, family: 'PUR' },
+        'J_ПУ': { minT: -60, maxT: 90,  hf: true,  fr: true,  oil: true,  uv: true,  flex_grade: 2, rank: 4, family: 'PUR' },
+        
+        'J_Р':  { minT: -60, maxT: 200, hf: true,  fr: true,  oil: false, uv: true,  flex_grade: 2, rank: 5, family: 'SIL' },
+        'J_Тп': { minT: -60, maxT: 100, hf: true,  fr: false, oil: true,  uv: true,  flex_grade: 2, rank: 4, family: 'TPE' },
+        'J_Пб': { minT: -60, maxT: 150, hf: true,  fr: false, oil: true,  uv: true,  flex_grade: 1, rank: 3, family: 'XL-HF' },
+        'J_Ф':  { minT: -60, maxT: 250, hf: true,  fr: false, oil: true,  uv: true,  flex_grade: 1, rank: 6, family: 'FEP' }
     },
 
     // ============================================================
