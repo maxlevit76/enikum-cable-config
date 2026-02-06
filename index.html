@@ -18,96 +18,163 @@
         <div class="logo"><span>Э</span>НИКУМ <span class="version-badge">v11.0 MODULAR</span></div>
         <div style="font-size:11px; color:#ADB5BD;">Energocomplex Engineering</div>
     </div>
-    <div class="sku-box">
-        <div class="sku-label">
-            <span>АРТИКУЛ</span>
-            <div class="reset-btn" onclick="app.resetAll()"><i class="fas fa-undo"></i> Сброс</div>
+    <div class="sku-display" id="main-sku">ЭНИКУМ-XXXX-XXXX-XXXX</div>
+</div>
+
+<ul class="nav nav-tabs custom-tabs" id="mainTabs" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" id="config-tab" data-bs-toggle="tab" data-bs-target="#p-config" type="button">КОНФИГУРАТОР</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="matrix-tab" data-bs-toggle="tab" data-bs-target="#p-matrix" type="button">СПРАВОЧНИК</button>
+    </li>
+</ul>
+
+<div class="tab-content" id="mainTabsContent">
+    
+    <div class="tab-pane fade show active" id="p-config" role="tabpanel">
+        <div class="container-fluid py-3">
+            <div id="filters-container"></div>
+            
+            <div class="actions-bar mt-4">
+                <button class="btn btn-primary w-100" onclick="app.copyToClipboard()">
+                    <i class="far fa-copy me-2"></i>КОПИРОВАТЬ АРТИКУЛ
+                </button>
+                <button class="btn btn-outline-secondary w-100 mt-2" onclick="app.downloadPDF()" id="pdf-btn">
+                    <i class="far fa-file-pdf me-2"></i>СКАЧАТЬ ТЕХОПИСАНИЕ
+                </button>
+            </div>
         </div>
-        <div class="sku-val" id="skuDisplay">...</div>
-        <div class="icon-dashboard" id="headerIcons"></div>
-    </div>
-</div>
-
-<div id="p-conf" class="page active">
-    <div class="cat-tabs">
-        <div class="cat-btn active" onclick="app.setCat('BUS', this)"><i class="fas fa-network-wired"></i> BUS</div>
-        <div class="cat-btn" onclick="app.setCat('SIGNAL', this)"><i class="fas fa-wave-square"></i> SIGNAL</div>
-        <div class="cat-btn" onclick="app.setCat('CONTROL', this)"><i class="fas fa-bolt"></i> CONTROL</div>
-    </div>
-    
-    <div id="sysAlert" class="sys-alert-block">
-        <div style="font-family:'Oswald'; font-weight:bold; margin-bottom:5px; text-transform:uppercase;"><i class="fas fa-clipboard-check"></i> Инженерный контроль</div>
-        <div id="sysAlertContent"></div>
     </div>
 
-    <div class="container" id="formArea"></div>
-    
-    <div class="app-footer">
-        <div>© 2025 ENICUM Configuration Tool</div>
-        <div>support@enicum.ru</div>
-    </div>
-</div>
+    <div class="tab-pane fade" id="p-matrix" role="tabpanel">
+        <div class="container-fluid mt-3">
+            
+            <div id="matrix-container" class="mb-5"></div>
 
-<div id="p-matrix" class="page">
-    <div class="container">
-        <h3 style="font-family:'Oswald';">МАТРИЦА СОВМЕСТИМОСТИ</h3>
-        <div class="matrix-scroll-wrap"><div id="summaryTableArea"></div></div>
-        <div id="detailedSpecs"></div>
-    </div>
-</div>
+            <hr class="my-5">
 
-<div id="p-pdf" class="page">
-    <div class="pdf-preview-wrap" id="pdfExportTarget">
-        <div class="pdf-content">
-            <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 3px solid #F7941D; padding-bottom: 15px; margin-bottom: 30px;">
-                <div>
-                    <div style="font-family:'Oswald'; font-size:36px; line-height:1; color:#1D1D1B;">ЭНИКУМ</div>
-                    <div style="font-size:12px; color:#777; letter-spacing:1px; margin-top:5px;">ЗАВОД СПКБ ТЕХНО</div>
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-weight:bold; font-size:14px;">ТУ 27.32.13-001-33185018-2023</div>
-                    <div style="font-size:11px; color:#777;">Сертификат ЕАС / Газпромсерт</div>
-                </div>
-            </div>
-            <div style="background:#F8F9FA; padding:20px; border-radius:4px; margin-bottom:30px;">
-                <div style="font-size:10px; color:#999; text-transform:uppercase; font-weight:bold; margin-bottom:5px;">Код заказа</div>
-                <div id="pdfSkuMain" style="font-family:'Oswald'; font-size:24px; line-height:1.2; word-break:break-all; color:#1D1D1B;">...</div>
-                <div id="pdfIcons" style="display:flex; gap:6px; margin-top:12px; flex-wrap:wrap;"></div>
-            </div>
-            <div id="pdfAlerts" style="margin-bottom:20px; font-size:11px; color:#856404; display:none;"></div>
-            <div style="display:flex; gap:40px; margin-bottom:30px;">
-                <div style="flex:3;">
-                    <h4 style="color:#F7941D; font-family:'Oswald'; text-transform:uppercase; font-size:16px; margin:0 0 15px 0; border-bottom:1px solid #EEE; padding-bottom:5px;">Назначение</h4>
-                    <div id="pdfDest" style="font-size:12px; line-height:1.6; color:#333; text-align:justify;"></div>
-                    <h4 style="color:#F7941D; font-family:'Oswald'; text-transform:uppercase; font-size:16px; margin:25px 0 15px 0; border-bottom:1px solid #EEE; padding-bottom:5px;">Конструкция</h4>
-                    <div id="pdfConstr" style="font-size:12px; line-height:1.6; color:#333;"></div>
-                </div>
-                <div style="flex:2;">
-                    <div style="font-size:11px; line-height:1.5;">
-                        <div style="display:flex; justify-content:space-between; border-bottom:1px solid #EEE; padding:5px 0;">
-                            <span style="color:#777;">Т. экспл.</span><span style="font-weight:bold;" id="pdfTempExp"></span>
+            <div class="wiki-content p-4 bg-white rounded shadow-sm border">
+                <h1 class="text-primary mb-3">АРХИТЕКТУРА КАБЕЛЬНЫХ ЛИНИЙ В ПРОМЫШЛЕННОЙ АВТОМАТИЗАЦИИ</h1>
+                <h4 class="text-secondary mb-4 border-bottom pb-2">Физические основы категоризации: BUS, SIGNAL, CONTROL</h4>
+                
+                <p>В номенклатуре продукции ЭНИКУМ принято условное разделение кабелей на три функциональные категории: <strong>BUS</strong>, <strong>SIGNAL</strong> и <strong>CONTROL</strong>. Данная классификация продиктована не маркетингом, а фундаментальными законами электродинамики.</p>
+
+                <div class="row g-4 mt-2 mb-5">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-primary shadow-sm">
+                            <div class="card-header bg-primary text-white font-weight-bold">1. КАТЕГОРИЯ BUS (ИНТЕРФЕЙСНЫЕ)</div>
+                            <div class="card-body">
+                                <p><strong>Уровень:</strong> Level 1 (Control Level). Controller-to-Controller / Controller-to-Fieldbus.</p>
+                                <p><strong>Физика:</strong> Высокочастотный цифровой поток (МГц), передача фронтами импульсов. Работает как длинная линия.</p>
+                                <p><strong>Требования:</strong> Строгое волновое сопротивление (Z₀: 100/120/150 Ом), низкая емкость (изоляция Пв/Пс/Ф).</p>
+                                <p><strong>Напряжение:</strong> Рабочее 5-12В, изоляция 300/500В.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-success shadow-sm">
+                            <div class="card-header bg-success text-white font-weight-bold">2. КАТЕГОРИЯ SIGNAL (МОНТАЖНЫЕ)</div>
+                            <div class="card-body">
+                                <p><strong>Уровень:</strong> Level 0 (Field Level). Sensor-to-PLC.</p>
+                                <p><strong>Физика:</strong> Аналог (4-20 мА, 0-10В) или дискретика. Важна точность амплитуды сигнала.</p>
+                                <p><strong>Требования:</strong> Экранирование (EMI), низкое омическое сопротивление.</p>
+                                <p><strong>Напряжение:</strong> Рабочее 24-48В, изоляция 300/500В.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-warning shadow-sm">
+                            <div class="card-header bg-warning text-dark font-weight-bold">3. КАТЕГОРИЯ CONTROL (УПРАВЛЕНИЕ)</div>
+                            <div class="card-body">
+                                <p><strong>Уровень:</strong> Уровень исполнительных механизмов и питания.</p>
+                                <p><strong>Физика:</strong> Энергия (Power Control).</p>
+                                <p><strong>Требования:</strong> Токовая нагрузка (сечение), стойкость к выбросам ЭДС и прочности изоляции.</p>
+                                <p><strong>Напряжение:</strong> Рабочее до 660В, изоляция 660/1000В.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <h3 class="mt-5 border-bottom pb-2">ДЕТАЛЬНОЕ ОПИСАНИЕ ИНДЕКСОВ (1-24)</h3>
+                <div class="table-responsive mt-3">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 120px;">Индекс</th>
+                                <th>Полное техническое описание (ТУ)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center font-weight-bold">Вз</td>
+                                <td><strong>Бронированный кабель для взрывоопасных зон.</strong> <br>Обеспечивает механическую защиту и герметичность вводов. Стальная оцинкованная лента или проволока.</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center font-weight-bold">В / Вп</td>
+                                <td><strong>ПВХ пластикат повышенной теплостойкости.</strong> <br>Стандартная изоляция и оболочка для категорий CONTROL и SIGNAL.</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center font-weight-bold">Пв / Пс</td>
+                                <td><strong>Вспененный (Foam) или сшитый полиэтилен.</strong> <br>Применяется в BUS-кабелях. Низкая диэлектрическая проницаемость (ε ≈ 1.5-2.0) обеспечивает минимальную погонную емкость и сохранение крутизны фронтов импульса.</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center font-weight-bold">Тп</td>
+                                <td><strong>Термопластичный эластомер.</strong> <br>Повышенная гибкость при экстремально низких температурах (до -60°С), стойкость к агрессивным средам.</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center font-weight-bold">Ф</td>
+                                <td><strong>Фторопластовая изоляция.</strong> <br>Максимальная химическая стойкость и температурный диапазон до +200°С. Идеально для агрессивных промышленных сред.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="mt-5 border-bottom pb-2 text-danger">ПОЖАРНАЯ БЕЗОПАСНОСТЬ (ФЗ-123)</h3>
+                <div class="table-responsive mt-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Исполнение</th>
+                                <th>Преимущественное применение</th>
+                                <th>Требования безопасности</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-weight-bold">нг-LS</td>
+                                <td>Внутренняя прокладка</td>
+                                <td>Не поддерживает горение, пониженное дымовыделение.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">нг-HF</td>
+                                <td>Общественные здания</td>
+                                <td>Безгалогенный. При горении не выделяет коррозионно-активных газов.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">нг-FR</td>
+                                <td>Системы безопасности</td>
+                                <td>Огнестойкий. Сохраняет работоспособность в огне до 180 минут.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <table style="width:100%; font-size:11px; border-collapse:collapse; border-top:2px solid #333;">
-                <tbody id="pdfSpecsTable"></tbody>
-            </table>
         </div>
     </div>
-    <div class="fab-download" onclick="app.downloadPDF()"><i class="fas fa-file-pdf"></i></div>
 </div>
 
-<div class="toast-container" id="toasts"></div>
+<div id="toasts" class="toast-container"></div>
 
-<div class="btm-nav">
-    <div class="nav-btn active" onclick="nav('conf', this)"><i class="fas fa-sliders-h"></i> Конфиг</div>
-    <div class="nav-btn" onclick="nav('matrix', this)"><i class="fas fa-book"></i> Справка</div>
-    <div class="nav-btn" onclick="nav('pdf', this)"><i class="fas fa-file-alt"></i> PDF</div>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="database.js"></script>
 <script src="logic.js"></script>
+<script>
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+        if(typeof app !== 'undefined') app.init();
+    });
+</script>
 
 </body>
 </html>
