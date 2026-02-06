@@ -1,4 +1,4 @@
-/* logic.js - v14.12: Config Restored & Wiki Debug */
+/* logic.js - v14.13: Clean Encyclopedia (No Debug Text) */
 
 // Навигация
 window.nav = function(p, btn) {
@@ -24,7 +24,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v14.12: Fixed & Ready']), 1000);
+        setTimeout(() => this.showToasts(['Система v14.13: Encyclopedia Cleaned']), 1000);
     },
 
     setCat(cat, btn) {
@@ -270,40 +270,22 @@ const app = {
 
     renderForm() {
         const area = document.getElementById('formArea');
-        if (!area) return; // Защита от ошибок
-        
-        // Запоминаем открытые вкладки аккордеона
+        if (!area) return;
         const openIdx = [];
         document.querySelectorAll('.acc-body').forEach((el, i) => { if(el.classList.contains('open')) openIdx.push(i); });
-        
         area.innerHTML = '';
-        
         if (DB && DB.GROUPS) {
             DB.GROUPS.forEach((grp, gIdx) => {
                 let html = '';
                 grp.ids.forEach(id => {
-                    // Виджет геометрии
                     if(id === 18) { html += this.getGeoWidget(); return; }
-                    // Индекс 23 только для BUS
                     if(id === 23 && this.state.cat !== 'BUS') return;
-                    
                     const meta = DB.INDICES.find(x => x.id === id);
-                    if (meta) {
-                        html += this.getControl(meta);
-                    }
+                    if (meta) { html += this.getControl(meta); }
                 });
-                
                 if(html) {
                     const isOpen = (gIdx === 0 || openIdx.includes(gIdx));
-                    area.innerHTML += `
-                    <div class="acc-group">
-                        <div class="acc-header ${isOpen?'active':''}" onclick="toggleAcc(this)">
-                            ${grp.t} <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="acc-body ${isOpen?'open':''}">
-                            ${html}
-                        </div>
-                    </div>`;
+                    area.innerHTML += `<div class="acc-group"><div class="acc-header ${isOpen?'active':''}" onclick="toggleAcc(this)">${grp.t} <i class="fas fa-chevron-down"></i></div><div class="acc-body ${isOpen?'open':''}">${html}</div></div>`;
                 }
             });
         }
@@ -388,8 +370,8 @@ const app = {
                     <div style="padding:10px;">`;
                 idx.opts.forEach(o => {
                     if (o.c || o.l) {
-                        // Вот здесь мы берем Wiki. Если Wiki нет или пуста, выводим hint с пометкой (Short)
-                        let wikiText = o.wiki && o.wiki.length > 5 ? o.wiki : (o.hint + " <span style='color:red; font-size:9px;'>(Short Descr)</span>");
+                        // Чистая логика: если нет Wiki, берем Hint. БЕЗ красных приписок.
+                        let wikiText = o.wiki || o.hint;
                         
                         wikiText = wikiText.replace(/\[ТУ (.*?)\]/g, '<span style="color:#0d6efd; font-weight:bold;">[ТУ $1]</span>');
                         let badge = "";
