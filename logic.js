@@ -1,4 +1,4 @@
-/* logic.js - v14.9: The Librarian (Rich Matrix & Encyclopedia) */
+/* logic.js - v14.13: Clean Encyclopedia (No Debug Text) */
 
 // Навигация
 window.nav = function(p, btn) {
@@ -24,7 +24,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v14.9: Reference Mode']), 1000);
+        setTimeout(() => this.showToasts(['Система v14.13: Encyclopedia Cleaned']), 1000);
     },
 
     setCat(cat, btn) {
@@ -61,6 +61,7 @@ const app = {
 
     updateVal(id, val) {
         this.state.idx[id] = val;
+        // Ex-d логика
         if (id === 1) {
             if (val === 'Вз') { 
                 if(this.state.idx[8] !== 'з') { this.state.idx[8] = 'з'; this.showToasts(['Добавлено заполнение для Ex-d']); }
@@ -267,56 +268,95 @@ const app = {
         c.appendChild(mkSlot(s[14] === '-ХС', '<i class="fas fa-flask"></i>', '#6610f2'));
     },
 
-    // === ОБНОВЛЕННЫЙ РЕНДЕР МАТРИЦЫ (СПРАВОЧНИК) ===
+    renderForm() {
+        const area = document.getElementById('formArea');
+        if (!area) return;
+        const openIdx = [];
+        document.querySelectorAll('.acc-body').forEach((el, i) => { if(el.classList.contains('open')) openIdx.push(i); });
+        area.innerHTML = '';
+        if (DB && DB.GROUPS) {
+            DB.GROUPS.forEach((grp, gIdx) => {
+                let html = '';
+                grp.ids.forEach(id => {
+                    if(id === 18) { html += this.getGeoWidget(); return; }
+                    if(id === 23 && this.state.cat !== 'BUS') return;
+                    const meta = DB.INDICES.find(x => x.id === id);
+                    if (meta) { html += this.getControl(meta); }
+                });
+                if(html) {
+                    const isOpen = (gIdx === 0 || openIdx.includes(gIdx));
+                    area.innerHTML += `<div class="acc-group"><div class="acc-header ${isOpen?'active':''}" onclick="toggleAcc(this)">${grp.t} <i class="fas fa-chevron-down"></i></div><div class="acc-body ${isOpen?'open':''}">${html}</div></div>`;
+                }
+            });
+        }
+    },
+
+    getControl(meta) {
+        const val = this.state.idx[meta.id];
+        let opts = meta.opts.map(o => {
+            let disabled = this.isDisabled(meta.id, o.c);
+            let style = "";
+            if (meta.id === 11 && o.c.includes('FR')) style = "color:#fd7e14; font-weight:bold;";
+            if (meta.id === 2 && DB.MAT_PROPS[o.c] && DB.MAT_PROPS[o.c].fr) style = "color:#fd7e14;";
+            if ((meta.id === 3 || meta.id === 5) && o.c !== "") style = "color:#fd7e14;";
+            if(disabled) return `<option value="${o.c}" disabled>${o.l}</option>`;
+            return `<option value="${o.c}" style="${style}" ${val===o.c?'selected':''}>${o.l}</option>`;
+        }).join('');
+        const hintObj = meta.opts.find(o => o.c === val);
+        const desc = hintObj ? hintObj.hint : ""; 
+        const hlClass = (val && val !== '') ? 'highlight' : '';
+        return `<div class="control-row"><div class="lbl-row"><div class="lbl-main">${meta.n}</div><div class="lbl-idx">#${meta.id}</div></div><select class="c-select ${hlClass}" onchange="app.updateVal(${meta.id}, this.value)">${opts}</select><div class="hint ${val?'visible':''}">${desc}</div></div>`;
+    },
+
+    getGeoWidget() {
+        const cat = this.state.cat; const lim = DB.LIMITS[cat];
+        let typesHtml = lim.types.map(t => `<option value="${t}" ${this.state.geo.type===t?'selected':''}>${DB.GEO_TYPES.find(x=>x.c===t).l}</option>`).join('');
+        let sList = lim.valid_S;
+        if(this.state.geo.type === 'vfd') sList = sList.filter(s => ['1.5','2.5','4.0','6.0'].includes(s));
+        if(cat === 'BUS') { const p = this.state.idx[23] || ''; const r = lim.proto[p] || lim.proto['']; sList = r.S; }
+        let sHtml = sList.map(s => `<option value="${s}" ${this.state.geo.S===s?'selected':''}>${s} мм²</option>`).join('');
+        let nList = [];
+        if(cat === 'BUS') { const p = this.state.idx[23] || ''; nList = (lim.proto[p] || lim.proto['']).N; }
+        else if(lim.get_valid_N) { nList = lim.get_valid_N(this.state.geo.S, this.state.geo.type); } else { nList = [1,2,4]; }
+        let nHtml = nList.map(n => `<option value="${n}" ${this.state.geo.N==n?'selected':''}>${n}</option>`).join('');
+        const isVFD = (this.state.geo.type === 'vfd');
+        return `<div class="control-row" style="border-left:3px solid var(--primary); padding-left:15px; margin-left:-5px;"><div class="lbl-row"><div class="lbl-main">ГЕОМЕТРИЯ (18)</div></div><div class="geo-widget"><div class="geo-col"><div class="geo-lbl">КОЛ-ВО</div><select class="c-select" ${isVFD?'disabled':''} onchange="app.updateGeo('N',this.value)">${nHtml}</select></div><div class="geo-col"><div class="geo-lbl">ТИП</div><select class="c-select" onchange="app.updateGeo('type',this.value)">${typesHtml}</select></div><div class="geo-col"><div class="geo-lbl">СЕЧЕНИЕ</div><select class="c-select" onchange="app.updateGeo('S',this.value)">${sHtml}</select></div></div></div>`;
+    },
+
+    isDisabled(id, val) {
+        if (id === 2 && !this.state.validIns.includes(val)) return true;
+        if (id === 9 && !this.state.validJacket.includes(val)) return true;
+        return false;
+    },
+
     renderMatrix() {
-        // 1. Сводная Таблица: Сравнение категорий
         const c1 = document.getElementById('summaryTableArea');
         if (c1) {
-            let html1 = `
-            <table class="summary-table" style="width:100%; border-collapse:collapse; font-size:11px;">
-                <thead>
-                    <tr style="background:#212529; color:white;">
-                        <th style="padding:8px; text-align:left;">ПАРАМЕТР</th>
-                        <th style="padding:8px;">BUS (Шина)</th>
-                        <th style="padding:8px;">SIGNAL (КСРЭВ)</th>
-                        <th style="padding:8px;">CONTROL (КУВ)</th>
-                    </tr>
-                </thead>
-                <tbody>
-            `;
-            
-            // Строки для таблицы
-            const rows = [
-                { l: "Напряжение", id: 22 },
-                { l: "Изоляция", id: 2 },
-                { l: "Экран", id: 6 },
-                { l: "Оболочка", id: 9 },
-                { l: "Пожарка", id: 11 }
-            ];
-
-            rows.forEach((r, idx) => {
-                const bg = idx % 2 === 0 ? '#fff' : '#f8f9fa';
-                const getDef = (cat) => {
-                    const code = DB.LIMITS[cat].defaults[r.id] || DB.LIMITS[cat].volt || "-";
-                    // Ищем описание
-                    const meta = DB.INDICES.find(x => x.id === r.id);
-                    const opt = meta ? meta.opts.find(o => o.c === code) : null;
-                    return opt ? `<b>${opt.c}</b><br><span style="color:#777; font-size:9px;">${opt.l.split('-')[0]}</span>` : code;
-                };
-
-                html1 += `
-                <tr style="background:${bg}; border-bottom:1px solid #ddd;">
-                    <td style="padding:8px; font-weight:bold;">${r.l}</td>
-                    <td style="padding:8px; text-align:center;">${getDef('BUS')}</td>
-                    <td style="padding:8px; text-align:center;">${getDef('SIGNAL')}</td>
-                    <td style="padding:8px; text-align:center;">${getDef('CONTROL')}</td>
-                </tr>`;
+            let html1 = '<table class="summary-table" style="width:auto; min-width:100%; border-collapse: collapse; font-size: 10px;"><thead><tr>';
+            DB.INDICES.forEach(idx => { 
+                html1 += `<th style="background:#343a40; color:#fff; padding:6px; border:1px solid #495057;">${idx.id}</th>`; 
             });
-            html1 += '</tbody></table>';
+            html1 += '</tr></thead><tbody><tr>';
+            DB.INDICES.forEach(idx => {
+                html1 += `<td style="padding:0; border:1px solid #dee2e6; vertical-align:top; background:#fff;">`;
+                idx.opts.forEach(o => {
+                    if (o.c) { 
+                        const isActive = (app.state.idx[idx.id] === o.c);
+                        const activeStyle = isActive ? 'background:#0d6efd; color:white; border-radius:0;' : '';
+                        let colorStyle = 'color:#333;';
+                        if (!isActive) {
+                            if (o.wiki && o.wiki.toLowerCase().includes('огнестойк')) colorStyle = 'color:#D67D0F; font-weight:bold;';
+                            if (idx.id === 11 && o.c.includes('FR')) colorStyle = 'color:#D67D0F; font-weight:bold;';
+                        }
+                        html1 += `<div style="padding:3px 4px; border-bottom:1px solid #f1f3f5; cursor:default; ${colorStyle} ${activeStyle}" title="${o.l}">${o.c}</div>`;
+                    }
+                });
+                html1 += `</td>`;
+            });
+            html1 += '</tr></tbody></table>';
             c1.innerHTML = html1;
         }
 
-        // 2. Детальная Энциклопедия
         const c2 = document.getElementById('detailedSpecs');
         if (c2) {
             let html2 = '';
@@ -328,17 +368,15 @@ const app = {
                         <span style="background:#333; color:white; padding:2px 6px; border-radius:4px; font-size:10px;">ID ${idx.id}</span>
                     </div>
                     <div style="padding:10px;">`;
-                
                 idx.opts.forEach(o => {
                     if (o.c || o.l) {
-                        let wikiText = o.wiki || "Базовое исполнение";
-                        // Подсветка ТУ
-                        wikiText = wikiText.replace(/\[ТУ (.*?)\]/g, '<span style="color:#0d6efd; font-weight:bold;">[ТУ $1]</span>');
+                        // Чистая логика: если нет Wiki, берем Hint. БЕЗ красных приписок.
+                        let wikiText = o.wiki || o.hint;
                         
+                        wikiText = wikiText.replace(/\[ТУ (.*?)\]/g, '<span style="color:#0d6efd; font-weight:bold;">[ТУ $1]</span>');
                         let badge = "";
-                        if(o.wiki && o.wiki.toLowerCase().includes("огнестойк")) badge = '<i class="fas fa-fire" style="color:#DC3545; margin-right:5px;"></i>';
-                        if(o.wiki && o.wiki.toLowerCase().includes("мороз")) badge = '<i class="fas fa-snowflake" style="color:#0DCAF0; margin-right:5px;"></i>';
-
+                        if(wikiText.toLowerCase().includes("огнестойк")) badge = '<i class="fas fa-fire" style="color:#DC3545; margin-right:5px;"></i>';
+                        if(wikiText.toLowerCase().includes("мороз")) badge = '<i class="fas fa-snowflake" style="color:#0DCAF0; margin-right:5px;"></i>';
                         html2 += `
                         <div style="margin-bottom:12px; border-bottom:1px dashed #eee; padding-bottom:8px;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
