@@ -356,43 +356,7 @@ const app = {
             html1 += '</tr></tbody></table>';
             c1.innerHTML = html1;
         }
-
-        const c2 = document.getElementById('detailedSpecs');
-        if (c2) {
-            let html2 = '';
-            DB.INDICES.forEach(idx => {
-                html2 += `
-                <div class="spec-block" style="border-left:4px solid #F7941D; margin-bottom:20px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-                    <div class="spec-title" style="padding:10px; background:#f1f3f5; font-weight:bold; display:flex; justify-content:space-between;">
-                        <span>${idx.n}</span>
-                        <span style="background:#333; color:white; padding:2px 6px; border-radius:4px; font-size:10px;">ID ${idx.id}</span>
-                    </div>
-                    <div style="padding:10px;">`;
-                idx.opts.forEach(o => {
-                    if (o.c || o.l) {
-                        // Чистая логика: если нет Wiki, берем Hint. БЕЗ красных приписок.
-                        let wikiText = o.wiki || o.hint;
-                        
-                        wikiText = wikiText.replace(/\[ТУ (.*?)\]/g, '<span style="color:#0d6efd; font-weight:bold;">[ТУ $1]</span>');
-                        let badge = "";
-                        if(wikiText.toLowerCase().includes("огнестойк")) badge = '<i class="fas fa-fire" style="color:#DC3545; margin-right:5px;"></i>';
-                        if(wikiText.toLowerCase().includes("мороз")) badge = '<i class="fas fa-snowflake" style="color:#0DCAF0; margin-right:5px;"></i>';
-                        html2 += `
-                        <div style="margin-bottom:12px; border-bottom:1px dashed #eee; padding-bottom:8px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="opt-v" style="font-size:14px; color:#F7941D;">${o.c ? o.c : "(-)"}</span>
-                                <span style="font-size:11px; font-weight:bold; color:#555;">${o.l}</span>
-                            </div>
-                            <div style="font-size:11px; color:#666; margin-top:4px; line-height:1.4;">
-                                ${badge} ${wikiText}
-                            </div>
-                        </div>`;
-                    }
-                });
-                html2 += `</div></div>`;
-            });
-            c2.innerHTML = html2;
-        }
+        // Вторая часть функции удалена, так как текст теперь статический в HTML
     },
     
     renderPDFPreview() {
