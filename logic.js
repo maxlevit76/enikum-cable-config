@@ -1,4 +1,4 @@
-/* logic.js - v14.5: Hard Police (Auto-Downgrade & Barrier Cleanup) */
+/* logic.js - v14.6: Aggressive Optimizer (Fix Stickiness) */
 
 // Навигация
 window.nav = function(p, btn) {
@@ -24,7 +24,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v14.5: Hard Police Active']), 1000);
+        setTimeout(() => this.showToasts(['Система v14.6: Optimization Active']), 1000);
     },
 
     setCat(cat, btn) {
@@ -88,7 +88,7 @@ const app = {
         this.state.explanations = []; 
         const addExplain = (txt) => this.state.explanations.push(txt);
 
-        // --- 1. СБОР ТРЕБОВАНИЙ ---
+        // 1. ТРЕБОВАНИЯ
         const req = { minT: -50, hf: false, fr: false, oil: false, chem: false, uv: false, flex: 1 };
         
         const fireCode = s[11] || "";
@@ -105,19 +105,12 @@ const app = {
         if (s[19] === '(6)') { req.flex = 2; addExplain("Робототехника"); }
 
         // --- 2. УПРАВЛЕНИЕ БАРЬЕРАМИ (BUS) ---
-        // Жесткая привязка барьера к FR для BUS
+        // (Работает корректно, как ты и подтвердил)
         if (cat === 'BUS') {
             if (req.fr) {
-                if (s[3] !== 'Си') {
-                    s[3] = 'Си';
-                    msgs.push("Добавлен барьер (Си) для защиты шины");
-                }
+                if (s[3] !== 'Си') { s[3] = 'Си'; msgs.push("Добавлен барьер (Си) для FR"); }
             } else {
-                // Если FR выключили - убираем барьер
-                if (s[3] === 'Си') {
-                    s[3] = '';
-                    // msgs.push("Убран барьер (нет FR)"); // Можно раскомментировать, если нужно уведомление
-                }
+                if (s[3] === 'Си') { s[3] = ''; }
             }
         }
 
@@ -141,7 +134,7 @@ const app = {
             if (req.oil && type === 'jacket' && !p.oil) return false;
             if (req.chem && type === 'jacket' && !p.chem) return false;
             
-            // Логика FR:
+            // Логика FR (Огнестойкость)
             if (req.fr) {
                 const hasBarrier = (s[3] === 'Си');
                 // Материал проходит, если он FR, ИЛИ если это изоляция с барьером
@@ -162,68 +155,71 @@ const app = {
         if (this.state.validIns.length === 0) msgs.push('НЕТ ИЗОЛЯЦИИ под эти требования!');
         if (this.state.validJacket.length === 0) msgs.push('НЕТ ОБОЛОЧКИ под эти требования!');
 
-        // --- 5. ОПТИМИЗАТОР (AUTO-SWITCH & DOWNGRADE) ---
+        // --- 5. АГРЕССИВНЫЙ ОПТИМИЗАТОР (AUTO-DOWNGRADE) ---
+        // Вот здесь мы чиним залипание
         
         const optimizeMaterial = (currentVal, validList, type) => {
-            // 1. Если текущий невалиден - меняем
-            // 2. Если текущий "Слишком хорош" (напр. FR когда не нужно) - меняем на стандарт
-            
             const curProp = DB.MAT_PROPS[(type==='jacket'?'J_':'')+currentVal];
-            if (!curProp) return currentVal; // Защита
+            if (!curProp) return currentVal; 
 
             let needChange = false;
             
-            // Проверка валидности
+            // 1. Невалиден? Менять!
             if (!validList.includes(currentVal)) needChange = true;
 
-            // Проверка "Избыточности" (Downgrade Logic)
-            // Если FR выключен, а материал FR -> ищем замену
+            // 2. Downgrade FR (Выключили FR, но материал остался дорогим)
             if (!req.fr && curProp.fr) needChange = true;
-            // Если HF выключен, а материал HF -> ищем замену (если есть дешевле)
-            if (!req.hf && curProp.hf && type==='jacket') {
-                // Для оболочек HF дороже, поэтому при снятии HF пытаемся уйти на ПВХ
-                // Для изоляции сложнее (Пв лучше П), поэтому там аккуратнее
-                needChange = true; 
+            
+            // 3. Downgrade HF (Выключили HF, но материал остался HF)
+            // Исключение: Для BUS изоляцию Пв (Foam PE) не трогаем,
+            // потому что ПВХ (В) там нельзя использовать технически.
+            if (!req.hf && curProp.hf) {
+                if (cat === 'BUS' && type === 'ins' && currentVal === 'Пв') {
+                    needChange = false; // Оставляем Пв
+                } else {
+                    needChange = true; // Меняем на ПВХ
+                }
             }
 
-            if (!needChange) return currentVal; // Оставляем как есть
+            if (!needChange) return currentVal; 
 
-            // --- АЛГОРИТМ ПОДБОРА ЗАМЕНЫ ---
-            
-            // Сортируем валидные по Рангу (Сначала дешевые)
+            // --- ПОДБОР ЗАМЕНЫ ---
+            // Сортировка: Сначала дешевые (Rank 1)
             const sortedValid = validList.sort((a,b) => {
                 let pA = DB.MAT_PROPS[(type==='jacket'?'J_':'')+a];
                 let pB = DB.MAT_PROPS[(type==='jacket'?'J_':'')+b];
                 return (pA ? pA.rank : 99) - (pB ? pB.rank : 99);
             });
 
-            // 1. Попытка сохранить Семейство (Family Stickiness)
-            // Пример: Было Пк (HF+FR), стало без FR -> ищем П (HF)
-            // Пример: Было Вк (PVC+FR), стало без FR -> ищем В (PVC)
+            // а) Пытаемся найти то же семейство (напр. Пк -> П)
             if (curProp.family) {
                 const sameFamily = sortedValid.find(c => {
                     let p = DB.MAT_PROPS[(type==='jacket'?'J_':'')+c];
-                    return p && p.family === curProp.family;
+                    // Ищем то же семейство, но учитываем снятие FR/HF
+                    let match = (p && p.family === curProp.family);
+                    if (!req.fr && p.fr) match = false; // Не берем FR, если не надо
+                    return match;
                 });
                 if (sameFamily) return sameFamily;
             }
 
-            // 2. Спец-правило для BUS (Приоритет Пв)
+            // б) Спец-правило BUS
             if (cat === 'BUS' && type === 'ins' && sortedValid.includes('Пв')) return 'Пв';
 
-            // 3. Fallback: Берем самый дешевый валидный
+            // в) Просто самый дешевый
             return sortedValid[0];
         };
 
-        // Запускаем оптимизатор
+        // Запуск для Изоляции
         if (this.state.validIns.length > 0) {
             const newIns = optimizeMaterial(s[2], this.state.validIns, 'ins');
-            if (newIns !== s[2]) { s[2] = newIns; }
+            if (newIns !== s[2]) { s[2] = newIns; msgs.push(`Изоляция оптимизирована: ${newIns}`); }
         }
 
+        // Запуск для Оболочки
         if (this.state.validJacket.length > 0) {
             const newJacket = optimizeMaterial(s[9], this.state.validJacket, 'jacket');
-            if (newJacket !== s[9]) { s[9] = newJacket; }
+            if (newJacket !== s[9]) { s[9] = newJacket; msgs.push(`Оболочка оптимизирована: ${newJacket}`); }
         }
         
         // --- 6. ЦВЕТА ---
