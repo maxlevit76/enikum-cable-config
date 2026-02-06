@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENICUM Configurator v14.20</title>
+    <title>ENICUM Configurator v14.22</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -12,7 +12,8 @@
         :root { --primary: #F7941D; --dark: #333; --light: #f8f9fa; }
         body { background-color: #f4f6f9; font-family: 'Segoe UI', Roboto, sans-serif; padding-bottom: 80px; }
         
-        /* --- СТИЛИ ИНТЕРФЕЙСА --- */
+        /* HEADER & NAV */
+        .header-panel { background: #fff; padding: 15px; margin-bottom: 15px; border-bottom: 2px solid var(--primary); }
         .nav-bottom { position: fixed; bottom: 0; width: 100%; background: #fff; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000; padding: 10px 0; display: flex; justify-content: space-around; }
         .nav-btn { border: none; background: none; color: #6c757d; font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; }
         .nav-btn.active { color: var(--primary); font-weight: bold; }
@@ -21,21 +22,18 @@
         .page { display: none; padding-bottom: 20px; }
         .page.active { display: block; }
         
-        .header-panel { background: #fff; padding: 15px; margin-bottom: 15px; border-bottom: 2px solid var(--primary); }
         .sku-box { font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: bold; color: #333; word-break: break-all; margin-top: 10px; }
-        
         .icon-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
         .icon-slot { width: 32px; height: 32px; border-radius: 4px; background: #e9ecef; display: flex; align-items: center; justify-content: center; color: #adb5bd; font-size: 14px; position: relative; }
         .icon-slot.active { color: #fff; }
         .slot-badge { position: absolute; bottom: -4px; right: -4px; font-size: 8px; background: #dc3545; color: white; padding: 1px 3px; border-radius: 3px; line-height: 1; }
 
-        /* Аккордеон и Формы */
+        /* CONFIGURATOR UI */
         .acc-group { background: #fff; margin-bottom: 10px; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .acc-header { padding: 12px 15px; font-weight: 600; color: #495057; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #fff; border-left: 4px solid transparent; }
         .acc-header.active { background: #fff9f2; color: var(--primary); border-left-color: var(--primary); }
         .acc-body { display: none; padding: 15px; border-top: 1px solid #f1f1f1; }
         .acc-body.open { display: block; }
-        
         .control-row { margin-bottom: 15px; }
         .lbl-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
         .lbl-main { font-size: 0.9rem; font-weight: 600; color: #333; }
@@ -45,40 +43,34 @@
         .c-select.highlight { border-color: var(--primary); background-color: #fff9f2; }
         .hint { font-size: 0.8rem; color: #6c757d; margin-top: 4px; font-style: italic; min-height: 1.2em; }
         .hint.visible { color: var(--primary); }
-
         .geo-widget { display: flex; gap: 5px; }
         .geo-col { flex: 1; }
         .geo-lbl { font-size: 0.7rem; color: #6c757d; margin-bottom: 2px; text-transform: uppercase; }
 
-        /* --- СТИЛИ СПРАВОЧНИКА (ВТОРАЯ СТРАНИЦА) --- */
+        /* ENCYCLOPEDIA (REFERENCE) */
         .encyclopedia-header { background: #343a40; color: white; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
         .encyclopedia-header h3 { margin: 0; font-size: 1.1rem; text-transform: uppercase; line-height: 1.4; }
-        
         .tech-article { background: #fff; padding: 20px; border: 1px solid #dee2e6; border-radius: 4px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .tech-article h4 { color: #333; font-weight: bold; margin-bottom: 15px; border-bottom: 3px solid var(--primary); padding-bottom: 10px; display: inline-block; }
-        
         .category-block { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed #eee; }
         .category-block:last-child { border-bottom: none; }
         .category-block h5 { color: #0d6efd; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; font-size: 1rem; }
         .category-block ul { padding-left: 20px; margin-bottom: 0; }
         .category-block li { margin-bottom: 5px; font-size: 0.95rem; color: #555; }
-        
         .idx-item { margin-bottom: 25px; padding: 15px; background: #fff; border-left: 5px solid var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 0 4px 4px 0; }
         .idx-item h5 { font-weight: bold; color: #333; background: #f8f9fa; padding: 10px; margin: -15px -15px 15px -15px; border-bottom: 1px solid #eee; font-size: 1rem; }
         .idx-item p { font-size: 0.9rem; line-height: 1.5; color: #444; margin-bottom: 10px; }
-        
         .section-divider { border: 0; height: 2px; background: #343a40; margin: 40px 0; opacity: 0.1; }
         
-        /* Таблицы */
-        .table-sm th, .table-sm td { padding: 0.5rem; }
+        /* TABLE STYLES */
         .summary-table td div { font-size: 10px; }
+        .table-sm th, .table-sm td { padding: 0.5rem; }
 
-        /* Toast & PDF */
+        /* TOAST & PDF */
         #toasts { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { background: #333; color: white; padding: 12px 20px; border-radius: 4px; font-size: 0.9rem; animation: fadeIn 0.3s; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 300px; }
         .toast.danger { background: #dc3545; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-        
         .pdf-preview { background: white; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(0,0,0,0.1); font-family: 'Times New Roman', serif; }
         .pdf-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
@@ -91,7 +83,7 @@
 
     <div class="header-panel">
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <div style="font-weight:bold; color:var(--primary);">ENICUM <span style="color:#adb5bd; font-size:0.8em;">v14.20</span></div>
+            <div style="font-weight:bold; color:var(--primary);">ENICUM <span style="color:#adb5bd; font-size:0.8em;">v14.22</span></div>
             <div class="icon-row" id="headerIcons"></div>
         </div>
         <div class="sku-box" id="skuDisplay">LOADING...</div>
@@ -125,62 +117,20 @@
                     <p><strong>Физические основы категоризации: BUS, SIGNAL, CONTROL</strong></p>
                     <p>В номенклатуре продукции <strong>ЭНИКУМ</strong> принято условное разделение кабелей на три функциональные категории. Данная классификация продиктована не маркетингом, а фундаментальными законами электродинамики. Различные уровни автоматизации (АСУ ТП) оперируют сигналами разной физической природы, что предъявляет взаимоисключающие требования к конструкции кабеля.</p>
 
-                    <div class="category-block">
-                        <h5>1. КАТЕГОРИЯ BUS (ИНТЕРФЕЙСНЫЕ)</h5>
-                        <ul>
-                            <li><strong>Уровень применения:</strong> Верхний уровень (Level 1). Связь контроллеров (PLC), панелей (HMI), частотных преобразователей.</li>
-                            <li><strong>Физика сигнала:</strong> Высокочастотный цифровой поток (МГц). Информация передается <strong>фронтами импульсов</strong>. На таких скоростях кабель работает как длинная линия.</li>
-                            <li><strong>Критические требования:</strong> Строго нормированное <strong>волновое сопротивление (Z₀)</strong> (100/120/150 Ом) и низкая емкость.</li>
-                            <li><strong>Напряжение:</strong> Рабочее 5...12 В. Изоляция 300/500 В (для защиты от наводок и соседства с силой).</li>
-                        </ul>
-                    </div>
-
-                    <div class="category-block">
-                        <h5>2. КАТЕГОРИЯ SIGNAL (МОНТАЖНЫЕ / КИПиА)</h5>
-                        <ul>
-                            <li><strong>Уровень применения:</strong> Полевой уровень (Level 0). Подключение датчиков и исполнительных механизмов.</li>
-                            <li><strong>Физика сигнала:</strong> Точный аналог (4...20 мА, 0...10 В) или низкоскоростная дискретика. Важна <strong>точность амплитуды</strong>.</li>
-                            <li><strong>Критические требования:</strong> Максимальное <strong>экранирование</strong> (защита от EMI) и омическое сопротивление жилы.</li>
-                            <li><strong>Напряжение:</strong> Рабочее 24...48 В (до 220 В в релейных схемах). Изоляция 300/500 В.</li>
-                        </ul>
-                    </div>
-
-                    <div class="category-block">
-                        <h5>3. КАТЕГОРИЯ CONTROL (УПРАВЛЕНИЕ И КОНТРОЛЬ)</h5>
-                        <ul>
-                            <li><strong>Уровень применения:</strong> Силовое управление и вторичная коммутация. Питание соленоидов, пускателей, двигателей.</li>
-                            <li><strong>Физика сигнала:</strong> Энергия (Power Control). Ток, совершающий работу.</li>
-                            <li><strong>Критические требования:</strong> <strong>Токовая нагрузка</strong> (сечение) и стойкость к коммутационным перенапряжениям.</li>
-                            <li><strong>Напряжение:</strong> Рабочее до 660 В. Изоляция 660/1000 В.</li>
-                        </ul>
-                    </div>
-
-                    <table class="table table-bordered table-sm mt-3" style="font-size: 0.9em;">
-                        <thead class="table-light"><tr><th>Параметр</th><th>BUS</th><th>SIGNAL</th><th>CONTROL</th></tr></thead>
-                        <tbody>
-                            <tr><td><strong>Сигнал</strong></td><td>Цифра (МГц)</td><td>Аналог / Ток</td><td>Сила / Питание</td></tr>
-                            <tr><td><strong>Критично</strong></td><td>Импеданс (Z₀)</td><td>Экран</td><td>Ток, Umax</td></tr>
-                            <tr><td><strong>Изоляция (U₀)</strong></td><td>300/500 В</td><td>300/500 В</td><td>660/1000 В</td></tr>
-                            <tr><td><strong>Геометрия</strong></td><td>Витая пара (точный шаг)</td><td>Витая пара / Пучок</td><td>Повив (пучок)</td></tr>
-                        </tbody>
-                    </table>
+                    <div class="category-block"><h5>1. КАТЕГОРИЯ BUS (ИНТЕРФЕЙСНЫЕ)</h5><ul><li><strong>Уровень применения:</strong> Верхний уровень (Level 1). Связь контроллеров (PLC), панелей (HMI), частотных преобразователей.</li><li><strong>Физика сигнала:</strong> Высокочастотный цифровой поток (МГц). Информация передается <strong>фронтами импульсов</strong>. На таких скоростях кабель работает как длинная линия.</li><li><strong>Критические требования:</strong> Строго нормированное <strong>волновое сопротивление (Z₀)</strong> (100/120/150 Ом) и низкая емкость.</li><li><strong>Напряжение:</strong> Рабочее 5...12 В. Изоляция 300/500 В (для защиты от наводок и соседства с силой).</li></ul></div>
+                    <div class="category-block"><h5>2. КАТЕГОРИЯ SIGNAL (МОНТАЖНЫЕ / КИПиА)</h5><ul><li><strong>Уровень применения:</strong> Полевой уровень (Level 0). Подключение датчиков и исполнительных механизмов.</li><li><strong>Физика сигнала:</strong> Точный аналог (4...20 мА, 0...10 В) или низкоскоростная дискретика. Важна <strong>точность амплитуды</strong>.</li><li><strong>Критические требования:</strong> Максимальное <strong>экранирование</strong> (защита от EMI) и омическое сопротивление жилы.</li><li><strong>Напряжение:</strong> Рабочее 24...48 В (до 220 В в релейных схемах). Изоляция 300/500 В.</li></ul></div>
+                    <div class="category-block"><h5>3. КАТЕГОРИЯ CONTROL (УПРАВЛЕНИЕ И КОНТРОЛЬ)</h5><ul><li><strong>Уровень применения:</strong> Силовое управление и вторичная коммутация. Питание соленоидов, пускателей, двигателей.</li><li><strong>Физика сигнала:</strong> Энергия (Power Control). Ток, совершающий работу.</li><li><strong>Критические требования:</strong> <strong>Токовая нагрузка</strong> (сечение) и стойкость к коммутационным перенапряжениям.</li><li><strong>Напряжение:</strong> Рабочее до 660 В. Изоляция 660/1000 В.</li></ul></div>
+                    
+                    <table class="table table-bordered table-sm mt-3" style="font-size: 0.9em;"><thead class="table-light"><tr><th>Параметр</th><th>BUS</th><th>SIGNAL</th><th>CONTROL</th></tr></thead><tbody><tr><td><strong>Сигнал</strong></td><td>Цифра (МГц)</td><td>Аналог / Ток</td><td>Сила / Питание</td></tr><tr><td><strong>Критично</strong></td><td>Импеданс (Z₀)</td><td>Экран</td><td>Ток, Umax</td></tr><tr><td><strong>Изоляция (U₀)</strong></td><td>300/500 В</td><td>300/500 В</td><td>660/1000 В</td></tr><tr><td><strong>Геометрия</strong></td><td>Витая пара (точный шаг)</td><td>Витая пара / Пучок</td><td>Повив (пучок)</td></tr></tbody></table>
                 </div>
 
                 <hr class="section-divider">
-
-                <div class="encyclopedia-header">
-                    <h3>ДЕТАЛЬНОЕ ОПИСАНИЕ ИНДЕКСОВ (МАРКИРОВКА)</h3>
-                </div>
+                <div class="encyclopedia-header"><h3>ДЕТАЛЬНОЕ ОПИСАНИЕ ИНДЕКСОВ (МАРКИРОВКА)</h3></div>
 
                 <div class="indices-list">
+                    <div class="idx-item"><h5>1. Применение во взрывоопасных зонах</h5><p><strong>Вз</strong> — для применения кабеля с частичной продольной и радиальной герметичностью на объектах и в помещениях, где возможны наличия смеси воздуха с горючими веществами в форме газа, пара или тумана, а также, где формируется среда в виде облака горючей пыли в воздухе в соответствии с ГОСТ IEC 60079-14, ПРИЛОЖЕНИЕ Е.</p></div>
                     
-                    <div class="idx-item">
-                        <h5>1. Применение во взрывоопасных зонах</h5>
-                        <p><strong>Вз</strong> — для применения кабеля с частичной продольной и радиальной герметичностью на объектах и в помещениях, где возможны наличия смеси воздуха с горючими веществами в форме газа, пара или тумана, а также, где формируется среда в виде облака горючей пыли в воздухе в соответствии с ГОСТ IEC 60079-14, ПРИЛОЖЕНИЕ Е.</p>
-                    </div>
-
-                    <div class="idx-item">
-                        <h5>2. Изоляция ТПЖ</h5>
+                    <div class="idx-item"><h5>2. Изоляция ТПЖ</h5>
                         <p><strong>В (PVC)</strong> — из поливинилхлоридного пластиката, в том числе пониженной пожарной опасности, в том числе низкотоксичного. Применение: для общего назначения в гражданской и промышленной отрасли, для систем связи сигнализации и управления доступом (СКУД), для контрольно-измерительного оборудования (КИПиА), систем промышленной автоматизации (АСУ ТП), с требованием к диэлектрической прочности изоляции - омическое сопротивление изоляции не менее 50 Ом/км.</p>
                         <p><strong>П (Polymer HF)</strong> — из полимерной композиции, не содержащей галогенов пониженной пожарной опасности. Применение: для общего назначения в гражданской и промышленной отрасли, для систем связи сигнализации и управления доступом (СКУД), для контрольно-измерительного оборудования (КИПиА), систем промышленной автоматизации (АСУ ТП), с требованием к диэлектрической прочности изоляции - омическое сопротивление изоляции не менее 100 Ом/км.</p>
                         <p><strong>Пб (XL-Polymer)</strong> — из сшитой полимерной композиции, не содержащей галогенов пониженной пожарной опасности. Применение: для общего назначения в гражданской и промышленной отрасли, для систем связи сигнализации и управления доступом (СКУД), для контрольно-измерительного оборудования (КИПиА), систем промышленной автоматизации (АСУ ТП), с требованием к диэлектрической прочности изоляции - омическое сопротивление изоляции не менее 1000 Ом/км.</p>
@@ -198,13 +148,9 @@
                         <p><strong>РПп (SiR/PO)</strong> — из огнестойкой силиконовой резины и полиолефиновой композиции. Применение: для систем пожарной безопасности и оборудования передачи данных.</p>
                     </div>
 
-                    <div class="idx-item">
-                        <h5>3. Огнестойкий слюдосодержащий барьер (Индивидуальный)</h5>
-                        <p><strong>Си (Mica)</strong> — слюдяная огнестойкая лента поверх скрученного проводника пары, тройки или четверки для дополнительной защиты изоляции от воздействия открытого пламени.</p>
-                    </div>
-
-                    <div class="idx-item">
-                        <h5>4. Индивидуальный экран</h5>
+                    <div class="idx-item"><h5>3. Огнестойкий слюдосодержащий барьер (Индивидуальный)</h5><p><strong>Си (Mica)</strong> — слюдяная огнестойкая лента поверх скрученного проводника пары, тройки или четверки для дополнительной защиты изоляции от воздействия открытого пламени.</p></div>
+                    
+                    <div class="idx-item"><h5>4. Индивидуальный экран</h5>
                         <p><strong>ЭИм (Cu-Tape)</strong> — с экраном из металлополимерной медной ленты и контактным проводником. 4.1.1 Для стационарного использования, без воздействия агрессивной среды.</p>
                         <p><strong>ЭИмо (Cu-Tape/Braid)</strong> — металлополимерная медная лента с контактным медным проводником и оплетка из медной круглой проволоки. 4.1.1 Для стационарного использования, без воздействия агрессивной среды.</p>
                         <p><strong>ЭИкм (Braid/Tape/Braid)</strong> — оплетка из медной круглой проволоки, металлополимерная лента с контактным медным проводником и оплетка из медной круглой проволоки. 4.1.1 Для стационарного использования, без воздействия агрессивной среды.</p>
@@ -216,13 +162,9 @@
                         <p><strong>ЭИн (Ni-Braid)</strong> — медная никелированная круглая проволока в виде оплетки. 4.1.5 Для стационарного и подвижного использования в условиях воздействия повышенной температуры до +250°С и коррозионной среды.</p>
                     </div>
 
-                    <div class="idx-item">
-                        <h5>5. Огнестойкий слюдосодержащий барьер (Общий)</h5>
-                        <p><strong>С (Mica)</strong> — слюдяная огнестойкая лента поверх сердечника кабеля для дополнительной защиты кабельного изделия от воздействия открытого пламени.</p>
-                    </div>
-
-                    <div class="idx-item">
-                        <h5>6. Общий экран</h5>
+                    <div class="idx-item"><h5>5. Огнестойкий слюдосодержащий барьер (Общий)</h5><p><strong>С (Mica)</strong> — слюдяная огнестойкая лента поверх сердечника кабеля для дополнительной защиты кабельного изделия от воздействия открытого пламени.</p></div>
+                    
+                    <div class="idx-item"><h5>6. Общий экран</h5>
                         <p><strong>Эм (Cu-Tape)</strong> — с экраном из металлополимерной медной ленты и контактным проводником. 6.1.1 Для стационарного использования, без воздействия агрессивной среды.</p>
                         <p><strong>Эмо (Cu-Tape/Braid)</strong> — металлополимерная медная лента с контактным медным проводником и оплетка из медной круглой проволоки. 6.1.1 Для стационарного использования, без воздействия агрессивной среды.</p>
                         <p><strong>Экм (Braid/Tape/Braid)</strong> — оплетка из медной круглой проволоки, металлополимерная лента с контактным медным проводником и оплетка из медной круглой проволоки. 6.1.1 Для стационарного использования, без воздействия агрессивной среды.</p>
@@ -234,18 +176,10 @@
                         <p><strong>Эн (Ni-Braid)</strong> — медная никелированная круглая проволока в виде оплетки. 6.1.5 Для стационарного и подвижного использования в условиях воздействия повышенной температуры до +250°С и коррозионной среды.</p>
                     </div>
 
-                    <div class="idx-item">
-                        <h5>7. Водоблокировка</h5>
-                        <p><strong>в</strong> — применение кабеля в условиях повышенной влажности (водопоглощение) и стойкости к продольному распространению воды в случае возможного механического повреждения целостности наружной оболочки при эксплуатации для дальнейшего устранения дефекта.</p>
-                    </div>
-
-                    <div class="idx-item">
-                        <h5>8. Внутреннее заполнение</h5>
-                        <p><strong>з</strong> — внутреннее заполнение (подложка) промежутков сердечника кабеля полученная методом экструзии для придания кабелю круглой формы и обеспечению частичной продольной герметизации для применения во взрывоопасных зонах.</p>
-                    </div>
-
-                    <div class="idx-item">
-                        <h5>9. Оболочка</h5>
+                    <div class="idx-item"><h5>7. Водоблокировка</h5><p><strong>в</strong> — применение кабеля в условиях повышенной влажности (водопоглощение) и стойкости к продольному распространению воды в случае возможного механического повреждения целостности наружной оболочки при эксплуатации для дальнейшего устранения дефекта.</p></div>
+                    <div class="idx-item"><h5>8. Внутреннее заполнение</h5><p><strong>з</strong> — внутреннее заполнение (подложка) промежутков сердечника кабеля полученная методом экструзии для придания кабелю круглой формы и обеспечению частичной продольной герметизации для применения во взрывоопасных зонах.</p></div>
+                    
+                    <div class="idx-item"><h5>9. Оболочка</h5>
                         <p><strong>Пэ (PE)</strong> — композиция полиэтилена - для одиночной прокладки на открытом воздухе с учётом воздействия солнечных излучений (УФ) и атмосферных осадков (без требований к пожарной безопасности).</p>
                         <p><strong>В (PVC)</strong> — ПВХ пластикат, в том числе пониженной пожарной опасности, в том числе низкотоксичный - для групповой прокладки внутри зданий и сооружений (без индекса УФ) или снаружи с учётом защиты от солнечных излучений.</p>
                         <p><strong>П (Polymer HF)</strong> — полимерная композиция, не содержащая галогенов пониженной пожарной опасности - для групповой прокладки в зданиях и сооружениях с массовым скоплением людей (свыше 50 человек), а также при наличии микропроцессорной и компьютерной техники (серверные и сетевые помещения, офисы, щитовые и т.д.).</p>
@@ -257,8 +191,7 @@
                         <p><strong>Ф (FEP)</strong> — фторопласт и его сополимеры - для одиночной прокладки. Экстремальная химстойкость и температуры до +250°С.</p>
                     </div>
 
-                    <div class="idx-item">
-                        <h5>10. Бронепокров</h5>
+                    <div class="idx-item"><h5>10. Бронепокров</h5>
                         <p><strong>КГ</strong> — круглые стальные оцинкованные проволоки в виде оплетки без защитной оболочки – для применения внутри зданий. Гибкость.</p>
                         <p><strong>К</strong> — круглые стальные оцинкованные проволоки в виде оплетки с защитной оболочкой (поверх брони) - для грунта и влажных помещений.</p>
                         <p><strong>Б</strong> — стальные оцинкованные ленты c защитной оболочкой (поверх брони) - для защиты от давления грунта.</p>
@@ -266,60 +199,9 @@
                         <p><strong>КБ</strong> — комбинированная броня (оплетка + ленты). Максимальная прочность.</p>
                     </div>
 
-                    <div class="idx-item">
-                        <h5>11. Индексы класса пожарной опасности (ФЗ-123)</h5>
-                        <div class="table-responsive">
-                        <table class="table table-striped table-bordered" style="font-size: 0.9rem;">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 15%;">Индекс</th>
-                                    <th style="width: 15%;">Класс пожарной опасности</th>
-                                    <th>Преимущественная область применения</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>нг(А)</strong></td>
-                                    <td>П1б.8.2.5.4</td>
-                                    <td>Производственные здания, сооружения, производственные и лабораторные помещения, мастерские (Ф5.11).</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>нг(А)-LS</strong></td>
-                                    <td>П1б.8.2.2.2</td>
-                                    <td>Многоквартирные жилые дома (Ф1.3); Одноквартирные жилые дома (Ф1.4); Театры, кинотеатры, клубы, библиотеки (Ф2.3); Музеи (Ф2.4); Здания производственного или складского назначения (Ф5).</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>нг(A)-HF</strong></td>
-                                    <td>П1б.8.1.2.1</td>
-                                    <td>Гостиницы, общежития, санатории (Ф1.2); Музеи в закрытых помещениях (Ф2.2); Здания торговли, вокзалы, поликлиники (Ф3); Школы, университеты, офисы, банки, пожарные депо (Ф4).</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>нг(A)-FRLS</strong></td>
-                                    <td>П1б.1.2.2.2</td>
-                                    <td>Для систем противопожарной защиты (СПЗ) и других систем, которые должны сохранять работоспособность в условиях пожара (Ф1-Ф5).</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>нг(A)-FRHF</strong></td>
-                                    <td>П1б.1.1.2.1</td>
-                                    <td>Для систем противопожарной защиты (СПЗ) и других систем, которые должны сохранять работоспособность в условиях пожара (Ф1.2; Ф2.2; Ф3; Ф4).</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>нг(A)-LSLTx</strong></td>
-                                    <td>П1б.8.2.1.2</td>
-                                    <td>Здания дошкольных образовательных организаций, специализированных домов престарелых и инвалидов (неквартирные), больницы, спальные корпуса интернатов (Ф1.1).</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>нг(А)-FRLSLTx</strong></td>
-                                    <td>П1б.8.2.1.2</td>
-                                    <td>Для систем СПЗ в детских садах, больницах и домах престарелых (Ф1.1), сохраняющих работоспособность в условиях пожара.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        </div>
-                    </div>
+                    <div class="idx-item"><h5>11. Индексы класса пожарной опасности (ФЗ-123)</h5><div class="table-responsive"><table class="table table-striped table-bordered" style="font-size: 0.9rem;"><thead class="table-light"><tr><th>Индекс</th><th>Класс пожарной опасности</th><th>Преимущественная область применения</th></tr></thead><tbody><tr><td><strong>нг(А)</strong></td><td>П1б.8.2.5.4</td><td>Производственные здания, сооружения, производственные и лабораторные помещения, мастерские (Ф5.11).</td></tr><tr><td><strong>нг(А)-LS</strong></td><td>П1б.8.2.2.2</td><td>Многоквартирные жилые дома (Ф1.3); Одноквартирные жилые дома (Ф1.4); Театры, кинотеатры, клубы, библиотеки (Ф2.3); Музеи (Ф2.4); Здания производственного или складского назначения (Ф5).</td></tr><tr><td><strong>нг(A)-HF</strong></td><td>П1б.8.1.2.1</td><td>Гостиницы, общежития, санатории (Ф1.2); Музеи в закрытых помещениях (Ф2.2); Здания торговли, вокзалы, поликлиники (Ф3); Школы, университеты, офисы, банки, пожарные депо (Ф4).</td></tr><tr><td><strong>нг(A)-FRLS</strong></td><td>П1б.1.2.2.2</td><td>Для систем противопожарной защиты (СПЗ) и других систем, которые должны сохранять работоспособность в условиях пожара (Ф1-Ф5).</td></tr><tr><td><strong>нг(A)-FRHF</strong></td><td>П1б.1.1.2.1</td><td>Для систем противопожарной защиты (СПЗ) и других систем, которые должны сохранять работоспособность в условиях пожара (Ф1.2; Ф2.2; Ф3; Ф4).</td></tr><tr><td><strong>нг(A)-LSLTx</strong></td><td>П1б.8.2.1.2</td><td>Здания дошкольных образовательных организаций, специализированных домов престарелых и инвалидов (неквартирные), больницы, спальные корпуса интернатов (Ф1.1).</td></tr><tr><td><strong>нг(А)-FRLSLTx</strong></td><td>П1б.8.2.1.2</td><td>Для систем СПЗ в детских садах, больницах и домах престарелых (Ф1.1), сохраняющих работоспособность в условиях пожара.</td></tr></tbody></table></div></div>
 
-                    <div class="idx-item">
-                        <h5>12. Климатическое исполнение</h5>
+                    <div class="idx-item"><h5>12. Климатическое исполнение</h5>
                         <p><strong>без обозначения (УХЛ)</strong> – эксплуатация с умеренным холодным климатом с абсолютной минимальной температурой не ниже -50°С.</p>
                         <p><strong>ХЛ</strong> - эксплуатация с холодным климатом с абсолютной минимальной температурой эксплуатации не ниже -65°С.</p>
                         <p><strong>ЭХЛ</strong> - эксплуатация с экстремальным холодным климатом с абсолютной минимальной температурой не ниже -70°С.</p>
@@ -327,8 +209,7 @@
                         <p><strong>М</strong> - морской климат. Соляной туман.</p>
                     </div>
 
-                    <div class="idx-item">
-                        <h5>13-17. Стойкость к внешним факторам</h5>
+                    <div class="idx-item"><h5>13-17. Стойкость к внешним факторам</h5>
                         <p><strong>МБ</strong> - маслобензостойкие (ГСМ, углеводороды).</p>
                         <p><strong>ХС</strong> - химически стойкие (кислоты, щелочи).</p>
                         <p><strong>ТС</strong> - термостойкие (+125°С ... +250°С).</p>
@@ -336,8 +217,7 @@
                         <p><strong>ГТ</strong> - защита от грызунов и термитов (репеллент).</p>
                     </div>
 
-                    <div class="idx-item">
-                        <h5>18. Группы скрученных изолированных токопроводящих жил и сечение</h5>
+                    <div class="idx-item"><h5>18. Группы скрученных изолированных токопроводящих жил и сечение</h5>
                         <p><strong>NxS</strong> — в пучок.</p>
                         <p><strong>Nx2xS</strong> — в пару.</p>
                         <p><strong>Nx3xS</strong> — в тройку.</p>
@@ -345,59 +225,48 @@
                         <p><strong>Комбинированные</strong> — NхS1+NхS2, Nх2хS1+Nх2хS2.</p>
                     </div>
 
-                    <div class="idx-item">
-                        <h5>19. Класс гибкости ГОСТ 22483</h5>
+                    <div class="idx-item"><h5>19. Класс гибкости ГОСТ 22483</h5>
                         <p><strong>без обозначения</strong> — 1 класс (однопроволочная).</p>
                         <p><strong>(3,4)</strong> — многопроволочная.</p>
                         <p><strong>(5,6)</strong> — высокая гибкость (робототехника).</p>
                     </div>
 
-                    <div class="idx-item">
-                        <h5>23. Использование в системах для передачи данных по протоколам, интерфейсам и других системах автоматики со скоростью передачи сигналов до 31,25 Кбит/с и до 10 Мбит/с</h5>
-                        
-                        <div style="background:#f8f9fa; padding:15px; border-left:4px solid #343a40; margin-bottom:15px;">
-                            <strong>1. [485] (RS-485 / Modbus / CAN)</strong><br>
-                            <strong>Физика интерфейса:</strong> Стандарт TIA/EIA-485 использует дифференциальную передачу сигнала. Информация кодируется не напряжением относительно земли, а разностью потенциалов между жилами А и В.<br>
-                            <strong>Требования к кабелю:</strong> Волновое сопротивление 120 Ом (± 15 Ом). При 10 Мбит/с спектр сигнала уходит в десятки МГц.<br>
-                            <strong>Конструкция ЭНИКУМ:</strong> Изоляция Пв (вспененный полиэтилен) или Пс. Экранирование ЭИал или ЭИо.<br>
-                            <strong>Применение:</strong> Системы диспетчеризации (BMS), учет ресурсов (АСКУЭ), управление климатом.
-                        </div>
-
-                        <div style="background:#f8f9fa; padding:15px; border-left:4px solid #6610f2; margin-bottom:15px;">
-                            <strong>2. [PB] (Profibus DP)</strong><br>
-                            <strong>«Старший брат» RS-485:</strong> Скорость до 12 Мбит/с. Любая неоднородность кабеля критична.<br>
-                            <strong>Главное отличие:</strong> Требуется импеданс 150 Ом. Это снижает емкость и затухание.<br>
-                            <strong>Химия:</strong> Технология Physical Foam Skin (Индекс Пв).<br>
-                            <strong>Применение:</strong> Робототехника Siemens, конвейеры.
-                        </div>
-
-                        <div style="background:#f8f9fa; padding:15px; border-left:4px solid #fd7e14;">
-                            <strong>3. [FF] (Foundation Fieldbus / PA)</strong><br>
-                            <strong>Физика:</strong> Манчестерский код (MBP). Передача питания и сигнала по одной паре.<br>
-                            <strong>Требования:</strong> Волновое сопротивление 100 Ом (± 20 Ом). Важно омическое сопротивление жилы.<br>
-                            <strong>Применение:</strong> Нефтегаз, взрывоопасные зоны (Ex-i).
-                        </div>
+                    <div class="idx-item"><h5>20. Токопроводящая жила (ТПЖ)</h5>
+                        <p><strong>л (Sn)</strong> — луженая медная жила (защита от коррозии, удобство пайки).</p>
+                        <p><strong>н (Ni)</strong> — никелированная жила (высокотемпературная).</p>
                     </div>
 
-                </div> </div> </div>
-    </div>
+                    <div class="idx-item"><h5>21. Использование в искробезопасных цепях</h5>
+                        <p><strong>i</strong> — для подключения электрооборудования с взрывозащитой вида «искробезопасная электрическая цепь» (Ex-i). Обычно синяя оболочка.</p>
+                    </div>
 
-    <div id="p-pdf" class="page">
-        <div class="container-fluid">
-            <div id="pdfExportTarget" class="pdf-preview">
-                <div class="pdf-header">
-                    <div><h2 style="margin:0; font-weight:bold;">ПАСПОРТ ПРОДУКТА</h2><div id="pdfSkuMain" style="font-family:'Courier New'; font-weight:bold; font-size:1.2em; margin-top:5px;"></div></div>
-                    <div id="pdfIcons" style="display:flex; gap:5px;"></div>
+                    <div class="idx-item"><h5>22. Номинальное напряжение</h5>
+                        <p><strong>300</strong> — до 300 В (интерфейсы).</p>
+                        <p><strong>500</strong> — до 500 В (автоматика).</p>
+                        <p><strong>660</strong> — до 660 В (силовое управление).</p>
+                    </div>
+
+                    <div class="idx-item"><h5>23. Использование в системах для передачи данных</h5>
+                        <div style="background:#f8f9fa; padding:15px; border-left:4px solid #343a40; margin-bottom:15px;"><strong>1. [485] (RS-485 / Modbus / CAN)</strong><br><strong>Физика:</strong> Дифференциальная пара, 120 Ом.<br><strong>Применение:</strong> Диспетчеризация, АСКУЭ.</div>
+                        <div style="background:#f8f9fa; padding:15px; border-left:4px solid #6610f2; margin-bottom:15px;"><strong>2. [PB] (Profibus DP)</strong><br><strong>Физика:</strong> 12 Мбит/с, 150 Ом. Строго нормированная геометрия.<br><strong>Применение:</strong> Робототехника Siemens.</div>
+                        <div style="background:#f8f9fa; padding:15px; border-left:4px solid #fd7e14;"><strong>3. [FF] (Foundation Fieldbus / PA)</strong><br><strong>Физика:</strong> Манчестерский код (MBP). Питание + сигнал.<br><strong>Применение:</strong> Нефтегаз, Ex-зоны.</div>
+                    </div>
+
+                    <div class="idx-item"><h5>24. Цвет оболочки</h5>
+                        <p><strong>Серый</strong> — Базовое исполнение.</p>
+                        <p><strong>Черный</strong> — Стойкость к УФ.</p>
+                        <p><strong>Синий</strong> — Ex-i.</p>
+                        <p><strong>Оранжевый</strong> — Огнестойкий.</p>
+                        <p><strong>Красный</strong> — Пожарная сигнализация.</p>
+                        <p><strong>Фиолетовый</strong> — Profibus.</p>
+                        <p><strong>Желтый</strong> — Внимание.</p>
+                    </div>
                 </div>
-                <div style="margin-bottom:20px; font-style:italic;" id="pdfDest"></div>
-                <h4 style="border-bottom:1px solid #000; padding-bottom:5px;">ТЕХНИЧЕСКИЕ ХАРАКТЕРИСТИКИ</h4>
-                <table class="pdf-table"><tbody id="pdfSpecsTable"></tbody></table>
-                <div id="pdfAlerts" style="background:#fff3cd; padding:10px; border:1px solid #ffeeba; display:none; font-size:0.9rem;"></div>
-                <div style="margin-top:30px; font-size:0.8rem; color:#777; text-align:center;">Сформировано конфигуратором ENICUM. Не является офертой.</div>
             </div>
         </div>
-        <div class="fab-download" onclick="app.downloadPDF()"><i class="fas fa-file-pdf"></i></div>
     </div>
+
+    <div id="p-pdf" class="page"><div class="container-fluid"><div id="pdfExportTarget" class="pdf-preview"><div class="pdf-header"><div><h2 style="margin:0; font-weight:bold;">ПАСПОРТ ПРОДУКТА</h2><div id="pdfSkuMain" style="font-family:'Courier New'; font-weight:bold; font-size:1.2em; margin-top:5px;"></div></div><div id="pdfIcons" style="display:flex; gap:5px;"></div></div><div style="margin-bottom:20px; font-style:italic;" id="pdfDest"></div><h4 style="border-bottom:1px solid #000; padding-bottom:5px;">ТЕХНИЧЕСКИЕ ХАРАКТЕРИСТИКИ</h4><table class="pdf-table"><tbody id="pdfSpecsTable"></tbody></table><div id="pdfAlerts" style="background:#fff3cd; padding:10px; border:1px solid #ffeeba; display:none; font-size:0.9rem;"></div><div style="margin-top:30px; font-size:0.8rem; color:#777; text-align:center;">Сформировано конфигуратором ENICUM. Не является офертой.</div></div></div><div class="fab-download" onclick="app.downloadPDF()"><i class="fas fa-file-pdf"></i></div></div>
 
     <div class="nav-bottom">
         <button class="nav-btn active" onclick="nav('config', this)"><i class="fas fa-sliders-h"></i> Конфигуратор</button>

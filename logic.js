@@ -1,6 +1,5 @@
-/* logic.js - v14.20: Configurator & Static Handbook */
+/* logic.js - v14.22: Safe Mode */
 
-// Навигация
 window.nav = function(p, btn) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
     document.getElementById('p-'+p).classList.add('active');
@@ -12,40 +11,29 @@ window.nav = function(p, btn) {
 }
 
 const app = {
-    state: { 
-        cat: 'BUS', 
-        geo: { N:1, type:'x2x', S:'0.60' }, 
-        idx: {}, 
-        explanations: [], 
-        validIns: [], 
-        validJacket: [], 
-        msgs: [] 
-    },
-
+    state: { cat: 'BUS', geo: { N:1, type:'x2x', S:'0.60' }, idx: {}, explanations: [], validIns: [], validJacket: [], msgs: [] },
+    
     init() { 
-        this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v14.20: Готова к работе']), 1000);
+        try {
+            this.setCat('BUS'); 
+            setTimeout(() => this.showToasts(['Система v14.22: Готова']), 1000);
+        } catch (e) {
+            console.error("Critical Init Error:", e);
+            alert("Ошибка инициализации! Проверьте database.js. Детали в консоли (F12).");
+        }
     },
 
     setCat(cat, btn) {
         this.state.cat = cat;
-        if(btn) { 
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); 
-            btn.classList.add('active'); 
-        }
+        if(btn) { document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
         this.doReset(cat);
     },
-
     resetAll() {
         const icon = document.querySelector('.reset-btn i');
         if(icon) icon.classList.add('fa-spin');
         this.doReset(this.state.cat);
-        setTimeout(() => { 
-            if(icon) icon.classList.remove('fa-spin');
-            this.showToasts(['Конфигурация сброшена']);
-        }, 500);
+        setTimeout(() => { if(icon) icon.classList.remove('fa-spin'); this.showToasts(['Сброшено']); }, 500);
     },
-
     doReset(cat) {
         for(let i=1; i<=24; i++) this.state.idx[i] = "";
         const defs = DB.LIMITS[cat].defaults;
@@ -58,151 +46,89 @@ const app = {
         this.calculateState();
         this.updateUI();
     },
-
     updateVal(id, val) {
         this.state.idx[id] = val;
-        // Ex-d логика
-        if (id === 1) {
-            if (val === 'Вз') { 
-                if(this.state.idx[8] !== 'з') { this.state.idx[8] = 'з'; this.showToasts(['Добавлено заполнение для Ex-d']); }
-            } else { 
-                if (this.state.idx[8] === 'з') this.state.idx[8] = ''; 
-            }
-        }
+        if (id === 1) { if (val === 'Вз') { if(this.state.idx[8] !== 'з') { this.state.idx[8] = 'з'; this.showToasts(['Добавлено заполнение Ex-d']); } } else { if (this.state.idx[8] === 'з') this.state.idx[8] = ''; } }
         this.calculateState();
         this.updateUI();
     },
-
     updateGeo(k, v) { 
         this.state.geo[k] = v; 
         if(this.state.geo.type === 'vfd') this.state.geo.N = 1; 
         this.calculateState(); 
         this.updateUI(); 
     },
-
-    // === ГЛАВНЫЙ АЛГОРИТМ ===
     calculateState() {
         const s = this.state.idx;
         const cat = this.state.cat;
         let msgs = [];
         this.state.explanations = []; 
         const addExplain = (txt) => this.state.explanations.push(txt);
-
         const req = { minT: -50, hf: false, fr: false, oil: false, chem: false, uv: false, flex: 1 };
-        
         const fireCode = s[11] || "";
         if (fireCode.includes('HF') || fireCode.includes('LTx')) req.hf = true;
         if (fireCode.includes('FR')) req.fr = true;
-
         if (s[12] && s[12].includes('ХЛ')) req.minT = -60;
         if (s[12] && s[12].includes('ЭХЛ')) req.minT = -70;
         if (s[13] === '-МБ') req.oil = true;
         if (s[14] === '-ХС') req.chem = true;
         if (s[16] === '-УФ' || s[9] === 'Пэ') req.uv = true;
-        
         if (s[19] === '(5)') { req.flex = 1; addExplain("Гибкий монтаж"); }
         if (s[19] === '(6)') { req.flex = 2; addExplain("Робототехника"); }
-
-        // BUS Force Barrier
-        if (cat === 'BUS') {
-            if (req.fr) {
-                if (s[3] !== 'Си') { s[3] = 'Си'; msgs.push("Добавлен барьер (Си)"); }
-            } else {
-                if (s[3] === 'Си') { s[3] = ''; }
-            }
-        }
-
-        // Horizontal Police
+        if (cat === 'BUS') { if (req.fr) { if (s[3] !== 'Си') { s[3] = 'Си'; msgs.push("Добавлен барьер (Си)"); } } else { if (s[3] === 'Си') { s[3] = ''; } } }
         if (s[19] === '(6)') { 
-            if (s[10] === 'К' || s[10] === 'Б') { s[10] = 'КГ'; msgs.push('Броня -> КГ (Гибкая)'); }
-            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[6])) { s[6] = 'Эо'; msgs.push('Экран -> Эо (Оплетка)'); }
-            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[4])) { s[4] = 'ЭИо'; msgs.push('Экран пар -> ЭИо (Оплетка)'); }
+            if (s[10] === 'К' || s[10] === 'Б') { s[10] = 'КГ'; msgs.push('Броня -> КГ'); }
+            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[6])) { s[6] = 'Эо'; msgs.push('Экран -> Эо'); }
+            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[4])) { s[4] = 'ЭИо'; msgs.push('Экран пар -> ЭИо'); }
         }
-
-        // Material Filter
         const isCompatible = (matCode, type) => {
             let key = (type === 'jacket') ? 'J_' + matCode : matCode;
             let p = DB.MAT_PROPS[key];
             if (!p) return false;
-
             if (p.minT > req.minT) return false;
             if (req.hf && !p.hf) return false;
             if (req.oil && type === 'jacket' && !p.oil) return false;
             if (req.chem && type === 'jacket' && !p.chem) return false;
-            
-            if (req.fr) {
-                const hasBarrier = (s[3] === 'Си');
-                if (!p.fr && !(type === 'ins' && hasBarrier)) return false;
-            }
-            
+            if (req.fr) { const hasBarrier = (s[3] === 'Си'); if (!p.fr && !(type === 'ins' && hasBarrier)) return false; }
             if (req.flex === 2 && p.flex_grade < 2) return false;
             if (req.flex === 1 && p.flex_grade < 0 && type==='jacket') return false;
             return true;
         };
-
         const allIns = DB.INDICES.find(x => x.id === 2).opts.map(o => o.c);
         const allJacket = DB.INDICES.find(x => x.id === 9).opts.map(o => o.c);
-
         this.state.validIns = allIns.filter(c => isCompatible(c, 'ins'));
         this.state.validJacket = allJacket.filter(c => isCompatible(c, 'jacket'));
-
-        if (this.state.validIns.length === 0) msgs.push('ОШИБКА: Нет подходящей Изоляции!');
-        if (this.state.validJacket.length === 0) msgs.push('ОШИБКА: Нет подходящей Оболочки!');
-
-        // Optimizer
+        if (this.state.validIns.length === 0) msgs.push('ОШИБКА: Нет изоляции!');
+        if (this.state.validJacket.length === 0) msgs.push('ОШИБКА: Нет оболочки!');
         const optimizeMaterial = (currentVal, validList, type) => {
             const curProp = DB.MAT_PROPS[(type==='jacket'?'J_':'')+currentVal];
             if (!curProp) return currentVal; 
-            let needChange = false;
-            let isDowngrade = false; 
-
+            let needChange = false; let isDowngrade = false; 
             if (!validList.includes(currentVal)) needChange = true;
             if (!req.fr && curProp.fr) { needChange = true; isDowngrade = true; }
-            if (!req.hf && curProp.hf) {
-                if (cat === 'BUS' && type === 'ins' && currentVal === 'Пв') { needChange = false; } 
-                else { needChange = true; isDowngrade = true; }
-            }
-
+            if (!req.hf && curProp.hf) { if (cat === 'BUS' && type === 'ins' && currentVal === 'Пв') { needChange = false; } else { needChange = true; isDowngrade = true; } }
             if (!needChange) return currentVal; 
-
             const sortedValid = validList.sort((a,b) => {
-                let pA = DB.MAT_PROPS[(type==='jacket'?'J_':'')+a];
-                let pB = DB.MAT_PROPS[(type==='jacket'?'J_':'')+b];
+                let pA = DB.MAT_PROPS[(type==='jacket'?'J_':'')+a]; let pB = DB.MAT_PROPS[(type==='jacket'?'J_':'')+b];
                 return (pA ? pA.rank : 99) - (pB ? pB.rank : 99);
             });
-
             if (curProp.family && !isDowngrade) {
-                const sameFamily = sortedValid.find(c => {
-                    let p = DB.MAT_PROPS[(type==='jacket'?'J_':'')+c];
-                    return p && p.family === curProp.family && (!req.fr ? !p.fr : true);
-                });
+                const sameFamily = sortedValid.find(c => { let p = DB.MAT_PROPS[(type==='jacket'?'J_':'')+c]; return p && p.family === curProp.family && (!req.fr ? !p.fr : true); });
                 if (sameFamily) return sameFamily;
             }
             if (cat === 'BUS' && type === 'ins' && sortedValid.includes('Пв')) return 'Пв';
             return sortedValid[0];
         };
-
-        if (this.state.validIns.length > 0) {
-            const newIns = optimizeMaterial(s[2], this.state.validIns, 'ins');
-            if (newIns !== s[2]) { s[2] = newIns; msgs.push(`Изоляция -> ${newIns}`); }
-        }
-
-        if (this.state.validJacket.length > 0) {
-            const newJacket = optimizeMaterial(s[9], this.state.validJacket, 'jacket');
-            if (newJacket !== s[9]) { s[9] = newJacket; msgs.push(`Оболочка -> ${newJacket}`); }
-        }
-        
+        if (this.state.validIns.length > 0) { const newIns = optimizeMaterial(s[2], this.state.validIns, 'ins'); if (newIns !== s[2]) { s[2] = newIns; msgs.push(`Изоляция -> ${newIns}`); } }
+        if (this.state.validJacket.length > 0) { const newJacket = optimizeMaterial(s[9], this.state.validJacket, 'jacket'); if (newJacket !== s[9]) { s[9] = newJacket; msgs.push(`Оболочка -> ${newJacket}`); } }
         let targetColor = 'Серый'; 
         if (s[16] === '-УФ' || s[9] === 'Пэ') targetColor = 'Черный';
         if (req.fr) targetColor = 'Оранжевый';
         if (s[21] === 'i') targetColor = 'Синий'; 
         if (cat === 'BUS' && s[23] === '[PB]') targetColor = 'Фиолетовый'; 
-        
         if (s[24] !== 'Спец' && s[24] !== 'Желтый' && s[24] !== 'Красный') { s[24] = targetColor; }
-
         this.state.msgs = msgs;
     },
-
     updateUI() {
         const s = this.state.idx;
         let sku = "ЭНИКУМ"; sku += " "; 
@@ -211,47 +137,34 @@ const app = {
         const g = this.state.geo;
         let s18 = (g.type === 'vfd') ? (DB.LIMITS.CONTROL.vfd_map[g.S]||"ERR") : ((g.type==='x') ? `${g.N}x${g.S}` : `${g.N}${g.type}${g.S}`);
         this.state.idx[18] = s18; sku += s18;
-        
         const flex = s[19]; if(flex && flex !== '(1)') sku += " " + flex; 
         if(s[20]) sku += " " + s[20];
         if(s[21]) sku += s[21]; if(s[22]) sku += s[22];
         if(s[23]) sku += s[23]; if(s[24]) sku += " " + s[24];
         sku = sku.replace(/\s+/g, ' ').trim();
         document.getElementById('skuDisplay').innerText = sku;
-
         this.renderIcons();
         this.renderForm();
         if(this.state.msgs && this.state.msgs.length) { this.showToasts(this.state.msgs); this.state.msgs = []; }
     },
-
     renderIcons() {
-        const s = this.state.idx;
-        const c = document.getElementById('headerIcons');
-        if (!c) return;
-        c.innerHTML = '';
+        const s = this.state.idx; const c = document.getElementById('headerIcons'); if (!c) return; c.innerHTML = '';
         const mkSlot = (isActive, html, color, badge) => {
-            const div = document.createElement('div');
-            div.className = `icon-slot ${isActive?'active':''}`;
-            if(isActive) div.style.background = color;
-            div.innerHTML = html;
-            if(isActive && badge) div.innerHTML += `<div class="slot-badge">${badge}</div>`;
-            return div;
+            const div = document.createElement('div'); div.className = `icon-slot ${isActive?'active':''}`;
+            if(isActive) div.style.background = color; div.innerHTML = html;
+            if(isActive && badge) div.innerHTML += `<div class="slot-badge">${badge}</div>`; return div;
         };
         c.appendChild(mkSlot(true, this.state.cat === 'BUS' ? '<i class="fas fa-network-wired"></i>' : (this.state.cat === 'SIGNAL' ? '<i class="fas fa-wave-square"></i>' : '<i class="fas fa-bolt"></i>'), '#343A40'));
         const isEx = (s[21] === 'i' || s[1] === 'Вз');
         let exColor = '#212529'; let exText = 'Ex'; if (s[21] === 'i') { exColor = '#0D6EFD'; exText = 'Ex-i'; }
         c.appendChild(mkSlot(isEx, exText, exColor));
-        let isFR = s[11] && s[11].includes('FR');
-        c.appendChild(mkSlot(isFR, '<i class="fas fa-fire"></i>', '#DC3545'));
+        let isFR = s[11] && s[11].includes('FR'); c.appendChild(mkSlot(isFR, '<i class="fas fa-fire"></i>', '#DC3545'));
         let isEco = (s[11] && (s[11].includes('LTx') || s[11].includes('HF')));
-        let ecoHtml = '<i class="fas fa-leaf"></i>'; let ecoBadge = '';
-        if (isEco) { if (s[11].includes('LTx')) { ecoBadge = 'LTx'; } else { ecoHtml = 'HF'; } }
+        let ecoHtml = '<i class="fas fa-leaf"></i>'; let ecoBadge = ''; if (isEco) { if (s[11].includes('LTx')) { ecoBadge = 'LTx'; } else { ecoHtml = 'HF'; } }
         c.appendChild(mkSlot(isEco, ecoHtml, '#198754', ecoBadge));
         let climColor = '#6EA8FE'; let climIcon = '<i class="fas fa-snowflake"></i>'; let climBadge = '';
         let isClim = (s[12] && s[12] !== '');
-        if (s[12] === '-ЭХЛ') { climColor = '#0D6EFD'; climBadge = 'Ar'; }
-        else if (s[12] === '-Т') { climColor = '#FFC107'; climIcon = '<i class="fas fa-sun"></i>'; climBadge = 'Tr'; }
-        else if (s[12] === '-М') { climColor = '#0DCAF0'; climIcon = '<i class="fas fa-water"></i>'; climBadge = 'Sea'; }
+        if (s[12] === '-ЭХЛ') { climColor = '#0D6EFD'; climBadge = 'Ar'; } else if (s[12] === '-Т') { climColor = '#FFC107'; climIcon = '<i class="fas fa-sun"></i>'; climBadge = 'Tr'; } else if (s[12] === '-М') { climColor = '#0DCAF0'; climIcon = '<i class="fas fa-water"></i>'; climBadge = 'Sea'; }
         c.appendChild(mkSlot(isClim, climIcon, climColor, climBadge));
         let isShield = !!s[10]; let shBadge = ''; if (isShield) { if (s[10] === 'Б') shBadge = 'x2'; if (s[10] === 'КБ') shBadge = 'x3'; }
         c.appendChild(mkSlot(isShield, '<i class="fas fa-shield-alt"></i>', '#495057', shBadge));
@@ -260,21 +173,15 @@ const app = {
         if (['Экл','Экм','ЭИкл'].includes(s[4]) || ['Экл'].includes(s[6])) screenCount = 3;
         c.appendChild(mkSlot(screenCount > 0, '<i class="fas fa-border-all"></i>', '#6c757d', screenCount > 1 ? 'x'+screenCount : ''));
         let flexIcon = '<i class="fas fa-bezier-curve"></i>'; let flexActive = false; let flexColor = '#fd7e14';
-        if (s[19] === '(5)') { flexActive = true; } 
-        if (s[19] === '(6)') { flexIcon = '<i class="fas fa-robot"></i>'; flexActive = true; flexColor = '#212529'; }
+        if (s[19] === '(5)') { flexActive = true; } if (s[19] === '(6)') { flexIcon = '<i class="fas fa-robot"></i>'; flexActive = true; flexColor = '#212529'; }
         c.appendChild(mkSlot(flexActive, flexIcon, flexColor));
-        const isUV = (s[16] === '-УФ' || s[9] === 'Пэ');
-        c.appendChild(mkSlot(isUV, '<i class="fas fa-sun"></i>', '#212529', 'UV')); 
+        const isUV = (s[16] === '-УФ' || s[9] === 'Пэ'); c.appendChild(mkSlot(isUV, '<i class="fas fa-sun"></i>', '#212529', 'UV')); 
         c.appendChild(mkSlot(s[13] === '-МБ', '<i class="fas fa-tint"></i>', '#000'));
         c.appendChild(mkSlot(s[14] === '-ХС', '<i class="fas fa-flask"></i>', '#6610f2'));
     },
-
     renderForm() {
-        const area = document.getElementById('formArea');
-        if (!area) return;
-        const openIdx = [];
-        document.querySelectorAll('.acc-body').forEach((el, i) => { if(el.classList.contains('open')) openIdx.push(i); });
-        
+        const area = document.getElementById('formArea'); if (!area) return;
+        const openIdx = []; document.querySelectorAll('.acc-body').forEach((el, i) => { if(el.classList.contains('open')) openIdx.push(i); });
         area.innerHTML = '';
         if (DB && DB.GROUPS) {
             DB.GROUPS.forEach((grp, gIdx) => {
@@ -282,43 +189,28 @@ const app = {
                 grp.ids.forEach(id => {
                     if(id === 18) { html += this.getGeoWidget(); return; }
                     if(id === 23 && this.state.cat !== 'BUS') return;
-                    const meta = DB.INDICES.find(x => x.id === id);
-                    if (meta) { html += this.getControl(meta); }
+                    const meta = DB.INDICES.find(x => x.id === id); if (meta) { html += this.getControl(meta); }
                 });
-                
                 if(html) {
                     const isOpen = (gIdx === 0 || openIdx.includes(gIdx));
-                    area.innerHTML += `
-                    <div class="acc-group">
-                        <div class="acc-header ${isOpen?'active':''}" onclick="toggleAcc(this)">
-                            ${grp.t} <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="acc-body ${isOpen?'open':''}">
-                            ${html}
-                        </div>
-                    </div>`;
+                    area.innerHTML += `<div class="acc-group"><div class="acc-header ${isOpen?'active':''}" onclick="toggleAcc(this)">${grp.t} <i class="fas fa-chevron-down"></i></div><div class="acc-body ${isOpen?'open':''}">${html}</div></div>`;
                 }
             });
         }
     },
-
     getControl(meta) {
         const val = this.state.idx[meta.id];
         let opts = meta.opts.map(o => {
-            let disabled = this.isDisabled(meta.id, o.c);
-            let style = "";
+            let disabled = this.isDisabled(meta.id, o.c); let style = "";
             if (meta.id === 11 && o.c.includes('FR')) style = "color:#fd7e14; font-weight:bold;";
             if (meta.id === 2 && DB.MAT_PROPS[o.c] && DB.MAT_PROPS[o.c].fr) style = "color:#fd7e14;";
             if ((meta.id === 3 || meta.id === 5) && o.c !== "") style = "color:#fd7e14;";
             if(disabled) return `<option value="${o.c}" disabled>${o.l}</option>`;
             return `<option value="${o.c}" style="${style}" ${val===o.c?'selected':''}>${o.l}</option>`;
         }).join('');
-        const hintObj = meta.opts.find(o => o.c === val);
-        const desc = hintObj ? hintObj.hint : ""; 
-        const hlClass = (val && val !== '') ? 'highlight' : '';
+        const hintObj = meta.opts.find(o => o.c === val); const desc = hintObj ? hintObj.hint : ""; const hlClass = (val && val !== '') ? 'highlight' : '';
         return `<div class="control-row"><div class="lbl-row"><div class="lbl-main">${meta.n}</div><div class="lbl-idx">#${meta.id}</div></div><select class="c-select ${hlClass}" onchange="app.updateVal(${meta.id}, this.value)">${opts}</select><div class="hint ${val?'visible':''}">${desc}</div></div>`;
     },
-
     getGeoWidget() {
         const cat = this.state.cat; const lim = DB.LIMITS[cat];
         let typesHtml = lim.types.map(t => `<option value="${t}" ${this.state.geo.type===t?'selected':''}>${DB.GEO_TYPES.find(x=>x.c===t).l}</option>`).join('');
@@ -333,20 +225,16 @@ const app = {
         const isVFD = (this.state.geo.type === 'vfd');
         return `<div class="control-row" style="border-left:3px solid var(--primary); padding-left:15px; margin-left:-5px;"><div class="lbl-row"><div class="lbl-main">ГЕОМЕТРИЯ (18)</div></div><div class="geo-widget"><div class="geo-col"><div class="geo-lbl">КОЛ-ВО</div><select class="c-select" ${isVFD?'disabled':''} onchange="app.updateGeo('N',this.value)">${nHtml}</select></div><div class="geo-col"><div class="geo-lbl">ТИП</div><select class="c-select" onchange="app.updateGeo('type',this.value)">${typesHtml}</select></div><div class="geo-col"><div class="geo-lbl">СЕЧЕНИЕ</div><select class="c-select" onchange="app.updateGeo('S',this.value)">${sHtml}</select></div></div></div>`;
     },
-
     isDisabled(id, val) {
         if (id === 2 && !this.state.validIns.includes(val)) return true;
         if (id === 9 && !this.state.validJacket.includes(val)) return true;
         return false;
     },
-
     renderMatrix() {
         const c1 = document.getElementById('summaryTableArea');
         if (c1) {
             let html1 = '<table class="summary-table" style="width:auto; min-width:100%; border-collapse: collapse; font-size: 10px;"><thead><tr>';
-            DB.INDICES.forEach(idx => { 
-                html1 += `<th style="background:#343a40; color:#fff; padding:6px; border:1px solid #495057;">${idx.id}</th>`; 
-            });
+            DB.INDICES.forEach(idx => { html1 += `<th style="background:#343a40; color:#fff; padding:6px; border:1px solid #495057;">${idx.id}</th>`; });
             html1 += '</tr></thead><tbody><tr>';
             DB.INDICES.forEach(idx => {
                 html1 += `<td style="padding:0; border:1px solid #dee2e6; vertical-align:top; background:#fff;">`;
@@ -368,7 +256,6 @@ const app = {
             c1.innerHTML = html1;
         }
     },
-    
     renderPDFPreview() {
         const sku = document.getElementById('skuDisplay').innerText;
         document.getElementById('pdfSkuMain').innerText = sku;
@@ -390,7 +277,6 @@ const app = {
             pdfAlerts.innerHTML = "<b>ПРИМЕЧАНИЯ:</b><br>" + this.state.explanations.map(e => `&bull; ${e}`).join('<br>');
         } else { pdfAlerts.style.display = 'none'; }
     }, 
-    
     downloadPDF() {
         const element = document.getElementById('pdfExportTarget');
         const sku = document.getElementById('skuDisplay').innerText;
@@ -399,7 +285,6 @@ const app = {
         const opt = { margin: 0, filename: `ENICUM_${sku}.pdf`, image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
         html2pdf().set(opt).from(element).save().then(() => { fab.innerHTML = oldHtml; app.showToasts(['PDF скачан']); });
     }, 
-    
     showToasts(msgs) {
         const c = document.getElementById('toasts');
         c.innerHTML = '';
