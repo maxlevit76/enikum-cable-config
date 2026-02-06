@@ -1,4 +1,4 @@
-/* logic.js - v14.8: Smart Notifications (Consolidated Toasts) */
+/* logic.js - v14.9: The Librarian (Rich Matrix & Encyclopedia) */
 
 // Навигация
 window.nav = function(p, btn) {
@@ -24,7 +24,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v14.8: UI Polished']), 1000);
+        setTimeout(() => this.showToasts(['Система v14.9: Reference Mode']), 1000);
     },
 
     setCat(cat, btn) {
@@ -61,7 +61,6 @@ const app = {
 
     updateVal(id, val) {
         this.state.idx[id] = val;
-        // Ex-d логика
         if (id === 1) {
             if (val === 'Вз') { 
                 if(this.state.idx[8] !== 'з') { this.state.idx[8] = 'з'; this.showToasts(['Добавлено заполнение для Ex-d']); }
@@ -88,7 +87,6 @@ const app = {
         this.state.explanations = []; 
         const addExplain = (txt) => this.state.explanations.push(txt);
 
-        // 1. ТРЕБОВАНИЯ
         const req = { minT: -50, hf: false, fr: false, oil: false, chem: false, uv: false, flex: 1 };
         
         const fireCode = s[11] || "";
@@ -104,7 +102,7 @@ const app = {
         if (s[19] === '(5)') { req.flex = 1; addExplain("Гибкий монтаж"); }
         if (s[19] === '(6)') { req.flex = 2; addExplain("Робототехника"); }
 
-        // --- 2. УПРАВЛЕНИЕ БАРЬЕРАМИ (BUS) ---
+        // BUS Force Barrier
         if (cat === 'BUS') {
             if (req.fr) {
                 if (s[3] !== 'Си') { s[3] = 'Си'; msgs.push("Добавлен барьер (Си)"); }
@@ -113,16 +111,14 @@ const app = {
             }
         }
 
-        // --- 3. ГОРИЗОНТАЛЬНАЯ ПОЛИЦИЯ ---
+        // Horizontal Police
         if (s[19] === '(6)') { 
-            if (s[10] === 'К' || s[10] === 'Б') {
-                s[10] = 'КГ'; msgs.push('Броня -> КГ (Гибкая)');
-            }
+            if (s[10] === 'К' || s[10] === 'Б') { s[10] = 'КГ'; msgs.push('Броня -> КГ (Гибкая)'); }
             if (['Эа','Эм','ЭИа','ЭИм'].includes(s[6])) { s[6] = 'Эо'; msgs.push('Экран -> Эо (Оплетка)'); }
             if (['Эа','Эм','ЭИа','ЭИм'].includes(s[4])) { s[4] = 'ЭИо'; msgs.push('Экран пар -> ЭИо (Оплетка)'); }
         }
 
-        // --- 4. ФИЛЬТРАЦИЯ МАТЕРИАЛОВ ---
+        // Material Filter
         const isCompatible = (matCode, type) => {
             let key = (type === 'jacket') ? 'J_' + matCode : matCode;
             let p = DB.MAT_PROPS[key];
@@ -152,7 +148,7 @@ const app = {
         if (this.state.validIns.length === 0) msgs.push('ОШИБКА: Нет подходящей Изоляции!');
         if (this.state.validJacket.length === 0) msgs.push('ОШИБКА: Нет подходящей Оболочки!');
 
-        // --- 5. ОПТИМИЗАТОР (БЕСПОЩАДНЫЙ) ---
+        // Optimizer
         const optimizeMaterial = (currentVal, validList, type) => {
             const curProp = DB.MAT_PROPS[(type==='jacket'?'J_':'')+currentVal];
             if (!curProp) return currentVal; 
@@ -195,7 +191,6 @@ const app = {
             if (newJacket !== s[9]) { s[9] = newJacket; msgs.push(`Оболочка -> ${newJacket}`); }
         }
         
-        // --- 6. ЦВЕТА ---
         let targetColor = 'Серый'; 
         if (s[16] === '-УФ' || s[9] === 'Пэ') targetColor = 'Черный';
         if (req.fr) targetColor = 'Оранжевый';
@@ -272,90 +267,91 @@ const app = {
         c.appendChild(mkSlot(s[14] === '-ХС', '<i class="fas fa-flask"></i>', '#6610f2'));
     },
 
-    renderForm() {
-        const area = document.getElementById('formArea');
-        const openIdx = [];
-        document.querySelectorAll('.acc-body').forEach((el, i) => { if(el.classList.contains('open')) openIdx.push(i); });
-        area.innerHTML = '';
-        DB.GROUPS.forEach((grp, gIdx) => {
-            let html = '';
-            grp.ids.forEach(id => {
-                if(id === 18) { html += this.getGeoWidget(); return; }
-                if(id === 23 && this.state.cat !== 'BUS') return;
-                const meta = DB.INDICES.find(x => x.id === id);
-                html += this.getControl(meta);
-            });
-            if(html) {
-                const isOpen = (gIdx === 0 || openIdx.includes(gIdx));
-                area.innerHTML += `<div class="acc-group"><div class="acc-header ${isOpen?'active':''}" onclick="toggleAcc(this)">${grp.t} <i class="fas fa-chevron-down"></i></div><div class="acc-body ${isOpen?'open':''}">${html}</div></div>`;
-            }
-        });
-    },
-
-    getControl(meta) {
-        const val = this.state.idx[meta.id];
-        let opts = meta.opts.map(o => {
-            let disabled = this.isDisabled(meta.id, o.c);
-            let style = "";
-            if (meta.id === 11 && o.c.includes('FR')) style = "color:#fd7e14; font-weight:bold;";
-            if (meta.id === 2 && DB.MAT_PROPS[o.c] && DB.MAT_PROPS[o.c].fr) style = "color:#fd7e14;";
-            if ((meta.id === 3 || meta.id === 5) && o.c !== "") style = "color:#fd7e14;";
-            if(disabled) return `<option value="${o.c}" disabled>${o.l}</option>`;
-            return `<option value="${o.c}" style="${style}" ${val===o.c?'selected':''}>${o.l}</option>`;
-        }).join('');
-        const hintObj = meta.opts.find(o => o.c === val);
-        const desc = hintObj ? hintObj.hint : ""; 
-        const hlClass = (val && val !== '') ? 'highlight' : '';
-        return `<div class="control-row"><div class="lbl-row"><div class="lbl-main">${meta.n}</div><div class="lbl-idx">#${meta.id}</div></div><select class="c-select ${hlClass}" onchange="app.updateVal(${meta.id}, this.value)">${opts}</select><div class="hint ${val?'visible':''}">${desc}</div></div>`;
-    },
-
-    getGeoWidget() {
-        const cat = this.state.cat; const lim = DB.LIMITS[cat];
-        let typesHtml = lim.types.map(t => `<option value="${t}" ${this.state.geo.type===t?'selected':''}>${DB.GEO_TYPES.find(x=>x.c===t).l}</option>`).join('');
-        let sList = lim.valid_S;
-        if(this.state.geo.type === 'vfd') sList = sList.filter(s => ['1.5','2.5','4.0','6.0'].includes(s));
-        if(cat === 'BUS') { const p = this.state.idx[23] || ''; const r = lim.proto[p] || lim.proto['']; sList = r.S; }
-        let sHtml = sList.map(s => `<option value="${s}" ${this.state.geo.S===s?'selected':''}>${s} мм²</option>`).join('');
-        let nList = [];
-        if(cat === 'BUS') { const p = this.state.idx[23] || ''; nList = (lim.proto[p] || lim.proto['']).N; }
-        else if(lim.get_valid_N) { nList = lim.get_valid_N(this.state.geo.S, this.state.geo.type); } else { nList = [1,2,4]; }
-        let nHtml = nList.map(n => `<option value="${n}" ${this.state.geo.N==n?'selected':''}>${n}</option>`).join('');
-        const isVFD = (this.state.geo.type === 'vfd');
-        return `<div class="control-row" style="border-left:3px solid var(--primary); padding-left:15px; margin-left:-5px;"><div class="lbl-row"><div class="lbl-main">ГЕОМЕТРИЯ (18)</div></div><div class="geo-widget"><div class="geo-col"><div class="geo-lbl">КОЛ-ВО</div><select class="c-select" ${isVFD?'disabled':''} onchange="app.updateGeo('N',this.value)">${nHtml}</select></div><div class="geo-col"><div class="geo-lbl">ТИП</div><select class="c-select" onchange="app.updateGeo('type',this.value)">${typesHtml}</select></div><div class="geo-col"><div class="geo-lbl">СЕЧЕНИЕ</div><select class="c-select" onchange="app.updateGeo('S',this.value)">${sHtml}</select></div></div></div>`;
-    },
-
-    isDisabled(id, val) {
-        if (id === 2 && !this.state.validIns.includes(val)) return true;
-        if (id === 9 && !this.state.validJacket.includes(val)) return true;
-        return false;
-    },
-
+    // === ОБНОВЛЕННЫЙ РЕНДЕР МАТРИЦЫ (СПРАВОЧНИК) ===
     renderMatrix() {
+        // 1. Сводная Таблица: Сравнение категорий
         const c1 = document.getElementById('summaryTableArea');
         if (c1) {
-            let html1 = '<table class="summary-table"><thead><tr>';
-            DB.INDICES.forEach(idx => { html1 += `<th>${idx.id}</th>`; });
-            html1 += '</tr></thead><tbody><tr>';
-            DB.INDICES.forEach(idx => {
-                let shortName = idx.n.replace("Изоляция ", "").replace("Оболочка", "Обол.").replace("Напряжение", "Вольт");
-                html1 += `<td><div class="st-idx" title="${idx.n}">${shortName}</div></td>`;
+            let html1 = `
+            <table class="summary-table" style="width:100%; border-collapse:collapse; font-size:11px;">
+                <thead>
+                    <tr style="background:#212529; color:white;">
+                        <th style="padding:8px; text-align:left;">ПАРАМЕТР</th>
+                        <th style="padding:8px;">BUS (Шина)</th>
+                        <th style="padding:8px;">SIGNAL (КСРЭВ)</th>
+                        <th style="padding:8px;">CONTROL (КУВ)</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            // Строки для таблицы
+            const rows = [
+                { l: "Напряжение", id: 22 },
+                { l: "Изоляция", id: 2 },
+                { l: "Экран", id: 6 },
+                { l: "Оболочка", id: 9 },
+                { l: "Пожарка", id: 11 }
+            ];
+
+            rows.forEach((r, idx) => {
+                const bg = idx % 2 === 0 ? '#fff' : '#f8f9fa';
+                const getDef = (cat) => {
+                    const code = DB.LIMITS[cat].defaults[r.id] || DB.LIMITS[cat].volt || "-";
+                    // Ищем описание
+                    const meta = DB.INDICES.find(x => x.id === r.id);
+                    const opt = meta ? meta.opts.find(o => o.c === code) : null;
+                    return opt ? `<b>${opt.c}</b><br><span style="color:#777; font-size:9px;">${opt.l.split('-')[0]}</span>` : code;
+                };
+
+                html1 += `
+                <tr style="background:${bg}; border-bottom:1px solid #ddd;">
+                    <td style="padding:8px; font-weight:bold;">${r.l}</td>
+                    <td style="padding:8px; text-align:center;">${getDef('BUS')}</td>
+                    <td style="padding:8px; text-align:center;">${getDef('SIGNAL')}</td>
+                    <td style="padding:8px; text-align:center;">${getDef('CONTROL')}</td>
+                </tr>`;
             });
-            html1 += '</tr></tbody></table>';
+            html1 += '</tbody></table>';
             c1.innerHTML = html1;
         }
+
+        // 2. Детальная Энциклопедия
         const c2 = document.getElementById('detailedSpecs');
         if (c2) {
             let html2 = '';
             DB.INDICES.forEach(idx => {
-                html2 += `<div class="spec-block"><div class="spec-title"><span>${idx.n}</span><span class="spec-code">Позиция #${idx.id}</span></div>`;
+                html2 += `
+                <div class="spec-block" style="border-left:4px solid #F7941D; margin-bottom:20px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                    <div class="spec-title" style="padding:10px; background:#f1f3f5; font-weight:bold; display:flex; justify-content:space-between;">
+                        <span>${idx.n}</span>
+                        <span style="background:#333; color:white; padding:2px 6px; border-radius:4px; font-size:10px;">ID ${idx.id}</span>
+                    </div>
+                    <div style="padding:10px;">`;
+                
                 idx.opts.forEach(o => {
                     if (o.c || o.l) {
-                        let extraStyle = "";
-                        if(o.wiki && o.wiki.includes("Огнестойкая")) extraStyle = "color:#D67D0F; font-weight:bold;";
-                        html2 += `<div style="margin-bottom:8px; padding-bottom:6px; border-bottom:1px dashed #eee;"><span class="opt-v" style="${extraStyle}">${o.c ? o.c : "(-)"}</span><div style="font-size:12px; font-weight:bold; color:#333;">${o.l}</div><div style="font-size:11px; color:#777; margin-top:2px;">${o.wiki || "..."}</div></div>`;
+                        let wikiText = o.wiki || "Базовое исполнение";
+                        // Подсветка ТУ
+                        wikiText = wikiText.replace(/\[ТУ (.*?)\]/g, '<span style="color:#0d6efd; font-weight:bold;">[ТУ $1]</span>');
+                        
+                        let badge = "";
+                        if(o.wiki && o.wiki.toLowerCase().includes("огнестойк")) badge = '<i class="fas fa-fire" style="color:#DC3545; margin-right:5px;"></i>';
+                        if(o.wiki && o.wiki.toLowerCase().includes("мороз")) badge = '<i class="fas fa-snowflake" style="color:#0DCAF0; margin-right:5px;"></i>';
+
+                        html2 += `
+                        <div style="margin-bottom:12px; border-bottom:1px dashed #eee; padding-bottom:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span class="opt-v" style="font-size:14px; color:#F7941D;">${o.c ? o.c : "(-)"}</span>
+                                <span style="font-size:11px; font-weight:bold; color:#555;">${o.l}</span>
+                            </div>
+                            <div style="font-size:11px; color:#666; margin-top:4px; line-height:1.4;">
+                                ${badge} ${wikiText}
+                            </div>
+                        </div>`;
                     }
                 });
-                html2 += `</div>`;
+                html2 += `</div></div>`;
             });
             c2.innerHTML = html2;
         }
@@ -396,21 +392,13 @@ const app = {
         const c = document.getElementById('toasts');
         c.innerHTML = '';
         if(!msgs || !msgs.length) return;
-
         const t = document.createElement('div');
         t.className = 'toast';
         const isDanger = msgs.some(m => m.includes('ОШИБКА'));
         if(isDanger) t.classList.add('danger');
-
         let content = '';
-        if(msgs.length === 1) {
-            content = `<span>${msgs[0]}</span>`;
-        } else {
-            content = `<div style="display:flex; flex-direction:column; align-items:flex-start;">`;
-            msgs.forEach(m => content += `<div style="margin-bottom:2px;">• ${m}</div>`);
-            content += `</div>`;
-        }
-        
+        if(msgs.length === 1) { content = `<span>${msgs[0]}</span>`; } 
+        else { content = `<div style="display:flex; flex-direction:column; align-items:flex-start;">`; msgs.forEach(m => content += `<div style="margin-bottom:2px;">• ${m}</div>`); content += `</div>`; }
         t.innerHTML = `<i class="fas fa-info-circle" style="margin-top:${msgs.length>1?'4px':'0'}"></i> ${content}`;
         c.appendChild(t);
         const time = 3000 + (msgs.length * 1000);
