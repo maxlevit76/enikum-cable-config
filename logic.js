@@ -1,4 +1,4 @@
-/* logic.js - v14.13: Clean Encyclopedia (No Debug Text) */
+/* logic.js - v14.20: Configurator & Static Handbook */
 
 // Навигация
 window.nav = function(p, btn) {
@@ -24,7 +24,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v14.13: Encyclopedia Cleaned']), 1000);
+        setTimeout(() => this.showToasts(['Система v14.20: Готова к работе']), 1000);
     },
 
     setCat(cat, btn) {
@@ -227,6 +227,7 @@ const app = {
     renderIcons() {
         const s = this.state.idx;
         const c = document.getElementById('headerIcons');
+        if (!c) return;
         c.innerHTML = '';
         const mkSlot = (isActive, html, color, badge) => {
             const div = document.createElement('div');
@@ -273,6 +274,7 @@ const app = {
         if (!area) return;
         const openIdx = [];
         document.querySelectorAll('.acc-body').forEach((el, i) => { if(el.classList.contains('open')) openIdx.push(i); });
+        
         area.innerHTML = '';
         if (DB && DB.GROUPS) {
             DB.GROUPS.forEach((grp, gIdx) => {
@@ -283,9 +285,18 @@ const app = {
                     const meta = DB.INDICES.find(x => x.id === id);
                     if (meta) { html += this.getControl(meta); }
                 });
+                
                 if(html) {
                     const isOpen = (gIdx === 0 || openIdx.includes(gIdx));
-                    area.innerHTML += `<div class="acc-group"><div class="acc-header ${isOpen?'active':''}" onclick="toggleAcc(this)">${grp.t} <i class="fas fa-chevron-down"></i></div><div class="acc-body ${isOpen?'open':''}">${html}</div></div>`;
+                    area.innerHTML += `
+                    <div class="acc-group">
+                        <div class="acc-header ${isOpen?'active':''}" onclick="toggleAcc(this)">
+                            ${grp.t} <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="acc-body ${isOpen?'open':''}">
+                            ${html}
+                        </div>
+                    </div>`;
                 }
             });
         }
@@ -356,7 +367,6 @@ const app = {
             html1 += '</tr></tbody></table>';
             c1.innerHTML = html1;
         }
-        // Вторая часть функции удалена, так как текст теперь статический в HTML
     },
     
     renderPDFPreview() {
