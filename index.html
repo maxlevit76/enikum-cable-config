@@ -11,27 +11,39 @@
     
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Стили для текстовой части Справочника */
-        .wiki-section { background: #fff; padding: 30px; border-radius: 8px; border: 1px solid #dee2e6; margin-top: 30px; color: #333; line-height: 1.6; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-        .wiki-main-title { font-family: 'Oswald'; color: #212529; font-size: 26px; text-transform: uppercase; margin-bottom: 20px; line-height: 1.2; border-left: 5px solid #F7941D; padding-left: 15px; }
-        .wiki-intro { font-size: 15px; margin-bottom: 30px; color: #495057; text-align: justify; }
-        .wiki-h2 { font-family: 'Oswald'; font-size: 20px; margin-top: 40px; margin-bottom: 15px; border-bottom: 2px solid #DEE2E6; padding-bottom: 5px; color: #212529; display: flex; align-items: center; gap: 10px; }
+        /* Стили для Энциклопедии (SSOT) */
+        .wiki-section { background: #fff; padding: 40px; border-radius: 8px; border: 1px solid #dee2e6; margin-top: 30px; color: #212529; line-height: 1.6; font-family: 'Roboto', sans-serif; }
         
-        .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .cat-card { padding: 20px; border-radius: 6px; border: 1px solid #E9ECEF; background: #FAFBFC; position: relative; overflow: hidden; }
-        .cat-card.bus { border-top: 4px solid #0D6EFD; }
-        .cat-card.signal { border-top: 4px solid #198754; }
-        .cat-card.control { border-top: 4px solid #F7941D; }
-        .cat-head { font-family: 'Oswald'; font-size: 18px; margin-bottom: 10px; text-transform: uppercase; }
-        .cat-param { font-size: 13px; margin-bottom: 6px; }
-        .cat-param b { color: #555; }
+        .wiki-title { font-family: 'Oswald'; color: #212529; font-size: 28px; text-transform: uppercase; margin-bottom: 25px; line-height: 1.2; border-left: 6px solid #F7941D; padding-left: 20px; }
+        
+        .wiki-intro { font-size: 16px; margin-bottom: 40px; color: #495057; text-align: justify; border-bottom: 1px solid #EEE; padding-bottom: 20px; }
+        .wiki-intro p { margin-bottom: 15px; }
 
-        .wiki-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; background: #fff; }
-        .wiki-table th { background: #343A40; color: #fff; padding: 12px; border: 1px solid #454D55; text-align: left; text-transform: uppercase; font-size: 12px; }
-        .wiki-table td { padding: 12px; border: 1px solid #DEE2E6; vertical-align: top; }
+        .wiki-h2 { font-family: 'Oswald'; font-size: 22px; margin-top: 50px; margin-bottom: 20px; color: #343A40; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #DEE2E6; padding-bottom: 8px; }
+        .wiki-h3 { font-family: 'Oswald'; font-size: 18px; margin-top: 30px; margin-bottom: 15px; color: #495057; text-transform: uppercase; }
+
+        /* Таблицы */
+        .wiki-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 20px 0; background: #fff; border: 1px solid #DEE2E6; }
+        .wiki-table th { background: #343A40; color: #fff; padding: 12px; border: 1px solid #454D55; text-align: left; vertical-align: middle; }
+        .wiki-table td { padding: 10px 12px; border: 1px solid #DEE2E6; vertical-align: top; }
         .wiki-table tr:nth-child(even) { background-color: #F8F9FA; }
+        .wiki-table tr:hover { background-color: #f1f3f5; }
+
+        /* Карточки категорий */
+        .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        .cat-card { padding: 25px; border-radius: 8px; border: 1px solid #E9ECEF; background: #FAFBFC; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .cat-card.bus { border-top: 5px solid #0D6EFD; }
+        .cat-card.signal { border-top: 5px solid #198754; }
+        .cat-card.control { border-top: 5px solid #F7941D; }
+        .cat-head { font-family: 'Oswald'; font-size: 20px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .idx-badge { font-family: 'Oswald'; background: #E9ECEF; color: #212529; padding: 2px 8px; border-radius: 4px; border: 1px solid #CED4DA; display: inline-block; min-width: 40px; text-align: center; }
+        /* Списки и формулы */
+        .spec-list { list-style: none; padding: 0; }
+        .spec-list li { margin-bottom: 10px; padding-left: 20px; position: relative; }
+        .spec-list li::before { content: "•"; color: #F7941D; font-weight: bold; position: absolute; left: 0; }
+        .formula { font-family: 'Times New Roman', serif; font-style: italic; background: #f8f9fa; padding: 2px 6px; border-radius: 4px; border: 1px solid #e9ecef; }
+        
+        .idx-badge { font-family: 'Oswald'; font-weight: bold; color: #212529; background: #E9ECEF; padding: 3px 8px; border-radius: 4px; border: 1px solid #ADB5BD; font-size: 12px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -77,7 +89,7 @@
         <div class="matrix-scroll-wrap"><div id="summaryTableArea"></div></div>
         
         <div class="wiki-section">
-            <div class="wiki-main-title">СИСТЕМАТИЗАЦИЯ КАБЕЛЬНЫХ РЕШЕНИЙ ЭНИКУМ ДЛЯ ПРОМЫШЛЕННОЙ АВТОМАТИЗАЦИИ: ФИЗИЧЕСКИЕ ОСНОВЫ И КРИТЕРИИ ВЫБОРА</div>
+            <div class="wiki-title">СИСТЕМАТИЗАЦИЯ КАБЕЛЬНЫХ РЕШЕНИЙ ЭНИКУМ ДЛЯ ПРОМЫШЛЕННОЙ АВТОМАТИЗАЦИИ: ФИЗИЧЕСКИЕ ОСНОВЫ И КРИТЕРИИ ВЫБОРА</div>
             
             <div class="wiki-intro">
                 <p>Марка кабеля для промышленной автоматизации "ЭНИКУМ" содержит в своем названии аббревиатуру <b>_КУМ</b> (Кабель Универсальный Монтажный), что отражает специфику данного проектного продукта. В отличие от складских марок, ЭНИКУМ является универсальным кабелем и изготавливается под конкретные проектные требования заказчика, чем обуславливается его назначение, конструктив, технические характеристики и свойства.</p>
@@ -85,89 +97,204 @@
                 <p>Для удобства и систематизации подбора и во избежение проектных ошибок, продуктовая матрица ЭНИКУМ условно разделена на три фундаментальные категории: <b>BUS</b> (Интерфейсные), <b>SIGNAL</b> (Монтажные) и <b>CONTROL</b> (Контроль и Управление). Раскроем ниже электрофизические причины такого разделения.</p>
             </div>
 
-            <div class="wiki-h2"><i class="fas fa-layer-group"></i> 1. ФУНДАМЕНТАЛЬНЫЕ КАТЕГОРИИ</div>
+            <div class="wiki-h2"><i class="fas fa-sitemap"></i> 1. УРОВЕНЬ АСУ ТП И ФИЗИКА СИГНАЛОВ</div>
+            <p>Система автоматизации строится иерархически. Каждая кабельная группа обслуживает свой уровень, работая с уникальной природой электрического сигнала.</p>
+            
             <div class="cat-grid">
                 <div class="cat-card bus">
-                    <div class="cat-head" style="color:#0D6EFD;">1. BUS (ИНТЕРФЕЙСНЫЕ)</div>
-                    <div class="cat-param"><b>Уровень:</b> Level 1 (Controller-to-Controller).</div>
-                    <div class="cat-param"><b>Физика:</b> Высокочастотный цифровой поток (МГц), передача фронтами импульсов. Работает как длинная линия.</div>
-                    <div class="cat-param"><b>Требования:</b> Строгое волновое сопротивление ($Z_0$: 100/120/150 Ом), низкая емкость (изоляция Пв/Пс/Ф).</div>
-                    <div class="cat-param"><b>Напряжение:</b> Рабочее 5-12В, изоляция 300/500В.</div>
+                    <div class="cat-head" style="color:#0D6EFD;">1.1. BUS (Интерфейсные)</div>
+                    <ul class="spec-list">
+                        <li><b>Уровень:</b> Level 1 (Control Level). ПЛК, панели, частотники.</li>
+                        <li><b>Физика:</b> Высокочастотный цифровой поток (МГц). Информация передается фронтами импульсов. Работает как длинная линия.</li>
+                        <li><b>Реализация:</b> Дифференциальная пара (RS-485). Логическая «1» и «0» определяются разностью потенциалов ($U_{diff} > 200$ мВ).</li>
+                    </ul>
                 </div>
                 <div class="cat-card signal">
-                    <div class="cat-head" style="color:#198754;">2. SIGNAL (МОНТАЖНЫЕ)</div>
-                    <div class="cat-param"><b>Уровень:</b> Level 0 (Sensor-to-PLC).</div>
-                    <div class="cat-param"><b>Физика:</b> Аналог (4-20 мА, 0-10В) или дискретика. Важна точность амплитуды.</div>
-                    <div class="cat-param"><b>Требования:</b> Экранирование (EMI), омическое сопротивление.</div>
-                    <div class="cat-param"><b>Напряжение:</b> Рабочее 24-48В, изоляция 300/500В.</div>
+                    <div class="cat-head" style="color:#198754;">1.2. SIGNAL (Монтажные)</div>
+                    <ul class="spec-list">
+                        <li><b>Уровень:</b> Level 0 (Sensor-to-PLC). Датчики и исполнительные механизмы.</li>
+                        <li><b>Физика:</b> Аналог (4...20 мА, 0...10В) или низкоскоростная дискретика. Волновые эффекты отсутствуют.</li>
+                        <li><b>Главный враг:</b> Искажение амплитуды из-за помех или омического сопротивления.</li>
+                    </ul>
                 </div>
                 <div class="cat-card control">
-                    <div class="cat-head" style="color:#F7941D;">3. CONTROL (УПРАВЛЕНИЕ)</div>
-                    <div class="cat-param"><b>Уровень:</b> Силовое управление, вторичная коммутация.</div>
-                    <div class="cat-param"><b>Физика:</b> Энергия (Power Control).</div>
-                    <div class="cat-param"><b>Требования:</b> Токовая нагрузка (сечение), стойкость к выбросам ЭДС.</div>
-                    <div class="cat-param"><b>Напряжение:</b> Рабочее до 660В, изоляция 660/1000В.</div>
+                    <div class="cat-head" style="color:#F7941D;">1.3. CONTROL (Управление)</div>
+                    <ul class="spec-list">
+                        <li><b>Уровень:</b> Силовое управление, вторичная коммутация (соленоиды, пускатели, двигатели).</li>
+                        <li><b>Физика:</b> Энергия (Power). Передача тока для совершения работы.</li>
+                        <li><b>Факторы:</b> Нагрев (Закон Джоуля-Ленца) и коммутационные перенапряжения.</li>
+                    </ul>
                 </div>
             </div>
 
-            <div class="wiki-h2"><i class="fas fa-list-ul"></i> 2. ДЕТАЛЬНОЕ ОПИСАНИЕ ИНДЕКСОВ (ТУ)</div>
-            <p style="font-size:13px; color:#666; margin-bottom:15px;">Ниже приведены расшифровки основных индексов, используемых в конфигураторе, согласно Техническим Условиям.</p>
+            <div class="wiki-h2"><i class="fas fa-bolt"></i> 2. НАПРЯЖЕНИЯ: РАБОЧЕЕ vs. НОМИНАЛЬНОЕ</div>
+            <p><i>«Зачем мне изоляция на 300В или 500В, если у меня в кабеле бежит цифровой сигнал 5 Вольт?»</i> — Ответ кроется в электробезопасности и переходных процессах.</p>
             <table class="wiki-table">
                 <thead>
                     <tr>
-                        <th style="width: 100px; text-align: center;">Индекс</th>
-                        <th>Описание и назначение</th>
+                        <th>Категория</th>
+                        <th>Рабочее (Сигнал)</th>
+                        <th>Изоляция (U<sub>0</sub>/U)</th>
+                        <th>Обоснование</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="text-center"><span class="idx-badge">Вз</span></td>
-                        <td><b>Взрывозащита.</b> Кабель для применения на объектах с риском возникновения взрывоопасных сред. Конструкция обеспечивает продольную и радиальную герметичность.</td>
+                        <td><b>BUS</b></td>
+                        <td>5В (TTL) ... 12В</td>
+                        <td>300/500 В</td>
+                        <td>Соседство с силовыми линиями 220/380В. Защита от пробоя фазы на лоток и синфазных помех (перекос «земли»).</td>
                     </tr>
                     <tr>
-                        <td class="text-center"><span class="idx-badge">Пв / Пс</span></td>
-                        <td><b>Изоляция из вспененного или сшитого полиэтилена.</b> Критически важна для категорий BUS. Обладает низкой диэлектрической проницаемостью, что снижает погонную емкость и позволяет передавать высокочастотные сигналы (RS-485, Profibus) на большие расстояния без искажения фронтов.</td>
+                        <td><b>SIGNAL</b></td>
+                        <td>24В ... 48В</td>
+                        <td>300/500 В</td>
+                        <td>Универсальность (релейная логика до 220В) и механическая прочность изоляции от передавливания.</td>
                     </tr>
                     <tr>
-                        <td class="text-center"><span class="idx-badge">Тп</span></td>
-                        <td><b>Термоэластопласт.</b> Материал оболочки или изоляции, сочетающий свойства резины и термопласта. Обеспечивает высокую гибкость (в том числе на морозе) и расширенный температурный диапазон до +100°С.</td>
-                    </tr>
-                    <tr>
-                        <td class="text-center"><span class="idx-badge">Ф</span></td>
-                        <td><b>Фторопласт.</b> Материал для экстремальных условий эксплуатации. Обладает высочайшей химической стойкостью к кислотам, щелочам, маслам и выдерживает температуры до +200...+250°С.</td>
+                        <td><b>CONTROL</b></td>
+                        <td>24В ... 660В</td>
+                        <td>660/1000 В</td>
+                        <td><b>Коммутационные перенапряжения.</b> ЭДС самоиндукции при отключении индуктивной нагрузки может достигать 1000–1500В.</td>
                     </tr>
                 </tbody>
             </table>
 
-            <div class="wiki-h2" style="color:#DC3545; border-color:#DC3545;"><i class="fas fa-fire"></i> 3. ПОЖАРНАЯ БЕЗОПАСНОСТЬ (ФЗ-123)</div>
+            <div class="wiki-h2"><i class="fas fa-table"></i> 3. СВОДНАЯ ТЕХНИЧЕСКАЯ МАТРИЦА</div>
+            <table class="wiki-table">
+                <thead>
+                    <tr>
+                        <th>Параметр</th>
+                        <th style="color:#0D6EFD;">BUS (Интерфейсный)</th>
+                        <th style="color:#198754;">SIGNAL (Монтажный)</th>
+                        <th style="color:#F7941D;">CONTROL (Управление)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Основная функция</td><td>Передача данных (Цифра)</td><td>Измерение и контроль (Аналог)</td><td>Силовое управление (Энергия)</td></tr>
+                    <tr><td>Уровень АСУ ТП</td><td>Level 1</td><td>Level 0 → Level 1</td><td>Level 1 → Level 0</td></tr>
+                    <tr><td>Физика сигнала</td><td>ВЧ-импульсы (МГц)</td><td>Ток / Напряжение / Контакт</td><td>Ток пром. частоты / DC</td></tr>
+                    <tr><td>Критичные параметры</td><td>Волновое сопр. (Z<sub>0</sub>), Емкость</td><td>Помехозащищенность (Экран)</td><td>Токовая нагрузка, Пробой U<sub>max</sub></td></tr>
+                    <tr><td>Типичные сечения</td><td>0.22 ... 0.78 мм²</td><td>0.5 ... 1.5 мм²</td><td>0.75 ... 6.0 мм² и выше</td></tr>
+                </tbody>
+            </table>
+
+            <div class="wiki-h2"><i class="fas fa-list-ol"></i> ИНДЕКСЫ МАРКООБРАЗОВАНИЯ (1-24)</div>
+            <p>Ниже приведены характеристики элементов конструкции согласно ТУ.</p>
+            
+            <div class="wiki-h3">1. Применение во взрывоопасных зонах</div>
+            <table class="wiki-table">
+                <tr>
+                    <td width="100" class="text-center"><span class="idx-badge">Вз</span></td>
+                    <td>Для применения кабеля с частичной продольной и радиальной герметичностью на объектах с риском возникновения взрывоопасных сред (газ, пар, пыль) по ГОСТ IEC 60079-14.</td>
+                </tr>
+            </table>
+
+            <div class="wiki-h3">2. Изоляция и типы</div>
+            <table class="wiki-table">
+                <tr>
+                    <td width="100" class="text-center"><span class="idx-badge">В</span></td>
+                    <td><b>PVC.</b> ПВХ пластикат. Общее назначение (СКУД, КИПиА). R<sub>из</sub> ≥ 50 Ом/км.</td>
+                </tr>
+                <tr>
+                    <td class="text-center"><span class="idx-badge">П</span></td>
+                    <td><b>Polymer HF.</b> Безгалогенная композиция. Для мест с людьми. R<sub>из</sub> ≥ 100 Ом/км.</td>
+                </tr>
+                <tr>
+                    <td class="text-center"><span class="idx-badge">Пв / Пс</span></td>
+                    <td><b>FPE / XLPE.</b> Вспененный или сшитый полиэтилен. Низкая емкость. Для интерфейсов RS-485, Profibus.</td>
+                </tr>
+                <tr>
+                    <td class="text-center"><span class="idx-badge">Тп</span></td>
+                    <td><b>TPE.</b> Термоэластопласт. Высокая гибкость, до +100°С. Робототехника.</td>
+                </tr>
+                <tr>
+                    <td class="text-center"><span class="idx-badge">Ф</span></td>
+                    <td><b>FEP.</b> Фторопласт. Экстремальная химия и температуры до +250°С. R<sub>из</sub> ≥ 1000 Ом/км.</td>
+                </tr>
+                <tr>
+                    <td class="text-center"><span class="idx-badge">Вк / Пк / Пск</span></td>
+                    <td><b>Mica + ...</b> Огнестойкие исполнения со слюдяными лентами. Защита от КЗ в открытом пламени.</td>
+                </tr>
+            </table>
+            <div class="wiki-h3">4. Экранирование (Индивидуальное и Общее)</div>
+            <table class="wiki-table">
+                <tr>
+                    <td width="150"><b>ЭИм / Эм</b></td>
+                    <td>Медная лента. Стационарное использование.</td>
+                </tr>
+                <tr>
+                    <td><b>ЭИо / Эо</b></td>
+                    <td>Медная оплетка. Подвижное использование.</td>
+                </tr>
+                <tr>
+                    <td><b>ЭИал / Эал</b></td>
+                    <td>Алюмолавсан + Луженая оплетка. Защита от коррозии.</td>
+                </tr>
+                <tr>
+                    <td><b>ЭИкм / Экм</b></td>
+                    <td>Тройной экран (Оплетка-Лента-Оплетка). Максимальная защита.</td>
+                </tr>
+            </table>
+
+            <div class="wiki-h2"><i class="fas fa-network-wired"></i> 23. ПРОТОКОЛЫ И ИНТЕРФЕЙСЫ</div>
+            <p>Физика передачи цифровых сигналов по длинным линиям.</p>
+            
+            <div style="background:#f8f9fa; padding:15px; border-left:4px solid #333; margin:15px 0;">
+                <b>Волновое сопротивление (Z<sub>0</sub>):</b> $$Z_0 = \sqrt{\frac{L}{C}}$$
+                Не зависит от длины кабеля. Определяется геометрией и химией диэлектрика ($\epsilon$). Если Z<sub>0</sub> не совпадает с нагрузкой, возникает отражение сигнала.
+            </div>
+
+            <table class="wiki-table">
+                <thead>
+                    <tr>
+                        <th>Параметр</th>
+                        <th style="color:#0D6EFD;">[485] RS-485</th>
+                        <th style="color:#6610f2;">[PB] Profibus DP</th>
+                        <th style="color:#fd7e14;">[FF] Fieldbus</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><b>Волновое сопр.</b></td><td>120 Ом (±15)</td><td>150 Ом</td><td>100 Ом (±20)</td></tr>
+                    <tr><td><b>Скорость</b></td><td>до 10 Мбит/с</td><td>до 12 Мбит/с</td><td>31.25 кбит/с</td></tr>
+                    <tr><td><b>Изоляция</b></td><td>Вспененный ПЭ (Пв)</td><td>Physical Foam Skin (Пв)</td><td>Сшитый ПЭ (Пс)</td></tr>
+                    <tr><td><b>Особенность</b></td><td>Универсальный</td><td>Критичен к емкости</td><td>Data + Power</td></tr>
+                </tbody>
+            </table>
+
+            <div class="wiki-h2" style="color:#DC3545; border-color:#DC3545;"><i class="fas fa-fire-extinguisher"></i> 11. ПОЖАРНАЯ БЕЗОПАСНОСТЬ (ФЗ-123)</div>
             <table class="wiki-table">
                 <thead style="border-bottom: 2px solid #DC3545;">
                     <tr>
-                        <th style="background:#DC3545; border-color:#B02A37;">Исполнение</th>
-                        <th style="background:#DC3545; border-color:#B02A37;">Требования и область применения</th>
+                        <th style="background:#DC3545;">Индекс</th>
+                        <th style="background:#DC3545;">Описание</th>
+                        <th style="background:#DC3545;">Класс зданий</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><b>нг(А)-LS</b></td>
-                        <td>(Low Smoke) Не распространяющие горение при групповой прокладке, с пониженным дымо- и газовыделением. Для внутренних электроустановок, жилых и общественных зданий.</td>
+                        <td>Low Smoke. Пониженное дымовыделение.</td>
+                        <td>Жилые дома, заводы (Ф1.3, Ф5)</td>
                     </tr>
                     <tr>
                         <td><b>нг(А)-HF</b></td>
-                        <td>(Halogen Free) Не распространяющие горение, не содержащие галогенов. При горении не выделяют коррозионно-активных газов. Для помещений с компьютерной техникой и мест массового скопления людей (аэропорты, БЦ).</td>
+                        <td>Halogen Free. Нет коррозии.</td>
+                        <td>Офисы, БЦ, Аэропорты (Ф4, Ф3)</td>
                     </tr>
                     <tr>
-                        <td><b>нг(А)-FR</b></td>
-                        <td>(Fire Resistant) Огнестойкие. Сохраняют работоспособность цепи в условиях пожара (открытое пламя) в течение регламентированного времени (до 180 мин). Для систем пожарной сигнализации, оповещения, пожаротушения.</td>
+                        <td><b>нг(А)-FRLS</b></td>
+                        <td>Fire Resistant + LS. Огнестойкий.</td>
+                        <td>Системы СПЗ (Ф1-Ф5)</td>
                     </tr>
                     <tr>
                         <td><b>нг(А)-LSLTx</b></td>
-                        <td>(Low Toxic) С низкой токсичностью продуктов горения. Обязательны для детских дошкольных учреждений, больниц, школ, спальных корпусов интернатов.</td>
+                        <td>Low Toxic. Низкая токсичность.</td>
+                        <td>Детсады, больницы (Ф1.1)</td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        
     </div>
 </div>
 
@@ -201,7 +328,9 @@
     <div class="nav-btn" onclick="nav('matrix', this)"><i class="fas fa-book"></i> Справка</div>
     <div class="nav-btn" onclick="nav('pdf', this)"><i class="fas fa-file-alt"></i> PDF</div>
 </div>
+
 <script src="database.js"></script>
 <script src="logic.js"></script>
+
 </body>
 </html>
