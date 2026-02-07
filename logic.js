@@ -1,4 +1,4 @@
-/* logic.js - v18.1: Cosmetics & Logic Anchor #1 (Fire) */
+/* logic.js - v18.3: Fire Logic Anchor 1.2 (Silicone) */
 
 window.nav = function(p, btn) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
@@ -23,7 +23,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v18.1: Готова']), 1000);
+        setTimeout(() => this.showToasts(['Система v18.3: Fire Logic 1.2']), 1000);
     },
 
     setCat(cat, btn) {
@@ -232,22 +232,27 @@ const app = {
         c.appendChild(mkSlot(true, catIcon, catColor));
         
         // --- 1. Ex / Ex-i ---
-        // (Черный по умолчанию, Синий если i)
         const isEx = (s[21] === 'i' || s[1] === 'Вз');
         let exColor = '#000000'; // Вз - ЧЕРНЫЙ
         let exText = 'Ex';
         if (s[21] === 'i') { exColor = '#0D6EFD'; exText = 'Ex-i'; } // i - Синий
         c.appendChild(mkSlot(isEx, exText, exColor));
         
-        // --- 2. FR (Fire Resistance - ЯКОРЬ №1) ---
+        // --- 2. FR (Fire Resistance - ЯКОРЬ №1.2) ---
         let isFR = s[11] && s[11].includes('FR');
         let frBadge = '';
         if (isFR) {
             let doubleBarrier = false;
             if (this.state.cat === 'BUS') {
+                // Для BUS: Только ОБЩИЙ барьер (C)
                 if (s[5] === 'С') doubleBarrier = true;
             } else {
-                if (s[5] === 'С' || s[3] === 'Си' || (s[2] && s[2].includes('к')) || (s[9] && s[9].includes('к'))) doubleBarrier = true;
+                // Для SIGNAL/CONTROL:
+                // 1. Общий (С) ИЛИ 
+                // 2. Индивидуальный (Си) ИЛИ
+                // 3. Изоляция Силикон (начинается на Р)
+                const isSilicone = (s[2] && s[2].startsWith('Р')); 
+                if (s[5] === 'С' || s[3] === 'Си' || isSilicone) doubleBarrier = true;
             }
             if (doubleBarrier) frBadge = 'x2';
         }
@@ -269,8 +274,8 @@ const app = {
         let isClim = (s[12] && s[12] !== '');
         
         if (s[12] === '-ЭХЛ') { climColor = '#0D6EFD'; climBadge = 'x2'; } // ЭХЛ = x2
-        else if (s[12] === '-Т') { climColor = '#FFC107'; climIcon = '<i class="fas fa-sun"></i>'; }
-        else if (s[12] === '-М') { climColor = '#0DCAF0'; climIcon = '<i class="fas fa-water"></i>'; } 
+        else if (s[12] === '-Т') { climColor = '#FFC107'; climIcon = '<i class="fas fa-sun"></i>'; } // Тропики - Желтый
+        else if (s[12] === '-М') { climColor = '#0DCAF0'; climIcon = '<i class="fas fa-water"></i>'; } // Морской - Голубой
         else if (s[12] === '-ХЛ') { climColor = '#0D6EFD'; } 
         
         c.appendChild(mkSlot(isClim, climIcon, climColor, climBadge));
@@ -293,7 +298,7 @@ const app = {
         // --- 9. Flex (5/6) ---
         let flexIcon = '<i class="fas fa-rainbow"></i>'; // Парабола
         let flexActive = false; 
-        let flexColor = '#6c757d'; // СЕРЫЙ МЕТАЛЛ (как броня)
+        let flexColor = '#6c757d'; // СЕРЫЙ МЕТАЛЛ
         if (s[19] === '(5)') { flexActive = true; } 
         if (s[19] === '(6)') { flexIcon = '<i class="fas fa-robot"></i>'; flexActive = true; }
         c.appendChild(mkSlot(flexActive, flexIcon, flexColor));
