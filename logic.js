@@ -1,4 +1,4 @@
-/* logic.js - v15.3 Fix: Full Color Icons */
+/* logic.js - v15.6 Fix: HF vs Leaf, Art Icons */
 
 window.nav = function(p, btn) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
@@ -23,7 +23,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v15.3: Colors Fixed']), 1000);
+        setTimeout(() => this.showToasts(['Система v15.6: HF Logic Update']), 1000);
     },
 
     setCat(cat, btn) {
@@ -220,88 +220,85 @@ const app = {
         const mkSlot = (isActive, html, color, badge) => {
             const div = document.createElement('div');
             div.className = `icon-slot ${isActive?'active':''}`;
-            // ВАЖНО: Если иконка активна, мы принудительно ставим ей цветной фон
-            if(isActive) div.style.background = color; 
+            if(isActive) div.style.background = color;
             div.innerHTML = html;
             if(isActive && badge) div.innerHTML += `<div class="slot-badge">${badge}</div>`;
             return div;
         };
         
-        // Категория (Всегда цветная)
+        // 1. Категория
         let catColor = (this.state.cat === 'BUS') ? 'var(--bus)' : ((this.state.cat === 'SIGNAL') ? 'var(--signal)' : 'var(--primary)');
         let catIcon = (this.state.cat === 'BUS') ? '<i class="fas fa-network-wired"></i>' : ((this.state.cat === 'SIGNAL') ? '<i class="fas fa-wave-square"></i>' : '<i class="fas fa-bolt"></i>');
         c.appendChild(mkSlot(true, catIcon, catColor));
         
-        // Ex (Взрывозащита)
-        // Логика: если i - синий, если Вз - оранжевый. Если ничего - не горит.
+        // 2. Ex (Взрывозащита)
+        // Вз = Оранжевый, i = Синий
         const isEx = (s[21] === 'i' || s[1] === 'Вз');
-        let exColor = 'var(--primary)'; // По умолчанию (Вз) - Оранжевый
+        let exColor = 'var(--primary)'; 
         let exText = 'Ex';
-        if (s[21] === 'i') { exColor = 'var(--bus)'; exText = 'Ex-i'; } // Ex-i - Синий
+        if (s[21] === 'i') { exColor = 'var(--bus)'; exText = 'Ex-i'; } 
         c.appendChild(mkSlot(isEx, exText, exColor));
         
-        // Fire (Огонь)
+        // 3. Fire (Огонь - Красный)
         let isFR = s[11] && s[11].includes('FR');
         c.appendChild(mkSlot(isFR, '<i class="fas fa-fire"></i>', 'var(--fire)'));
         
-        // Thermo (Термостойкость)
+        // 4. Thermo (Термо - Оранжевый + Бейдж)
         let isHot = (s[15] && s[15] !== '');
-        // Извлекаем цифру (125, 200) для бейджа
         let hotBadge = isHot ? s[15].replace('-ТС-', '').replace('-TC-', '') : '';
         c.appendChild(mkSlot(isHot, '<i class="fas fa-temperature-high"></i>', 'var(--hot)', hotBadge));
 
-        // Eco (Экологичность)
-        let isEco = (s[11] && (s[11].includes('LTx') || s[11].includes('HF')));
-        let ecoHtml = '<i class="fas fa-leaf"></i>';
-        let ecoBadge = '';
-        if (isEco) { if (s[11].includes('LTx')) { ecoBadge = 'LTx'; } else { ecoHtml = 'HF'; } }
-        c.appendChild(mkSlot(isEco, ecoHtml, 'var(--signal)', ecoBadge));
+        // 5. Eco (HF vs LTx) - Ключевое изменение!
+        let isLTx = (s[11] && s[11].includes('LTx'));
+        let isHF = (s[11] && s[11].includes('HF'));
         
-        // Climate (Климат)
-        // ХЛ/УХЛ - по умолчанию, но можно подсветить синим.
-        // ЭХЛ - Арктика (Синий).
-        // Т - Тропики (Оранжевый/Желтый).
-        // М - Морской (Голубой).
-        let climColor = 'var(--bus)'; // Стандартный холод
+        let ecoActive = isLTx || isHF;
+        let ecoColor = 'var(--signal)'; // Зеленый
+        let ecoHtml = '<i class="fas fa-leaf"></i>'; // По умолчанию лист (неактивный)
+        let ecoBadge = '';
+
+        if (isLTx) {
+            ecoHtml = '<i class="fas fa-leaf"></i>'; // Лист для LTx
+            ecoBadge = 'LTx';
+        } else if (isHF) {
+            ecoHtml = 'HF'; // Текст для HF
+            // Без бейджа, так как сам текст иконки говорит за себя
+        } 
+        c.appendChild(mkSlot(ecoActive, ecoHtml, ecoColor, ecoBadge));
+        
+        // 6. Climate (Тропики-Желтый, Море-Голубой, Арктика-Синий)
+        let climColor = 'var(--bus)'; 
         let climIcon = '<i class="fas fa-snowflake"></i>'; let climBadge = '';
-        let isClim = (s[12] && s[12] !== ''); // Если климат выбран явно
-        if (s[12] === '-ЭХЛ') { climColor = 'var(--bus)'; climBadge = 'Ar'; }
-        else if (s[12] === '-Т') { climColor = 'var(--hot)'; climIcon = '<i class="fas fa-sun"></i>'; climBadge = 'Tr'; }
-        else if (s[12] === '-М') { climColor = 'var(--cold)'; climIcon = '<i class="fas fa-water"></i>'; climBadge = 'Sea'; }
+        let isClim = (s[12] && s[12] !== '');
+        if (s[12] === '-ЭХЛ') { climColor = 'var(--bus)'; climBadge = 'Ar'; } 
+        else if (s[12] === '-Т') { climColor = 'var(--yellow)'; climIcon = '<i class="fas fa-sun"></i>'; climBadge = 'Tr'; }
+        else if (s[12] === '-М') { climColor = 'var(--cold)'; climIcon = '<i class="fas fa-water"></i>'; climBadge = 'Sea'; } 
         else if (s[12] === '-ХЛ') { climColor = 'var(--bus)'; climBadge = 'HL'; }
         c.appendChild(mkSlot(isClim, climIcon, climColor, climBadge));
         
-        // Shield (Броня) - делаем Оранжевым (Primary), чтобы горела
+        // 7. Shield (Броня - Серый металл)
         let isShield = !!s[10]; let shBadge = ''; if (isShield) { if (s[10] === 'Б') shBadge = 'x2'; if (s[10] === 'КБ') shBadge = 'x3'; }
-        c.appendChild(mkSlot(isShield, '<i class="fas fa-shield-alt"></i>', 'var(--primary)', shBadge));
+        c.appendChild(mkSlot(isShield, '<i class="fas fa-shield-alt"></i>', 'var(--grey)', shBadge));
         
-        // Screen (Экран) - делаем Оранжевым или Серым (но ярким). Пусть будет Оранжевый для единообразия.
+        // 8. Screen (Экран - Серый металл)
         let screenCount = 0; if (s[4]) screenCount++; if (s[6]) screenCount++;
         if (['Эал','Эмо','ЭИал'].includes(s[4]) || ['Эал','Эмо'].includes(s[6])) screenCount = Math.max(screenCount, 2);
         if (['Экл','Экм','ЭИкл'].includes(s[4]) || ['Экл'].includes(s[6])) screenCount = 3;
-        // screenCount > 0 значит экран есть. Красим в Primary.
-        c.appendChild(mkSlot(screenCount > 0, '<i class="fas fa-border-all"></i>', 'var(--primary)', screenCount > 1 ? 'x'+screenCount : ''));
+        c.appendChild(mkSlot(screenCount > 0, '<i class="fas fa-border-all"></i>', 'var(--grey)', screenCount > 1 ? 'x'+screenCount : ''));
         
-        // Flex (Гибкость)
+        // 9. Flex (5-Оранжевый, 6-Темный)
         let flexIcon = '<i class="fas fa-bezier-curve"></i>'; let flexActive = false; let flexColor = 'var(--primary)';
         if (s[19] === '(5)') { flexActive = true; flexColor = 'var(--primary)'; } 
-        if (s[19] === '(6)') { flexIcon = '<i class="fas fa-robot"></i>'; flexActive = true; flexColor = 'var(--hot)'; } // Робот - поярче (Hot/Orange)
+        if (s[19] === '(6)') { flexIcon = '<i class="fas fa-robot"></i>'; flexActive = true; flexColor = 'var(--dark)'; }
         c.appendChild(mkSlot(flexActive, flexIcon, flexColor));
         
-        // UV (УФ) - Черный (но активный)
+        // 10. UV (Черный)
         const isUV = (s[16] === '-УФ' || s[9] === 'Пэ');
-        // var(--uv) у нас светлый в CSS для темного фона, или используем белый фон и черный текст?
-        // Лучше использовать var(--dark) но убедиться что он отличается от фона.
-        // Или var(--primary) если хотим чтоб горело. Пусть будет черным (UV обычно ассоциируется с черным кабелем).
-        // Но чтобы "горело", фон должен быть var(--uv) (светлый) а иконка темная, или наоборот.
-        // Сейчас в CSS .icon-slot.active color: white. Значит фон должен быть цветом.
-        // Сделаем фон белым (светло-серым), а иконку черной (через override стиля) или просто фон primary.
-        // Проще: фон Primary (оранжевый), как "защита от солнца".
-        c.appendChild(mkSlot(isUV, '<i class="fas fa-sun"></i>', 'var(--primary)', 'UV'));
+        c.appendChild(mkSlot(isUV, '<i class="fas fa-sun"></i>', 'var(--dark)', 'UV'));
         
-        // Oil/Chem
-        c.appendChild(mkSlot(s[13] === '-МБ', '<i class="fas fa-tint"></i>', 'var(--dark)')); // Масло - черное
-        c.appendChild(mkSlot(s[14] === '-ХС', '<i class="fas fa-flask"></i>', 'var(--bus)')); // Химия - синяя
+        // 11. Oil/Chem (Масло-Черное, Химия-Фиолетовая)
+        c.appendChild(mkSlot(s[13] === '-МБ', '<i class="fas fa-tint"></i>', 'var(--dark)')); 
+        c.appendChild(mkSlot(s[14] === '-ХС', '<i class="fas fa-flask"></i>', 'var(--chem)')); 
     },
 
     renderForm() {
@@ -379,7 +376,7 @@ const app = {
                 idx.opts.forEach(o => {
                     if (o.c) { 
                         const isActive = (app.state.idx[idx.id] === o.c);
-                        const activeStyle = isActive ? 'background:var(--primary); color:white; font-weight:bold;' : ''; // Яркая подсветка!
+                        const activeStyle = isActive ? 'background:#0D6EFD; color:white; font-weight:bold;' : ''; // СИНИЙ (Legacy Art Style)
                         let colorStyle = 'color:var(--text);';
                         if (!isActive) {
                             if (o.wiki && o.wiki.toLowerCase().includes('огнестойк')) colorStyle = 'color:var(--primary-dark); font-weight:bold;';

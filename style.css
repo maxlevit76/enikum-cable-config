@@ -1,431 +1,264 @@
-/* logic.js - v15.2 Fixed: Matrix Highlight & Icons */
+/* style.css - v15.5 Final Art Style (SSOT) */
 
-window.nav = function(p, btn) {
-    document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
-    document.getElementById('p-'+p).classList.add('active');
-    document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
-    if(btn) btn.classList.add('active');
-    if(p === 'matrix') app.renderMatrix();
-    if(p === 'pdf') app.renderPDFPreview();
-    window.scrollTo(0,0);
+:root {
+    /* === ЦВЕТА БРЕНДА === */
+    --primary:      #F7941D; 
+    --primary-dark: #D67D0F;
+    
+    /* === ЦВЕТА СТАТУСОВ (ART PALETTE) === */
+    --bus:          #0D6EFD; /* Синий */
+    --signal:       #198754; /* Зеленый */
+    --fire:         #DC3545; /* Красный */
+    --hot:          #fd7e14; /* Оранжевый */
+    --cold:         #0DCAF0; /* Голубой (Cyan) */
+    --yellow:       #FFC107; /* Желтый */
+    --chem:         #6610f2; /* Фиолетовый */
+    --grey:         #6c757d; /* Серый металл */
+    
+    /* === ИНТЕРФЕЙС === */
+    --dark:         #212529; 
+    --text:         #333333; 
+    --text-muted:   #ADB5BD; 
+    --border:       #DEE2E6; 
+    
+    --bg-body:      #E9ECEF;
+    --bg-white:     #FFFFFF;
+    --bg-light:     #F8F9FA;
+    --bg-warn:      #FFF3CD;
 }
 
-const app = {
-    state: { 
-        cat: 'BUS', 
-        geo: { N:1, type:'x2x', S:'0.60' }, 
-        idx: {}, 
-        explanations: [], 
-        validIns: [], 
-        validJacket: [], 
-        msgs: [] 
-    },
+* { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
-    init() { 
-        this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v15.2: Готова']), 1000);
-    },
-
-    setCat(cat, btn) {
-        this.state.cat = cat;
-        if(btn) { 
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); 
-            btn.classList.add('active');
-        }
-        this.doReset(cat);
-    },
-
-    resetAll() {
-        const icon = document.querySelector('.reset-btn i');
-        if(icon) icon.classList.add('fa-spin');
-        this.doReset(this.state.cat);
-        setTimeout(() => { 
-            if(icon) icon.classList.remove('fa-spin');
-            this.showToasts(['Конфигурация сброшена']);
-        }, 500);
-    },
-
-    doReset(cat) {
-        for(let i=1; i<=24; i++) this.state.idx[i] = "";
-        const defs = DB.LIMITS[cat].defaults;
-        for(const [k,v] of Object.entries(defs)) this.state.idx[k] = v;
-        this.state.idx[22] = DB.LIMITS[cat].volt;
-        if(cat==='BUS') this.state.geo = {N:1, type:'x2x', S:'0.60'};
-        if(cat==='SIGNAL') this.state.geo = {N:2, type:'x2x', S:'0.75'};
-        if(cat==='CONTROL') this.state.geo = {N:5, type:'x', S:'1.5'};
-        if (!this.state.idx[19]) this.state.idx[19] = '(1)';
-        this.calculateState();
-        this.updateUI();
-    },
-
-    updateVal(id, val) {
-        this.state.idx[id] = val;
-        if (id === 1) {
-            if (val === 'Вз') { 
-                if(this.state.idx[8] !== 'з') { this.state.idx[8] = 'з'; this.showToasts(['Ex-d: добавлено заполнение']); }
-            } else { 
-                if (this.state.idx[8] === 'з') this.state.idx[8] = '';
-            }
-        }
-        this.calculateState();
-        this.updateUI();
-    },
-
-    updateGeo(k, v) { 
-        this.state.geo[k] = v;
-        if(this.state.geo.type === 'vfd') this.state.geo.N = 1; 
-        this.calculateState(); 
-        this.updateUI(); 
-    },
-
-    calculateState() {
-        const s = this.state.idx;
-        const cat = this.state.cat;
-        let msgs = [];
-        this.state.explanations = []; 
-        const addExplain = (txt) => this.state.explanations.push(txt);
-        
-        const req = { minT: -50, hf: false, fr: false, oil: false, chem: false, uv: false, flex: 1 };
-        const fireCode = s[11] || "";
-        
-        if (fireCode.includes('HF') || fireCode.includes('LTx')) req.hf = true;
-        if (fireCode.includes('FR')) req.fr = true;
-        if (s[12] && s[12].includes('ХЛ')) req.minT = -60;
-        if (s[12] && s[12].includes('ЭХЛ')) req.minT = -70;
-        if (s[13] === '-МБ') req.oil = true;
-        if (s[14] === '-ХС') req.chem = true;
-        if (s[16] === '-УФ' || s[9] === 'Пэ') req.uv = true;
-        
-        if (s[19] === '(5)') { req.flex = 1; addExplain("Гибкий монтаж"); }
-        if (s[19] === '(6)') { req.flex = 2; addExplain("Робототехника"); }
-
-        if (cat === 'BUS') {
-            if (req.fr) {
-                if (s[3] !== 'Си') { s[3] = 'Си'; msgs.push("Добавлен барьер (Си)"); }
-            } else {
-                if (s[3] === 'Си') { s[3] = ''; }
-            }
-        }
-
-        if (s[19] === '(6)') { 
-            if (s[10] === 'К' || s[10] === 'Б') { s[10] = 'КГ'; msgs.push('Броня -> КГ (Гибкая)'); }
-            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[6])) { s[6] = 'Эо'; msgs.push('Экран -> Эо (Оплетка)'); }
-            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[4])) { s[4] = 'ЭИо'; msgs.push('Экран пар -> ЭИо (Оплетка)'); }
-        }
-
-        const isCompatible = (matCode, type) => {
-            let key = (type === 'jacket') ? 'J_' + matCode : matCode;
-            let p = DB.MAT_PROPS[key];
-            if (!p) return false;
-
-            if (p.minT > req.minT) return false;
-            if (req.hf && !p.hf) return false;
-            if (req.oil && type === 'jacket' && !p.oil) return false;
-            if (req.chem && type === 'jacket' && !p.chem) return false;
-            if (req.fr) {
-                const hasBarrier = (s[3] === 'Си');
-                if (!p.fr && !(type === 'ins' && hasBarrier)) return false;
-            }
-            if (req.flex === 2 && p.flex_grade < 2) return false;
-            if (req.flex === 1 && p.flex_grade < 0 && type==='jacket') return false;
-            return true;
-        };
-        const allIns = DB.INDICES.find(x => x.id === 2).opts.map(o => o.c);
-        const allJacket = DB.INDICES.find(x => x.id === 9).opts.map(o => o.c);
-        this.state.validIns = allIns.filter(c => isCompatible(c, 'ins'));
-        this.state.validJacket = allJacket.filter(c => isCompatible(c, 'jacket'));
-
-        if (this.state.validIns.length === 0) msgs.push('ОШИБКА: Нет подходящей Изоляции!');
-        if (this.state.validJacket.length === 0) msgs.push('ОШИБКА: Нет подходящей Оболочки!');
-
-        const optimizeMaterial = (currentVal, validList, type) => {
-            const curProp = DB.MAT_PROPS[(type==='jacket'?'J_':'')+currentVal];
-            if (!curProp) return currentVal; 
-            let needChange = false;
-            let isDowngrade = false; 
-
-            if (!validList.includes(currentVal)) needChange = true;
-            if (!req.fr && curProp.fr) { needChange = true; isDowngrade = true; }
-            if (!req.hf && curProp.hf) {
-                if (cat === 'BUS' && type === 'ins' && currentVal === 'Пв') { needChange = false; } 
-                else { needChange = true; isDowngrade = true; }
-            }
-
-            if (!needChange) return currentVal;
-            const sortedValid = validList.sort((a,b) => {
-                let pA = DB.MAT_PROPS[(type==='jacket'?'J_':'')+a];
-                let pB = DB.MAT_PROPS[(type==='jacket'?'J_':'')+b];
-                return (pA ? pA.rank : 99) - (pB ? pB.rank : 99);
-            });
-            if (curProp.family && !isDowngrade) {
-                const sameFamily = sortedValid.find(c => {
-                    let p = DB.MAT_PROPS[(type==='jacket'?'J_':'')+c];
-                    return p && p.family === curProp.family && (!req.fr ? !p.fr : true);
-                });
-                if (sameFamily) return sameFamily;
-            }
-            if (cat === 'BUS' && type === 'ins' && sortedValid.includes('Пв')) return 'Пв';
-            return sortedValid[0];
-        };
-
-        if (this.state.validIns.length > 0) {
-            const newIns = optimizeMaterial(s[2], this.state.validIns, 'ins');
-            if (newIns !== s[2]) { s[2] = newIns; msgs.push(`Изоляция -> ${newIns}`); }
-        }
-
-        if (this.state.validJacket.length > 0) {
-            const newJacket = optimizeMaterial(s[9], this.state.validJacket, 'jacket');
-            if (newJacket !== s[9]) { s[9] = newJacket; msgs.push(`Оболочка -> ${newJacket}`); }
-        }
-        
-        let targetColor = 'Серый';
-        if (s[16] === '-УФ' || s[9] === 'Пэ') targetColor = 'Черный';
-        if (req.fr) targetColor = 'Оранжевый';
-        if (s[21] === 'i') targetColor = 'Синий'; 
-        if (cat === 'BUS' && s[23] === '[PB]') targetColor = 'Фиолетовый';
-        if (s[24] !== 'Спец' && s[24] !== 'Желтый' && s[24] !== 'Красный') { s[24] = targetColor; }
-
-        this.state.msgs = msgs;
-    },
-
-    updateUI() {
-        const s = this.state.idx;
-        let sku = "ЭНИКУМ"; sku += " "; 
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].forEach(id => { if(s[id]) sku += s[id]; });
-        sku += " ";
-        const g = this.state.geo;
-        let s18 = (g.type === 'vfd') ? (DB.LIMITS.CONTROL.vfd_map[g.S]||"ERR") : ((g.type==='x') ? `${g.N}x${g.S}` : `${g.N}${g.type}${g.S}`);
-        this.state.idx[18] = s18; sku += s18;
-        
-        const flex = s[19];
-        if(flex && flex !== '(1)') sku += " " + flex; 
-        if(s[20]) sku += " " + s[20];
-        if(s[21]) sku += s[21]; if(s[22]) sku += s[22];
-        if(s[23]) sku += s[23]; if(s[24]) sku += " " + s[24];
-        sku = sku.replace(/\s+/g, ' ').trim();
-        
-        const elSku = document.getElementById('skuDisplay');
-        if(elSku) elSku.innerText = sku;
-
-        this.renderIcons();
-        this.renderForm();
-        if(this.state.msgs && this.state.msgs.length) { this.showToasts(this.state.msgs); this.state.msgs = []; }
-    },
-
-    renderIcons() {
-        const s = this.state.idx;
-        const c = document.getElementById('headerIcons');
-        if(!c) return;
-        c.innerHTML = '';
-        const mkSlot = (isActive, html, color, badge) => {
-            const div = document.createElement('div');
-            div.className = `icon-slot ${isActive?'active':''}`;
-            if(isActive) div.style.background = color; // Если передан цвет, ставим его фоном
-            div.innerHTML = html;
-            if(isActive && badge) div.innerHTML += `<div class="slot-badge">${badge}</div>`;
-            return div;
-        };
-        
-        // Категория (Всегда активна)
-        let catColor = (this.state.cat === 'BUS') ? 'var(--bus)' : ((this.state.cat === 'SIGNAL') ? 'var(--signal)' : 'var(--primary)');
-        let catIcon = (this.state.cat === 'BUS') ? '<i class="fas fa-network-wired"></i>' : ((this.state.cat === 'SIGNAL') ? '<i class="fas fa-wave-square"></i>' : '<i class="fas fa-bolt"></i>');
-        c.appendChild(mkSlot(true, catIcon, catColor));
-        
-        // Ex
-        const isEx = (s[21] === 'i' || s[1] === 'Вз');
-        let exColor = 'var(--text-muted)'; let exText = 'Ex';
-        if (s[21] === 'i') { exColor = 'var(--bus)'; exText = 'Ex-i'; }
-        else if (s[1] === 'Вз') { exColor = 'var(--primary)'; } // Для Ex-d оранжевый
-        c.appendChild(mkSlot(isEx, exText, exColor));
-        
-        // Fire
-        let isFR = s[11] && s[11].includes('FR');
-        c.appendChild(mkSlot(isFR, '<i class="fas fa-fire"></i>', 'var(--fire)'));
-        
-        // Thermo
-        let isHot = (s[15] && s[15] !== '');
-        let hotBadge = isHot ? s[15].replace('-ТС-', '').replace('-TC-', '') : '';
-        c.appendChild(mkSlot(isHot, '<i class="fas fa-temperature-high"></i>', 'var(--hot)', hotBadge));
-
-        // Eco
-        let isEco = (s[11] && (s[11].includes('LTx') || s[11].includes('HF')));
-        let ecoHtml = '<i class="fas fa-leaf"></i>';
-        let ecoBadge = '';
-        if (isEco) { if (s[11].includes('LTx')) { ecoBadge = 'LTx'; } else { ecoHtml = 'HF'; } }
-        c.appendChild(mkSlot(isEco, ecoHtml, 'var(--signal)', ecoBadge));
-        
-        // Climate
-        let climColor = '#6EA8FE'; 
-        let climIcon = '<i class="fas fa-snowflake"></i>'; let climBadge = '';
-        let isClim = (s[12] && s[12] !== '');
-        if (s[12] === '-ЭХЛ') { climColor = 'var(--bus)'; climBadge = 'Ar'; }
-        else if (s[12] === '-Т') { climColor = 'var(--hot)'; climIcon = '<i class="fas fa-sun"></i>'; climBadge = 'Tr'; }
-        else if (s[12] === '-М') { climColor = 'var(--cold)'; climIcon = '<i class="fas fa-water"></i>'; climBadge = 'Sea'; }
-        c.appendChild(mkSlot(isClim, climIcon, climColor, climBadge));
-        
-        // Shield
-        let isShield = !!s[10]; let shBadge = ''; if (isShield) { if (s[10] === 'Б') shBadge = 'x2'; if (s[10] === 'КБ') shBadge = 'x3'; }
-        c.appendChild(mkSlot(isShield, '<i class="fas fa-shield-alt"></i>', 'var(--primary)', shBadge));
-        
-        // Screen
-        let screenCount = 0; if (s[4]) screenCount++; if (s[6]) screenCount++;
-        if (['Эал','Эмо','ЭИал'].includes(s[4]) || ['Эал','Эмо'].includes(s[6])) screenCount = Math.max(screenCount, 2);
-        if (['Экл','Экм','ЭИкл'].includes(s[4]) || ['Экл'].includes(s[6])) screenCount = 3;
-        c.appendChild(mkSlot(screenCount > 0, '<i class="fas fa-border-all"></i>', 'var(--text-muted)', screenCount > 1 ? 'x'+screenCount : ''));
-        
-        // Flex
-        let flexIcon = '<i class="fas fa-bezier-curve"></i>'; let flexActive = false; let flexColor = 'var(--primary)';
-        if (s[19] === '(5)') { flexActive = true; } 
-        if (s[19] === '(6)') { flexIcon = '<i class="fas fa-robot"></i>'; flexActive = true; flexColor = 'var(--dark)'; }
-        c.appendChild(mkSlot(flexActive, flexIcon, flexColor));
-        
-        // UV
-        const isUV = (s[16] === '-УФ' || s[9] === 'Пэ');
-        c.appendChild(mkSlot(isUV, '<i class="fas fa-sun"></i>', 'var(--uv)', 'UV'));
-        
-        // Oil/Chem
-        c.appendChild(mkSlot(s[13] === '-МБ', '<i class="fas fa-tint"></i>', 'var(--uv)'));
-        c.appendChild(mkSlot(s[14] === '-ХС', '<i class="fas fa-flask"></i>', 'var(--primary-dark)'));
-    },
-
-    renderForm() {
-        const area = document.getElementById('formArea');
-        if (!area) return;
-        const openIdx = [];
-        document.querySelectorAll('.acc-body').forEach((el, i) => { if(el.classList.contains('open')) openIdx.push(i); });
-        area.innerHTML = '';
-        if (DB && DB.GROUPS) {
-            DB.GROUPS.forEach((grp, gIdx) => {
-                let html = '';
-                grp.ids.forEach(id => {
-                    if(id === 18) { html += this.getGeoWidget(); return; }
-                    if(id === 23 && this.state.cat !== 'BUS') return;
-                    const meta = DB.INDICES.find(x => x.id === id);
-                    if (meta) { html += this.getControl(meta); }
-                });
-                if(html) {
-                    const isOpen = (gIdx === 0 || openIdx.includes(gIdx));
-                    area.innerHTML += `<div class="acc-group"><div class="acc-header ${isOpen?'active':''}" onclick="toggleAcc(this)">${grp.t} <i class="fas fa-chevron-down"></i></div><div class="acc-body ${isOpen?'open':''}">${html}</div></div>`;
-                }
-            });
-        }
-    },
-
-    getControl(meta) {
-        const val = this.state.idx[meta.id];
-        let opts = meta.opts.map(o => {
-            let disabled = this.isDisabled(meta.id, o.c);
-            let style = "";
-            if (meta.id === 11 && o.c.includes('FR')) style = "color:var(--primary-dark); font-weight:bold;";
-            if (meta.id === 2 && DB.MAT_PROPS[o.c] && DB.MAT_PROPS[o.c].fr) style = "color:var(--primary-dark);";
-            if ((meta.id === 3 || meta.id === 5) && o.c !== "") style = "color:var(--primary-dark);";
-            if(disabled) return `<option value="${o.c}" disabled>${o.l}</option>`;
-            return `<option value="${o.c}" style="${style}" ${val===o.c?'selected':''}>${o.l}</option>`;
-        }).join('');
-        const hintObj = meta.opts.find(o => o.c === val);
-        const desc = hintObj ? hintObj.hint : "";
-        const hlClass = (val && val !== '') ? 'highlight' : '';
-        return `<div class="control-row"><div class="lbl-row"><div class="lbl-main">${meta.n}</div><div class="lbl-idx">#${meta.id}</div></div><select class="c-select ${hlClass}" onchange="app.updateVal(${meta.id}, this.value)">${opts}</select><div class="hint ${val?'visible':''}">${desc}</div></div>`;
-    },
-
-    getGeoWidget() {
-        const cat = this.state.cat;
-        const lim = DB.LIMITS[cat];
-        let typesHtml = lim.types.map(t => `<option value="${t}" ${this.state.geo.type===t?'selected':''}>${DB.GEO_TYPES.find(x=>x.c===t).l}</option>`).join('');
-        let sList = lim.valid_S;
-        if(this.state.geo.type === 'vfd') sList = sList.filter(s => ['1.5','2.5','4.0','6.0'].includes(s));
-        if(cat === 'BUS') { const p = this.state.idx[23] || ''; const r = lim.proto[p] || lim.proto['']; sList = r.S; }
-        let sHtml = sList.map(s => `<option value="${s}" ${this.state.geo.S===s?'selected':''}>${s} мм²</option>`).join('');
-        let nList = [];
-        if(cat === 'BUS') { const p = this.state.idx[23] || ''; nList = (lim.proto[p] || lim.proto['']).N; }
-        else if(lim.get_valid_N) { nList = lim.get_valid_N(this.state.geo.S, this.state.geo.type); } else { nList = [1,2,4]; }
-        let nHtml = nList.map(n => `<option value="${n}" ${this.state.geo.N==n?'selected':''}>${n}</option>`).join('');
-        const isVFD = (this.state.geo.type === 'vfd');
-        return `<div class="control-row" style="border-left:3px solid var(--primary); padding-left:15px; margin-left:-5px;"><div class="lbl-row"><div class="lbl-main">ГЕОМЕТРИЯ (18)</div></div><div class="geo-widget"><div class="geo-col"><div class="geo-lbl">КОЛ-ВО</div><select class="c-select" ${isVFD?'disabled':''} onchange="app.updateGeo('N',this.value)">${nHtml}</select></div><div class="geo-col"><div class="geo-lbl">ТИП</div><select class="c-select" onchange="app.updateGeo('type',this.value)">${typesHtml}</select></div><div class="geo-col"><div class="geo-lbl">СЕЧЕНИЕ</div><select class="c-select" onchange="app.updateGeo('S',this.value)">${sHtml}</select></div></div></div>`;
-    },
-
-    isDisabled(id, val) {
-        if (id === 2 && !this.state.validIns.includes(val)) return true;
-        if (id === 9 && !this.state.validJacket.includes(val)) return true;
-        return false;
-    },
-
-    renderMatrix() {
-        const c1 = document.getElementById('summaryTableArea');
-        if (c1) {
-            let html1 = '<table class="summary-table" style="width:auto; min-width:100%; border-collapse: collapse; font-size: 10px;"><thead><tr>';
-            DB.INDICES.forEach(idx => { 
-                html1 += `<th style="background:var(--dark); color:white; padding:6px; border:1px solid var(--text);">${idx.id}</th>`; 
-            });
-            html1 += '</tr></thead><tbody><tr>';
-            DB.INDICES.forEach(idx => {
-                html1 += `<td style="padding:0; border:1px solid var(--border); vertical-align:top; background:var(--bg-white);">`;
-                idx.opts.forEach(o => {
-                    if (o.c) { 
-                        const isActive = (app.state.idx[idx.id] === o.c);
-                        const activeStyle = isActive ? 'background:var(--primary); color:white; font-weight:bold;' : ''; // Яркая подсветка!
-                        let colorStyle = 'color:var(--text);';
-                        if (!isActive) {
-                            if (o.wiki && o.wiki.toLowerCase().includes('огнестойк')) colorStyle = 'color:var(--primary-dark); font-weight:bold;';
-                            if (idx.id === 11 && o.c.includes('FR')) colorStyle = 'color:var(--primary-dark); font-weight:bold;';
-                        }
-                        html1 += `<div style="padding:3px 4px; border-bottom:1px solid var(--bg-light); cursor:default; ${colorStyle} ${activeStyle}" title="${o.l}">${o.c}</div>`;
-                    }
-                });
-                html1 += `</td>`;
-            });
-            html1 += '</tr></tbody></table>';
-            c1.innerHTML = html1;
-        }
-    },
-    
-    renderPDFPreview() {
-        const sku = document.getElementById('skuDisplay').innerText;
-        document.getElementById('pdfSkuMain').innerText = sku;
-        document.getElementById('pdfIcons').innerHTML = document.getElementById('headerIcons').innerHTML;
-        
-        let specHtml = '';
-        [18, 22, 23, 10, 11, 21].forEach((id, index) => {
-            const val = this.state.idx[id]; if(!val && id !== 18) return;
-            const meta = DB.INDICES.find(x=>x.id===id); const opt = meta.opts.find(o=>o.c===val);
-            const valStr = (id===18) ? this.state.idx[18] : (opt ? opt.l : val);
-            const bg = index % 2 === 0 ? 'var(--bg-white)' : 'var(--bg-light)';
-            specHtml += `<tr style="background:${bg}; border-bottom:1px solid var(--border);"><td style="padding:8px; color:var(--text-muted); width:40%;">${meta.n}</td><td style="padding:8px; font-weight:bold; text-align:right;">${valStr}</td></tr>`;
-        });
-        const tableArea = document.getElementById('pdfSpecsTable');
-        if(tableArea) tableArea.innerHTML = specHtml;
-    }, 
-    
-    downloadPDF() {
-        const element = document.getElementById('pdfExportTarget');
-        const sku = document.getElementById('skuDisplay').innerText;
-        const fab = document.querySelector('.fab-download');
-        const oldHtml = fab.innerHTML; fab.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        const opt = { margin: 0, filename: `ENICUM_${sku}.pdf`, image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-        html2pdf().set(opt).from(element).save().then(() => { fab.innerHTML = oldHtml; app.showToasts(['PDF скачан']); });
-    }, 
-    
-    showToasts(msgs) {
-        const c = document.getElementById('toasts');
-        c.innerHTML = '';
-        if(!msgs || !msgs.length) return;
-        const t = document.createElement('div');
-        t.className = 'toast';
-        const isDanger = msgs.some(m => m.includes('ОШИБКА'));
-        if(isDanger) t.classList.add('danger');
-        let content = '';
-        if(msgs.length === 1) { content = `<span>${msgs[0]}</span>`; } 
-        else { content = `<div style="display:flex; flex-direction:column; align-items:flex-start;">`; msgs.forEach(m => content += `<div style="margin-bottom:2px;">• ${m}</div>`); content += `</div>`; }
-        t.innerHTML = `<i class="fas fa-info-circle" style="margin-top:${msgs.length>1?'4px':'0'}"></i> ${content}`;
-        c.appendChild(t);
-        const time = 3000 + (msgs.length * 1000);
-        setTimeout(() => c.innerHTML = '', time);
-    }
-};
-
-function toggleAcc(el) {
-    el.classList.toggle('active');
-    el.nextElementSibling.classList.toggle('open');
+body { 
+    margin: 0; padding: 0; 
+    font-family: 'Roboto', sans-serif; 
+    background: var(--bg-body);
+    color: var(--text); 
+    padding-bottom: 140px; 
 }
 
-app.init();
+/* HEADER */
+.app-header { 
+    background: var(--dark); 
+    color: white; 
+    padding: 15px; 
+    position: sticky; top: 0; z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+}
+.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.logo { font-family: 'Oswald'; font-size: 26px; letter-spacing: 1px; text-transform: uppercase; }
+.logo span { color: var(--primary); }
+.version-badge { font-size: 10px; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #AAA; }
+
+.reset-btn { 
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
+    color: var(--text-muted); border-radius: 4px; padding: 4px 8px; font-size: 11px; 
+    cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s;
+}
+.reset-btn:hover { background: var(--fire); color: white; border-color: var(--fire); }
+
+.sku-box { 
+    background: rgba(255,255,255,0.05); padding: 12px 15px; 
+    border-radius: 6px; border-left: 4px solid var(--primary); 
+    display: flex; flex-direction: column; gap: 8px; 
+}
+.sku-label { 
+    font-size: 9px; text-transform: uppercase; color: #888; 
+    font-weight: bold; letter-spacing: 0.5px; 
+    display:flex; justify-content:space-between; align-items:center; 
+}
+.sku-val { font-family: 'Oswald'; font-size: 22px; color: white; line-height: 1.1; word-break: break-all; }
+
+/* ICONS (ART STYLE) */
+.icon-dashboard { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
+.icon-slot { 
+    width: 28px; height: 28px; border-radius: 4px; 
+    background: #343a40; /* Темно-серый фон для неактивных */
+    color: #6c757d; 
+    opacity: 1; 
+    display: flex; justify-content: center; align-items: center; 
+    font-size: 12px; font-weight: bold; position: relative;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+}
+.icon-slot.active { 
+    color: white; /* Иконка всегда белая на цветном фоне */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3); 
+    border-color: rgba(255,255,255,0.6); 
+    transform: translateY(-1px);
+}
+/* Спец. правило для Желтого фона: делаем иконку темной */
+.icon-slot.active[style*="FFC107"] { color: #212529 !important; } 
+
+.slot-badge { 
+    position: absolute; bottom: -5px; right: -5px;
+    font-size: 8px; font-weight: 800; color: var(--dark); 
+    background: white; padding: 1px 3px; border-radius: 3px; 
+    border: 1px solid var(--dark); z-index: 2; line-height: 1;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* TABS */
+.cat-tabs { 
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 10px 15px;
+    background: var(--bg-white); box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+    position: sticky; top: 135px; z-index: 900; 
+}
+.cat-btn { 
+    padding: 12px 0; text-align: center;
+    font-size: 12px; font-weight: bold; 
+    background: var(--bg-body); color: var(--text-muted); 
+    border-radius: 6px; cursor: pointer; 
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    transition: 0.2s; border: 2px solid transparent; 
+}
+.cat-btn.active { 
+    background: var(--bg-white); color: var(--dark); 
+    border-color: var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+}
+.cat-btn.active i { color: var(--primary); }
+
+/* MAIN CONTENT */
+.container { padding: 15px; max-width: 800px; margin: 0 auto; }
+
+.acc-group { 
+    background: var(--bg-white); border-radius: 8px; margin-bottom: 12px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid var(--border); 
+}
+.acc-header { 
+    padding: 15px 20px; font-family: 'Oswald'; font-size: 16px; text-transform: uppercase; 
+    display: flex; justify-content: space-between; align-items: center; 
+    cursor: pointer; background: var(--bg-white); transition: 0.2s; 
+}
+.acc-header:hover { background: var(--bg-light); }
+.acc-header.active { background: var(--bg-body); color: var(--primary-dark); }
+.acc-body { display: none; padding: 20px; border-top: 1px solid var(--border); }
+.acc-body.open { display: block; animation: slideDown 0.3s; }
+
+/* CONTROLS */
+.control-row { margin-bottom: 25px; }
+.lbl-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.lbl-main { font-weight: 700; font-size: 14px; color: var(--dark); }
+.lbl-idx { font-size: 10px; background: var(--border); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+
+select.c-select { 
+    width: 100%; padding: 14px; font-size: 15px; 
+    border: 1px solid var(--border); border-radius: 6px; 
+    background: #fff; appearance: none; color: var(--text);
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); 
+    background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 10px; 
+}
+select.c-select.highlight { background-color: var(--bg-warn); border-color: #ffeeba; }
+
+.hint { 
+    font-size: 12px; color: #666; margin-top: 10px; 
+    background: #FFF9DB; padding: 10px; border-radius: 6px;
+    border-left: 4px solid var(--primary); display: none; 
+}
+.hint.visible { display: block; animation: fadeIn 0.3s; }
+
+.geo-widget { display: flex; gap: 8px; }
+.geo-col { flex: 1; }
+.geo-lbl { font-size: 10px; text-align: center; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 4px;}
+
+.sys-alert-block { 
+    background: var(--bg-warn); border: 1px solid #FFEEBA; color: #856404;
+    padding: 15px; margin: 15px; border-radius: 8px; font-size: 13px; 
+    display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+}
+.sys-alert-block.active { display: block; animation: fadeIn 0.5s; }
+
+/* СПРАВОЧНИК: НАУЧНЫЙ СТИЛЬ (Fixed Borders) */
+.paper-layout {
+    background: transparent; 
+    border: none; box-shadow: none; padding: 0; margin-top: 20px;
+    color: var(--text);
+    font-family: "Times New Roman", serif;
+    font-size: 15px; 
+    line-height: 1.4;
+    text-align: justify;
+}
+
+.paper-layout h1 {
+    font-family: "Times New Roman", serif; font-weight: bold; font-size: 20px;
+    text-transform: uppercase; text-align: center; margin-bottom: 25px;
+    color: var(--dark); border-bottom: 2px solid var(--dark); padding-bottom: 10px;
+}
+.paper-layout h2 {
+    font-family: "Times New Roman", serif; font-weight: bold; font-size: 16px;
+    text-transform: uppercase; margin-top: 30px; margin-bottom: 10px;
+    border-bottom: 1px solid var(--dark); color: var(--dark);
+    display: inline-block; padding-bottom: 3px;
+}
+.paper-layout h3 {
+    font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 5px; color: var(--dark);
+}
+.paper-layout p { margin-bottom: 10px; text-indent: 25px; }
+.paper-layout ul { margin: 10px 0; padding-left: 25px; }
+.paper-layout li { margin-bottom: 5px; }
+
+.science-table {
+    width: 100%; border-collapse: collapse; margin: 20px 0;
+    font-size: 12px; background: white;
+    border: 1px solid var(--dark);
+}
+.science-table th, .science-table td {
+    border: 1px solid var(--dark);
+    padding: 5px 8px; vertical-align: top;
+}
+.science-table th { background: #E0E0E0; font-weight: bold; text-align: center; color: black; }
+
+.formula {
+    text-align: center; font-style: italic; font-weight: bold;
+    margin: 15px 0; padding: 10px; background: var(--bg-light);
+    border: 1px dashed var(--text-muted);
+}
+
+/* FOOTER & NAV */
+.app-footer { 
+    position: fixed; bottom: 70px; left: 0; width: 100%; 
+    background: var(--bg-light); border-top: 1px solid var(--border); 
+    padding: 10px; text-align: center; font-size: 10px; color: #999; 
+}
+.btm-nav { 
+    position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; 
+    background: white; border-top: 1px solid var(--border); display: flex; z-index: 1100;
+}
+.nav-btn { 
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; font-size: 10px; font-weight: bold; 
+    color: var(--text-muted); text-transform: uppercase; cursor: pointer; 
+}
+.nav-btn.active { color: var(--primary); background: rgba(247,148,29,0.05); }
+
+.toast-container { 
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); 
+    width: 90%; max-width: 400px; z-index: 2000; pointer-events: none; 
+}
+.toast { 
+    background: rgba(33,37,41,0.95); color: white; padding: 12px; 
+    border-radius: 6px; margin-top: 8px; font-size: 13px; 
+    border-left: 4px solid var(--signal); display: flex; gap: 10px; align-items: center; 
+    animation: fadeIn 0.3s;
+}
+.toast.danger { border-left-color: var(--fire); }
+
+/* PDF */
+#p-pdf { background: #525659; min-height: 100vh; padding: 20px 0; }
+.pdf-preview-wrap { width: 100%; max-width: 794px; margin: 0 auto; background: white; padding: 40px; }
+.fab-download { 
+    position: fixed; bottom: 120px; right: 20px; width: 56px; height: 56px; 
+    background: var(--dark); border-radius: 50%; color: var(--primary); 
+    display: flex; align-items: center; justify-content: center; font-size: 24px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1200;
+}
+
+/* MATRIX SCROLL */
+.matrix-scroll-wrap { overflow-x: auto; background: white; border: 1px solid var(--border); margin-bottom: 20px; }
+.summary-table { width: 100%; min-width: 800px; border-collapse: collapse; font-size: 10px; }
+.summary-table th, .summary-table td { border: 1px solid #ddd; padding: 5px; text-align: center; }
+.summary-table th { background: var(--dark); color: white; }
+
+@keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.page { display: none; } .page.active { display: block; animation: fadeIn 0.3s; }
