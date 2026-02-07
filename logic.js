@@ -1,4 +1,4 @@
-/* logic.js - v16.0 RECOVERY: Art Colors & Logic */
+/* logic.js - v17.1 FINAL: Engineering & Art Logic */
 
 window.nav = function(p, btn) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
@@ -23,7 +23,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v16.0: Готова']), 1000);
+        setTimeout(() => this.showToasts(['Система готова: v17.1']), 1000);
     },
 
     setCat(cat, btn) {
@@ -62,7 +62,7 @@ const app = {
         this.state.idx[id] = val;
         if (id === 1) {
             if (val === 'Вз') { 
-                if(this.state.idx[8] !== 'з') { this.state.idx[8] = 'з'; this.showToasts(['Ex-d: добавлено заполнение']); }
+                if(this.state.idx[8] !== 'з') { this.state.idx[8] = 'з'; this.showToasts(['Вз: добавлено заполнение']); }
             } else { 
                 if (this.state.idx[8] === 'з') this.state.idx[8] = '';
             }
@@ -220,7 +220,7 @@ const app = {
         const mkSlot = (isActive, html, color, badge) => {
             const div = document.createElement('div');
             div.className = `icon-slot ${isActive?'active':''}`;
-            if(isActive) div.style.background = color; // Прямая передача цвета
+            if(isActive) div.style.background = color; // ВАЖНО: Арт-цвет фона
             div.innerHTML = html;
             if(isActive && badge) div.innerHTML += `<div class="slot-badge">${badge}</div>`;
             return div;
@@ -362,7 +362,8 @@ const app = {
     renderMatrix() {
         const c1 = document.getElementById('summaryTableArea');
         if (c1) {
-            let html1 = '<table class="summary-table" style="width:auto; min-width:100%; border-collapse: collapse; font-size: 10px;"><thead><tr>';
+            // ВАЖНО: Размер шрифта 11px жестко задан здесь, чтобы соответствовать статье
+            let html1 = '<table class="summary-table" style="width:auto; min-width:100%; border-collapse: collapse; font-size: 11px;"><thead><tr>';
             DB.INDICES.forEach(idx => { 
                 html1 += `<th style="background:var(--dark); color:white; padding:6px; border:1px solid var(--text);">${idx.id}</th>`; 
             });
@@ -372,7 +373,7 @@ const app = {
                 idx.opts.forEach(o => {
                     if (o.c) { 
                         const isActive = (app.state.idx[idx.id] === o.c);
-                        const activeStyle = isActive ? 'background:#0D6EFD; color:white; font-weight:bold;' : ''; // СИНИЙ!
+                        const activeStyle = isActive ? 'background:#0D6EFD; color:white; font-weight:bold;' : ''; // СИНИЙ АКТИВ
                         let colorStyle = 'color:var(--text);';
                         if (!isActive) {
                             if (o.wiki && o.wiki.toLowerCase().includes('огнестойк')) colorStyle = 'color:#F7941D; font-weight:bold;';

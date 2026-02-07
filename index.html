@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ЭНИКУМ Конфигуратор v16.1</title>
+    <title>ЭНИКУМ Конфигуратор v17.1</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,7 +15,7 @@
 
 <div class="app-header">
     <div class="header-top">
-        <div class="logo"><span>Э</span>НИКУМ <span class="version-badge">v16.1 MODERN</span></div>
+        <div class="logo"><span>Э</span>НИКУМ <span class="version-badge">v17.1 FULL TEXT</span></div>
         <div style="font-size:11px; color:#ADB5BD;">Energocomplex Engineering</div>
     </div>
     <div class="sku-box">
@@ -50,11 +50,12 @@
 
 <div id="p-matrix" class="page">
     <div class="container">
-        <h3 style="font-family:'Oswald'; font-size: 16px; margin-bottom: 10px; color:#6c757d;">МАТРИЦА СОВМЕСТИМОСТИ</h3>
+        <h1 class="section-title" style="color:var(--dark); border-bottom: 3px solid var(--primary); padding-bottom: 10px; margin-bottom: 20px;">Матрица индексов маркообразования кабеля Эникум</h1>
+        
         <div class="matrix-scroll-wrap"><div id="summaryTableArea"></div></div>
         
         <div class="paper-layout">
-            <h1>Систематизация кабельных решений Эникум для промышленной автоматизации</h1>
+            <h1>Систематизация кабельных решений Эникум для промышленной автоматизации: Физические основы и критерии выбора</h1>
             
             <p>Марка кабеля для промышленной автоматизации "ЭНИКУМ" содержит в своем названии аббревиатуру <b>_КУМ</b> (Кабель Универсальный Монтажный), что отражает специфику данного проектного продукта. В отличие от складских марок, ЭНИКУМ является универсальным кабелем и изготавливается под конкретные проектные требования заказчика, чем обуславливается его назначение, конструктив, технические характеристики и свойства.</p>
             <p>Вместо того, чтобы сравнивать и выбирать из каталогов подходящую модель, мы предлагаем просто создать ее самим под свои конкретные потребности. Выбирая необходимые параметры, которые обозначены индексами в таблице маркообразования, вы создаете как в конструкторе свой продукт, свое уникальное техническое решение.</p>
@@ -367,7 +368,11 @@
             
             <p><b>1.1. Волновое сопротивление (Characteristic Impedance, <i>Z<sub>0</sub></i>)</b></p>
             <p>Это ключевой параметр для любого цифрового кабеля. Он не зависит от длины кабеля, а определяется его геометрией и химией.</p>
-            <div class="formula">$$Z_0 = \sqrt{\frac{L}{C}}$$</div>
+            
+            <div class="formula">
+                Z<sub>0</sub> = &radic;<span style="text-decoration: overline;">L / C</span>
+            </div>
+            
             <p>Где:</p>
             <ul>
                 <li><i>L</i> — погонная индуктивность (зависит от расстояния между жилами).</li>
