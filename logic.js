@@ -1,4 +1,4 @@
-/* logic.js - v15.0 SSOT: Логика с использованием CSS-переменных */
+/* logic.js - v15.1 Fixes: Icons & Thermo */
 
 window.nav = function(p, btn) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
@@ -23,7 +23,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v15.0: SSOT Ready']), 1000);
+        setTimeout(() => this.showToasts(['Система готова']), 1000);
     },
 
     setCat(cat, btn) {
@@ -41,7 +41,7 @@ const app = {
         this.doReset(this.state.cat);
         setTimeout(() => { 
             if(icon) icon.classList.remove('fa-spin');
-            this.showToasts(['Конфигурация сброшена']);
+            this.showToasts(['Сброс выполнен']);
         }, 500);
     },
 
@@ -62,7 +62,7 @@ const app = {
         this.state.idx[id] = val;
         if (id === 1) {
             if (val === 'Вз') { 
-                if(this.state.idx[8] !== 'з') { this.state.idx[8] = 'з'; this.showToasts(['Добавлено заполнение для Ex-d']); }
+                if(this.state.idx[8] !== 'з') { this.state.idx[8] = 'з'; this.showToasts(['Вз: добавлено заполнение']); }
             } else { 
                 if (this.state.idx[8] === 'з') this.state.idx[8] = '';
             }
@@ -108,9 +108,9 @@ const app = {
         }
 
         if (s[19] === '(6)') { 
-            if (s[10] === 'К' || s[10] === 'Б') { s[10] = 'КГ'; msgs.push('Броня -> КГ (Гибкая)'); }
-            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[6])) { s[6] = 'Эо'; msgs.push('Экран -> Эо (Оплетка)'); }
-            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[4])) { s[4] = 'ЭИо'; msgs.push('Экран пар -> ЭИо (Оплетка)'); }
+            if (s[10] === 'К' || s[10] === 'Б') { s[10] = 'КГ'; msgs.push('Броня -> КГ'); }
+            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[6])) { s[6] = 'Эо'; msgs.push('Экран -> Эо'); }
+            if (['Эа','Эм','ЭИа','ЭИм'].includes(s[4])) { s[4] = 'ЭИо'; msgs.push('Экран пар -> ЭИо'); }
         }
 
         const isCompatible = (matCode, type) => {
@@ -225,44 +225,49 @@ const app = {
             if(isActive && badge) div.innerHTML += `<div class="slot-badge">${badge}</div>`;
             return div;
         };
-        // КАТЕГОРИИ: Используем CSS Variables через JS (или HEX из SSOT если нужно, но здесь берем нейтральный)
-        c.appendChild(mkSlot(true, this.state.cat === 'BUS' ? '<i class="fas fa-network-wired"></i>' : (this.state.cat === 'SIGNAL' ? '<i class="fas fa-wave-square"></i>' : '<i class="fas fa-bolt"></i>'), 'var(--text)'));
         
-        // Ex (Синий = var(--bus))
+        // Категория
+        c.appendChild(mkSlot(true, this.state.cat === 'BUS' ? '<i class="fas fa-network-wired"></i>' : (this.state.cat === 'SIGNAL' ? '<i class="fas fa-wave-square"></i>' : '<i class="fas fa-bolt"></i>'), 'var(--dark)'));
+        
+        // Ex
         const isEx = (s[21] === 'i' || s[1] === 'Вз');
         let exColor = 'var(--dark)'; let exText = 'Ex';
         if (s[21] === 'i') { exColor = 'var(--bus)'; exText = 'Ex-i'; }
         c.appendChild(mkSlot(isEx, exText, exColor));
         
-        // Fire (Красный = var(--fire))
+        // Fire
         let isFR = s[11] && s[11].includes('FR');
         c.appendChild(mkSlot(isFR, '<i class="fas fa-fire"></i>', 'var(--fire)'));
         
-        // Eco (Зеленый = var(--signal))
+        // Thermo (Исправлено!)
+        let isHot = (s[15] && s[15] !== ''); 
+        c.appendChild(mkSlot(isHot, '<i class="fas fa-temperature-high"></i>', 'var(--hot)'));
+
+        // Eco
         let isEco = (s[11] && (s[11].includes('LTx') || s[11].includes('HF')));
         let ecoHtml = '<i class="fas fa-leaf"></i>';
         let ecoBadge = '';
         if (isEco) { if (s[11].includes('LTx')) { ecoBadge = 'LTx'; } else { ecoHtml = 'HF'; } }
         c.appendChild(mkSlot(isEco, ecoHtml, 'var(--signal)', ecoBadge));
         
-        // Climate (Голубой = var(--cold))
-        let climColor = '#6EA8FE'; // Оставим легкий оттенок для обычного холода
+        // Climate
+        let climColor = '#6EA8FE'; 
         let climIcon = '<i class="fas fa-snowflake"></i>'; let climBadge = '';
         let isClim = (s[12] && s[12] !== '');
         if (s[12] === '-ЭХЛ') { climColor = 'var(--bus)'; climBadge = 'Ar'; }
-        else if (s[12] === '-Т') { climColor = 'var(--warn)'; climIcon = '<i class="fas fa-sun"></i>'; climBadge = 'Tr'; }
+        else if (s[12] === '-Т') { climColor = 'var(--hot)'; climIcon = '<i class="fas fa-sun"></i>'; climBadge = 'Tr'; }
         else if (s[12] === '-М') { climColor = 'var(--cold)'; climIcon = '<i class="fas fa-water"></i>'; climBadge = 'Sea'; }
         c.appendChild(mkSlot(isClim, climIcon, climColor, climBadge));
         
         // Shield
         let isShield = !!s[10]; let shBadge = ''; if (isShield) { if (s[10] === 'Б') shBadge = 'x2'; if (s[10] === 'КБ') shBadge = 'x3'; }
-        c.appendChild(mkSlot(isShield, '<i class="fas fa-shield-alt"></i>', 'var(--text-muted)', shBadge));
+        c.appendChild(mkSlot(isShield, '<i class="fas fa-shield-alt"></i>', 'var(--dark)', shBadge));
         
         // Screen
         let screenCount = 0; if (s[4]) screenCount++; if (s[6]) screenCount++;
         if (['Эал','Эмо','ЭИал'].includes(s[4]) || ['Эал','Эмо'].includes(s[6])) screenCount = Math.max(screenCount, 2);
         if (['Экл','Экм','ЭИкл'].includes(s[4]) || ['Экл'].includes(s[6])) screenCount = 3;
-        c.appendChild(mkSlot(screenCount > 0, '<i class="fas fa-border-all"></i>', 'var(--text-muted)', screenCount > 1 ? 'x'+screenCount : ''));
+        c.appendChild(mkSlot(screenCount > 0, '<i class="fas fa-border-all"></i>', 'var(--dark)', screenCount > 1 ? 'x'+screenCount : ''));
         
         // Flex
         let flexIcon = '<i class="fas fa-bezier-curve"></i>'; let flexActive = false; let flexColor = 'var(--primary)';
@@ -307,7 +312,6 @@ const app = {
         let opts = meta.opts.map(o => {
             let disabled = this.isDisabled(meta.id, o.c);
             let style = "";
-            // SSOT: используем переменные в inline-стилях
             if (meta.id === 11 && o.c.includes('FR')) style = "color:var(--primary-dark); font-weight:bold;";
             if (meta.id === 2 && DB.MAT_PROPS[o.c] && DB.MAT_PROPS[o.c].fr) style = "color:var(--primary-dark);";
             if ((meta.id === 3 || meta.id === 5) && o.c !== "") style = "color:var(--primary-dark);";
@@ -355,7 +359,6 @@ const app = {
                 idx.opts.forEach(o => {
                     if (o.c) { 
                         const isActive = (app.state.idx[idx.id] === o.c);
-                        // SSOT Styles
                         const activeStyle = isActive ? 'background:var(--bus); color:white; border-radius:0;' : '';
                         let colorStyle = 'color:var(--text);';
                         if (!isActive) {
