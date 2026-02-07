@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ЭНИКУМ Конфигуратор v17.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENICUM Configurator v20.0 (Dashboard)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -14,38 +14,34 @@
 <body>
 
 <div class="app-header">
-    <div class="header-top">
-        <div class="logo"><span>Э</span>НИКУМ <span class="version-badge">v17.1 FULL TEXT</span></div>
-        <div style="font-size:11px; color:#ADB5BD;">Energocomplex Engineering</div>
+    <div class="brand-zone">
+        <div class="brand-logo-header"></div>
     </div>
-    <div class="sku-box">
-        <div class="sku-label">
-            <span>АРТИКУЛ</span>
-            <div class="reset-btn" onclick="app.resetAll()"><i class="fas fa-undo"></i> Сброс</div>
-        </div>
+    
+    <div class="sku-zone">
         <div class="sku-val" id="skuDisplay">...</div>
-        <div class="icon-dashboard" id="headerIcons"></div>
+        <div class="icon-line" id="headerIcons"></div>
+    </div>
+    
+    <div class="tools-zone">
+        <div class="tool-btn" onclick="app.resetAll()" title="Сброс конфигурации"><i class="fas fa-undo"></i></div>
+        <a href="tel:+74950000000" class="phone-link"><i class="fas fa-phone"></i> CALL</a>
     </div>
 </div>
 
-<div id="p-conf" class="page active">
-    <div class="cat-tabs">
-        <div class="cat-btn active" onclick="app.setCat('BUS', this)"><i class="fas fa-network-wired"></i> BUS</div>
-        <div class="cat-btn" onclick="app.setCat('SIGNAL', this)"><i class="fas fa-wave-square"></i> SIGNAL</div>
-        <div class="cat-btn" onclick="app.setCat('CONTROL', this)"><i class="fas fa-bolt"></i> CONTROL</div>
-    </div>
-    
-    <div id="sysAlert" class="sys-alert-block">
-        <div style="font-family:'Oswald'; font-weight:bold; margin-bottom:5px; text-transform:uppercase;"><i class="fas fa-clipboard-check"></i> Инженерный контроль</div>
-        <div id="sysAlertContent"></div>
-    </div>
+<div class="cat-tabs">
+    <div class="cat-btn active" onclick="app.setCat('BUS', this)">BUS (Интерфейс)</div>
+    <div class="cat-btn" onclick="app.setCat('SIGNAL', this)">SIGNAL (Монтаж)</div>
+    <div class="cat-btn" onclick="app.setCat('CONTROL', this)">CONTROL (Сила)</div>
+</div>
 
-    <div class="container" id="formArea"></div>
-    
-    <div class="app-footer">
-        <div>© 2026 ENICUM Configuration Tool</div>
-        <div>support@enicum.ru</div>
-    </div>
+<div id="sysAlert" class="sys-alert-block">
+    <div style="font-family:'Oswald'; font-weight:bold; margin-bottom:5px; text-transform:uppercase;"><i class="fas fa-clipboard-check"></i> Инженерный контроль</div>
+    <div id="sysAlertContent"></div>
+</div>
+
+<div id="p-conf" class="page active" style="padding-top:0;">
+    <div id="dashboardGrid" class="dashboard-grid"></div>
 </div>
 
 <div id="p-matrix" class="page">
@@ -404,7 +400,7 @@
                 <li>Изоляция: Используется Пв (вспененный полиэтилен) или Пс (сшитый полиэтилен). Они обеспечивают низкую емкость и жесткую фиксацию геометрии.</li>
                 <li>Экранирование: Комбинированное ЭИал (фольга + оплетка) или ЭИо (плотная оплетка) для защиты от низкочастотных (силовые кабели рядом) и высокочастотных (ЧРП, сварка) помех.</li>
             </ul>
-            <p>Референсный артикул ЭНИКУМ: <b>ЭНИКУМ ПвЭИо 1х2х0.78 [485] Серый</b> (Аналог: Belden 9841, RS-485 1x2x24 AWG)</p>
+            <p>Референсный артикул ЭНИКУМ: <b>ЭНИКУМ 1ПвЭИо 1х2х0.78 [485] Серый</b> (Аналог: Belden 9841, RS-485 1x2x24 AWG)</p>
             <p>Применение: Системы диспетчеризации (BMS), учет ресурсов (АСКУЭ), управление климатом, RS-485, CAN-bus, Modbus RTU.</p>
 
             <h4>3. Протокол [PB]: Profibus DP</h4>
@@ -415,7 +411,7 @@
             <p>Если для RS-485 стандарт — 120 Ом, то для Profibus DP (стандарт EN 50170) требуется кабель с импедансом 150 Ом. Зачем? Повышение импеданса позволяет снизить погонную емкость (до 28-30 пФ/м) и уменьшить затухание на высоких частотах. Химия: Получить 150 Ом на тонкой жиле (0.64 мм) с использованием сплошного полиэтилена сложно — изоляция получится слишком толстой. Поэтому ЭНИКУМ использует технологию Physical Foam Skin (Индекс Пв): пористый слой внутри, твердая корка снаружи. Это дает идеальный баланс габаритов и электрики.</p>
             <p><b>3.3. Конструкция ЭНИКУМ [PB]</b></p>
             <p>Только жесткая медная жила (Index 19: (1)). Многопроволочная жила на частотах 12 МГц имеет повышенное затухание из-за скин-эффекта и межпроволочных окислов.</p>
-            <p>Референсный артикул ЭНИКУМ: <b>ЭНИКУМ ПвЭИкм 1х2х0.64 [PB] Фиолетовый</b> (Аналог: Siemens 6XV1830-0EH10, Lapp UNITRONIC BUS PB)</p>
+            <p>Референсный артикул ЭНИКУМ: <b>ЭНИКУМ 1ПвЭИкм 1х2х0.64 [PB] Фиолетовый</b> (Аналог: Siemens 6XV1830-0EH10, Lapp UNITRONIC BUS PB)</p>
             <p>Применение: Высокоскоростные конвейерные линии, робототехника Siemens Simatic, связь между контроллерами PLC и периферией.</p>
             <p>Сходства и отличия [485] и [PB]:</p>
             <ul>
@@ -441,7 +437,7 @@
                 <li>Оранжевый: Обычное применение.</li>
                 <li>Синий (Index i): Для искробезопасных цепей (Ex-i), где энергия в линии ограничена барьерами.</li>
             </ul>
-            <p>Референсный артикул ЭНИКУМ: <b>ЭНИКУМ ПсЭИа 1х2х1.0 [FF] Оранжевый (или Синий + индекс i)</b> (Аналог: Belden 3076F, Lapp UNITRONIC BUS PA)</p>
+            <p>Референсный артикул ЭНИКУМ: <b>ЭНИКУМ 1ПсЭИа 1х2х1.0 [FF] Оранжевый (или Синий + индекс i)</b> (Аналог: Belden 3076F, Lapp UNITRONIC BUS PA)</p>
             <p>Применение: Датчики давления, расходомеры, уровнемеры на НПЗ, управление задвижками во взрывоопасных зонах.</p>
 
             <h4>5. Сводная сравнительная таблица</h4>
@@ -481,35 +477,36 @@
 </div>
 
 <div id="p-pdf" class="page">
-    <div class="pdf-preview-wrap" id="pdfExportTarget">
-        <div class="pdf-content">
-            <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom: 3px solid #F7941D; padding-bottom: 15px; margin-bottom: 30px;">
-                <div>
-                    <div style="font-family:'Oswald'; font-size:36px; line-height:1; color:#212529;">ЭНИКУМ</div>
-                    <div style="font-size:12px; color:#ADB5BD; letter-spacing:1px; margin-top:5px;">ЗАВОД СПКБ ТЕХНО</div>
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-weight:bold; font-size:14px;">ТУ 27.32.13-001-33185018-2023</div>
-                </div>
-            </div>
-            <div style="background:#F8F9FA; padding:20px; border-radius:4px; margin-bottom:30px;">
-                <div id="pdfSkuMain" style="font-family:'Oswald'; font-size:24px; color:#212529;">...</div>
-                <div id="pdfIcons" style="display:flex; gap:6px; margin-top:12px; flex-wrap:wrap;"></div>
-            </div>
-            <table style="width:100%; font-size:11px; border-collapse:collapse; border-top:2px solid #333;">
-                <tbody id="pdfSpecsTable"></tbody>
-            </table>
+    <div class="pdf-preview-wrap" id="pdfExportTarget" style="padding:40px; background:white; max-width:800px; margin:0 auto;">
+        <div class="brand-logo" style="width:200px; height:60px; background-image:var(--logo-doc); background-size:contain; margin-bottom:20px;"></div>
+        
+        <div style="font-family:'Oswald'; font-size:24px; margin-bottom:20px; border-bottom:2px solid var(--primary); padding-bottom:10px;" id="pdfSkuMain">...</div>
+        <div id="pdfIcons" style="display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap;"></div>
+        
+        <table style="width:100%; font-size:12px; border-collapse:collapse; font-family:'Roboto Condensed'; border-top:1px solid #000;">
+            <tbody id="pdfSpecsTable"></tbody>
+        </table>
+        
+        <div style="margin-top:30px; font-size:10px; color:#999; border-top:1px solid #eee; padding-top:10px;">
+            Сформировано в ENICUM Configurator v20.0
         </div>
     </div>
-    <div class="fab-download" onclick="app.downloadPDF()"><i class="fas fa-file-pdf"></i></div>
+    
+    <div class="fab-download" onclick="app.downloadPDF()" style="position:fixed; bottom:50px; right:20px; width:50px; height:50px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); cursor:pointer; font-size:20px;">
+        <i class="fas fa-file-pdf"></i>
+    </div>
+</div>
+
+<div class="app-footer">
+    <div style="font-weight:bold; color:#ccc;">ENICUM v20.0</div>
+    <div class="footer-nav">
+        <div class="footer-link" onclick="nav('conf')">КОНФИГУРАТОР</div>
+        <div class="footer-link" onclick="nav('matrix')">СПРАВКА</div>
+        <div class="footer-link" onclick="nav('pdf')">PDF</div>
+    </div>
 </div>
 
 <div class="toast-container" id="toasts"></div>
-<div class="btm-nav">
-    <div class="nav-btn active" onclick="nav('conf', this)"><i class="fas fa-sliders-h"></i> Конфиг</div>
-    <div class="nav-btn" onclick="nav('matrix', this)"><i class="fas fa-book"></i> Справка</div>
-    <div class="nav-btn" onclick="nav('pdf', this)"><i class="fas fa-file-alt"></i> PDF</div>
-</div>
 
 <script src="database.js"></script>
 <script src="logic.js"></script>
