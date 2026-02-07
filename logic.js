@@ -1,4 +1,4 @@
-/* logic.js - v18.3: Fire Logic Anchor 1.2 (Silicone) */
+/* logic.js - v18.4: Screen/Armor Anchors + Fire Anchor 1.2 */
 
 window.nav = function(p, btn) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
@@ -23,7 +23,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система v18.3: Fire Logic 1.2']), 1000);
+        setTimeout(() => this.showToasts(['Система v18.4: Logic Updated']), 1000);
     },
 
     setCat(cat, btn) {
@@ -238,20 +238,15 @@ const app = {
         if (s[21] === 'i') { exColor = '#0D6EFD'; exText = 'Ex-i'; } // i - Синий
         c.appendChild(mkSlot(isEx, exText, exColor));
         
-        // --- 2. FR (Fire Resistance - ЯКОРЬ №1.2) ---
+        // --- 2. FR (Fire - ЯКОРЬ №1.2) ---
         let isFR = s[11] && s[11].includes('FR');
         let frBadge = '';
         if (isFR) {
             let doubleBarrier = false;
             if (this.state.cat === 'BUS') {
-                // Для BUS: Только ОБЩИЙ барьер (C)
                 if (s[5] === 'С') doubleBarrier = true;
             } else {
-                // Для SIGNAL/CONTROL:
-                // 1. Общий (С) ИЛИ 
-                // 2. Индивидуальный (Си) ИЛИ
-                // 3. Изоляция Силикон (начинается на Р)
-                const isSilicone = (s[2] && s[2].startsWith('Р')); 
+                const isSilicone = (s[2] && s[2].startsWith('Р'));
                 if (s[5] === 'С' || s[3] === 'Си' || isSilicone) doubleBarrier = true;
             }
             if (doubleBarrier) frBadge = 'x2';
@@ -273,9 +268,9 @@ const app = {
         let climBadge = '';
         let isClim = (s[12] && s[12] !== '');
         
-        if (s[12] === '-ЭХЛ') { climColor = '#0D6EFD'; climBadge = 'x2'; } // ЭХЛ = x2
-        else if (s[12] === '-Т') { climColor = '#FFC107'; climIcon = '<i class="fas fa-sun"></i>'; } // Тропики - Желтый
-        else if (s[12] === '-М') { climColor = '#0DCAF0'; climIcon = '<i class="fas fa-water"></i>'; } // Морской - Голубой
+        if (s[12] === '-ЭХЛ') { climColor = '#0D6EFD'; climBadge = 'x2'; }
+        else if (s[12] === '-Т') { climColor = '#FFC107'; climIcon = '<i class="fas fa-sun"></i>'; }
+        else if (s[12] === '-М') { climColor = '#0DCAF0'; climIcon = '<i class="fas fa-water"></i>'; } 
         else if (s[12] === '-ХЛ') { climColor = '#0D6EFD'; } 
         
         c.appendChild(mkSlot(isClim, climIcon, climColor, climBadge));
@@ -296,21 +291,37 @@ const app = {
         c.appendChild(mkSlot(isUV, '<i class="fas fa-sun"></i>', '#212529', 'UV'));
         
         // --- 9. Flex (5/6) ---
-        let flexIcon = '<i class="fas fa-rainbow"></i>'; // Парабола
+        let flexIcon = '<i class="fas fa-rainbow"></i>';
         let flexActive = false; 
-        let flexColor = '#6c757d'; // СЕРЫЙ МЕТАЛЛ
+        let flexColor = '#6c757d'; 
         if (s[19] === '(5)') { flexActive = true; } 
         if (s[19] === '(6)') { flexIcon = '<i class="fas fa-robot"></i>'; flexActive = true; }
         c.appendChild(mkSlot(flexActive, flexIcon, flexColor));
         
-        // --- 10. Screen ---
-        let screenCount = 0; if (s[4]) screenCount++; if (s[6]) screenCount++;
-        if (['Эал','Эмо','ЭИал'].includes(s[4]) || ['Эал','Эмо'].includes(s[6])) screenCount = Math.max(screenCount, 2);
-        if (['Экл','Экм','ЭИкл'].includes(s[4]) || ['Экл'].includes(s[6])) screenCount = 3;
-        c.appendChild(mkSlot(screenCount > 0, '<i class="fas fa-border-all"></i>', '#6c757d', screenCount > 1 ? 'x'+screenCount : ''));
+        // --- 10. Screen (ЯКОРЬ №2: Layers Count) ---
+        let screenCount = 0;
+        const countLayers = (val) => {
+            if (!val) return 0;
+            if (['Экл','Экм','ЭИкл','ЭИкм'].includes(val)) return 3; // Triple
+            if (['Эал','Эмо','ЭИал','ЭИмо'].includes(val)) return 2; // Double
+            return 1; // Simple
+        };
+        screenCount = countLayers(s[4]) + countLayers(s[6]);
+        let scrBadge = '';
+        if (screenCount >= 4) scrBadge = 'x4'; // New x4 logic
+        else if (screenCount === 3) scrBadge = 'x3';
+        else if (screenCount === 2) scrBadge = 'x2';
         
-        // --- 11. Armor ---
-        let isShield = !!s[10]; let shBadge = ''; if (isShield) { if (s[10] === 'Б') shBadge = 'x2'; if (s[10] === 'КБ') shBadge = 'x3'; }
+        c.appendChild(mkSlot(screenCount > 0, '<i class="fas fa-border-all"></i>', '#6c757d', scrBadge));
+        
+        // --- 11. Armor (ЯКОРЬ №3: Type Logic) ---
+        let isShield = !!s[10]; 
+        let shBadge = ''; 
+        if (isShield) { 
+            if (s[10] === 'Б' || s[10] === 'Кп') shBadge = 'x2'; // Tapes or Spiral = x2
+            if (s[10] === 'КБ') shBadge = 'x3'; // Combined = x3
+            // К and КГ = No Badge
+        }
         c.appendChild(mkSlot(isShield, '<i class="fas fa-shield-alt"></i>', '#6c757d', shBadge));
     },
 
