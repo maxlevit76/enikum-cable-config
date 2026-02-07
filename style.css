@@ -1,49 +1,33 @@
-/* style.css - v15.5 Final Art Style (SSOT) */
+/* style.css - v16.0 RECOVERY: Scientific & Art Style */
 
 :root {
-    /* === ЦВЕТА БРЕНДА === */
-    --primary:      #F7941D; 
-    --primary-dark: #D67D0F;
+    /* Базовый интерфейс (фон, шапка) */
+    --dark: #212529; 
+    --light: #F8F9FA;
+    --border: #DEE2E6;
+    --text: #333333;
     
-    /* === ЦВЕТА СТАТУСОВ (ART PALETTE) === */
-    --bus:          #0D6EFD; /* Синий */
-    --signal:       #198754; /* Зеленый */
-    --fire:         #DC3545; /* Красный */
-    --hot:          #fd7e14; /* Оранжевый */
-    --cold:         #0DCAF0; /* Голубой (Cyan) */
-    --yellow:       #FFC107; /* Желтый */
-    --chem:         #6610f2; /* Фиолетовый */
-    --grey:         #6c757d; /* Серый металл */
-    
-    /* === ИНТЕРФЕЙС === */
-    --dark:         #212529; 
-    --text:         #333333; 
-    --text-muted:   #ADB5BD; 
-    --border:       #DEE2E6; 
-    
-    --bg-body:      #E9ECEF;
-    --bg-white:     #FFFFFF;
-    --bg-light:     #F8F9FA;
-    --bg-warn:      #FFF3CD;
+    /* Основной оранжевый Эникум (для лого и акцентов) */
+    --primary: #F7941D; 
 }
 
-* { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
 body { 
     margin: 0; padding: 0; 
-    font-family: 'Roboto', sans-serif; 
-    background: var(--bg-body);
+    font-family: 'Roboto', sans-serif; /* Интерфейс - Робото */
+    background: #E9ECEF;
     color: var(--text); 
     padding-bottom: 140px; 
 }
 
-/* HEADER */
+/* === HEADER (ДАШБОРД) === */
 .app-header { 
     background: var(--dark); 
     color: white; 
     padding: 15px; 
     position: sticky; top: 0; z-index: 1000;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
 }
 .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .logo { font-family: 'Oswald'; font-size: 26px; letter-spacing: 1px; text-transform: uppercase; }
@@ -52,10 +36,10 @@ body {
 
 .reset-btn { 
     background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
-    color: var(--text-muted); border-radius: 4px; padding: 4px 8px; font-size: 11px; 
+    color: #ADB5BD; border-radius: 4px; padding: 4px 8px; font-size: 11px; 
     cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s;
 }
-.reset-btn:hover { background: var(--fire); color: white; border-color: var(--fire); }
+.reset-btn:hover { background: #DC3545; color: white; border-color: #DC3545; }
 
 .sku-box { 
     background: rgba(255,255,255,0.05); padding: 12px 15px; 
@@ -69,82 +53,78 @@ body {
 }
 .sku-val { font-family: 'Oswald'; font-size: 22px; color: white; line-height: 1.1; word-break: break-all; }
 
-/* ICONS (ART STYLE) */
+/* === ИКОНКИ (ART) === */
 .icon-dashboard { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
 .icon-slot { 
     width: 28px; height: 28px; border-radius: 4px; 
-    background: #343a40; /* Темно-серый фон для неактивных */
-    color: #6c757d; 
-    opacity: 1; 
+    background: #343a40; /* Темный фон для неактивных */
+    color: #6c757d; /* Тусклый текст для неактивных */
     display: flex; justify-content: center; align-items: center; 
     font-size: 12px; font-weight: bold; position: relative;
     border: 1px solid rgba(255,255,255,0.1);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 .icon-slot.active { 
-    color: white; /* Иконка всегда белая на цветном фоне */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3); 
-    border-color: rgba(255,255,255,0.6); 
+    color: white; /* По умолчанию белый текст, переопределяется в JS для желтого */
+    border-color: rgba(255,255,255,0.5);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     transform: translateY(-1px);
+    /* Цвет фона (background) задается жестко через JS */
 }
-/* Спец. правило для Желтого фона: делаем иконку темной */
-.icon-slot.active[style*="FFC107"] { color: #212529 !important; } 
-
 .slot-badge { 
     position: absolute; bottom: -5px; right: -5px;
-    font-size: 8px; font-weight: 800; color: var(--dark); 
+    font-size: 8px; font-weight: 800; color: #212529; 
     background: white; padding: 1px 3px; border-radius: 3px; 
-    border: 1px solid var(--dark); z-index: 2; line-height: 1;
+    border: 1px solid #212529; z-index: 2; line-height: 1;
     box-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
-/* TABS */
+/* === ВКЛАДКИ === */
 .cat-tabs { 
     display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 10px 15px;
-    background: var(--bg-white); box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+    background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
     position: sticky; top: 135px; z-index: 900; 
 }
 .cat-btn { 
     padding: 12px 0; text-align: center;
     font-size: 12px; font-weight: bold; 
-    background: var(--bg-body); color: var(--text-muted); 
+    background: #E9ECEF; color: #ADB5BD; 
     border-radius: 6px; cursor: pointer; 
     display: flex; flex-direction: column; align-items: center; gap: 4px;
     transition: 0.2s; border: 2px solid transparent; 
 }
 .cat-btn.active { 
-    background: var(--bg-white); color: var(--dark); 
+    background: white; color: #212529; 
     border-color: var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
 }
 .cat-btn.active i { color: var(--primary); }
 
-/* MAIN CONTENT */
+/* === КОНФИГУРАТОР === */
 .container { padding: 15px; max-width: 800px; margin: 0 auto; }
 
 .acc-group { 
-    background: var(--bg-white); border-radius: 8px; margin-bottom: 12px; 
+    background: white; border-radius: 8px; margin-bottom: 12px; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid var(--border); 
 }
 .acc-header { 
     padding: 15px 20px; font-family: 'Oswald'; font-size: 16px; text-transform: uppercase; 
     display: flex; justify-content: space-between; align-items: center; 
-    cursor: pointer; background: var(--bg-white); transition: 0.2s; 
+    cursor: pointer; background: white; transition: 0.2s; color: #212529;
 }
-.acc-header:hover { background: var(--bg-light); }
-.acc-header.active { background: var(--bg-body); color: var(--primary-dark); }
+.acc-header:hover { background: var(--light); }
+.acc-header.active { background: #E9ECEF; color: #D67D0F; }
 .acc-body { display: none; padding: 20px; border-top: 1px solid var(--border); }
 .acc-body.open { display: block; animation: slideDown 0.3s; }
 
-/* CONTROLS */
 .control-row { margin-bottom: 25px; }
 .lbl-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-.lbl-main { font-weight: 700; font-size: 14px; color: var(--dark); }
-.lbl-idx { font-size: 10px; background: var(--border); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+.lbl-main { font-weight: 700; font-size: 14px; color: #212529; }
+.lbl-idx { font-size: 10px; background: var(--border); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #495057; }
 
 select.c-select { 
     width: 100%; padding: 14px; font-size: 15px; 
     border: 1px solid var(--border); border-radius: 6px; 
-    background: #fff; appearance: none; color: var(--text);
+    background: #fff; appearance: none; color: #333;
     background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); 
     background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 10px; 
 }
@@ -168,56 +148,67 @@ select.c-select.highlight { background-color: var(--bg-warn); border-color: #ffe
 }
 .sys-alert-block.active { display: block; animation: fadeIn 0.5s; }
 
-/* СПРАВОЧНИК: НАУЧНЫЙ СТИЛЬ (Fixed Borders) */
+/* === СПРАВОЧНИК (SCIENTIFIC STYLE) === */
 .paper-layout {
-    background: transparent; 
-    border: none; box-shadow: none; padding: 0; margin-top: 20px;
-    color: var(--text);
-    font-family: "Times New Roman", serif;
-    font-size: 15px; 
-    line-height: 1.4;
+    background: white; 
+    color: black;
+    font-family: "Times New Roman", Times, serif; /* Тот самый шрифт */
+    font-size: 14px;
+    line-height: 1.3;
     text-align: justify;
+    padding: 40px; /* Отступы как на листе */
+    border: 1px solid #ccc; /* Граница листа */
+    margin-top: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .paper-layout h1 {
-    font-family: "Times New Roman", serif; font-weight: bold; font-size: 20px;
-    text-transform: uppercase; text-align: center; margin-bottom: 25px;
-    color: var(--dark); border-bottom: 2px solid var(--dark); padding-bottom: 10px;
+    font-family: "Times New Roman", serif; font-weight: bold; font-size: 18px;
+    text-transform: uppercase; text-align: center; margin-bottom: 20px;
+    color: black; border-bottom: 2px solid black; padding-bottom: 10px; line-height: 1.2;
 }
 .paper-layout h2 {
-    font-family: "Times New Roman", serif; font-weight: bold; font-size: 16px;
-    text-transform: uppercase; margin-top: 30px; margin-bottom: 10px;
-    border-bottom: 1px solid var(--dark); color: var(--dark);
-    display: inline-block; padding-bottom: 3px;
+    font-family: "Times New Roman", serif; font-weight: bold; font-size: 15px;
+    text-transform: uppercase; margin-top: 25px; margin-bottom: 10px;
+    border-bottom: 1px solid black; color: black;
+    display: inline-block; padding-bottom: 2px;
 }
 .paper-layout h3 {
-    font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 5px; color: var(--dark);
+    font-family: "Times New Roman", serif;
+    font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; color: black;
 }
-.paper-layout p { margin-bottom: 10px; text-indent: 25px; }
-.paper-layout ul { margin: 10px 0; padding-left: 25px; }
-.paper-layout li { margin-bottom: 5px; }
+.paper-layout h4 {
+    font-family: "Times New Roman", serif;
+    font-size: 13px; font-weight: bold; font-style: italic; margin-top: 15px; color: #444;
+}
+.paper-layout p { margin-bottom: 8px; text-indent: 20px; }
+.paper-layout ul { margin: 5px 0; padding-left: 20px; }
+.paper-layout li { margin-bottom: 4px; }
+.paper-layout b { font-weight: bold; color: black; }
 
+/* Таблицы (ГОСТ / Газета) */
 .science-table {
-    width: 100%; border-collapse: collapse; margin: 20px 0;
-    font-size: 12px; background: white;
-    border: 1px solid var(--dark);
+    width: 100%; border-collapse: collapse; margin: 15px 0;
+    font-size: 12px; font-family: "Times New Roman", serif;
+    background: white; border: 1px solid black;
 }
 .science-table th, .science-table td {
-    border: 1px solid var(--dark);
-    padding: 5px 8px; vertical-align: top;
+    border: 1px solid black; /* Четкие черные границы */
+    padding: 4px 8px; vertical-align: top; text-align: left;
 }
-.science-table th { background: #E0E0E0; font-weight: bold; text-align: center; color: black; }
+.science-table th { background: #f0f0f0; font-weight: bold; text-align: center; }
 
+/* Формулы */
 .formula {
-    text-align: center; font-style: italic; font-weight: bold;
-    margin: 15px 0; padding: 10px; background: var(--bg-light);
-    border: 1px dashed var(--text-muted);
+    display: block; text-align: center; font-style: italic; font-weight: bold;
+    margin: 15px 0; padding: 5px; background: transparent;
+    font-family: "Times New Roman", serif;
 }
 
-/* FOOTER & NAV */
+/* === ПОДВАЛ И НАВИГАЦИЯ === */
 .app-footer { 
     position: fixed; bottom: 70px; left: 0; width: 100%; 
-    background: var(--bg-light); border-top: 1px solid var(--border); 
+    background: var(--light); border-top: 1px solid var(--border); 
     padding: 10px; text-align: center; font-size: 10px; color: #999; 
 }
 .btm-nav { 
@@ -227,10 +218,11 @@ select.c-select.highlight { background-color: var(--bg-warn); border-color: #ffe
 .nav-btn { 
     flex: 1; display: flex; flex-direction: column; align-items: center;
     justify-content: center; font-size: 10px; font-weight: bold; 
-    color: var(--text-muted); text-transform: uppercase; cursor: pointer; 
+    color: #ADB5BD; text-transform: uppercase; cursor: pointer; 
 }
 .nav-btn.active { color: var(--primary); background: rgba(247,148,29,0.05); }
 
+/* TOASTS */
 .toast-container { 
     position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); 
     width: 90%; max-width: 400px; z-index: 2000; pointer-events: none; 
@@ -238,17 +230,17 @@ select.c-select.highlight { background-color: var(--bg-warn); border-color: #ffe
 .toast { 
     background: rgba(33,37,41,0.95); color: white; padding: 12px; 
     border-radius: 6px; margin-top: 8px; font-size: 13px; 
-    border-left: 4px solid var(--signal); display: flex; gap: 10px; align-items: center; 
+    border-left: 4px solid #198754; display: flex; gap: 10px; align-items: center; 
     animation: fadeIn 0.3s;
 }
-.toast.danger { border-left-color: var(--fire); }
+.toast.danger { border-left-color: #DC3545; }
 
 /* PDF */
 #p-pdf { background: #525659; min-height: 100vh; padding: 20px 0; }
 .pdf-preview-wrap { width: 100%; max-width: 794px; margin: 0 auto; background: white; padding: 40px; }
 .fab-download { 
     position: fixed; bottom: 120px; right: 20px; width: 56px; height: 56px; 
-    background: var(--dark); border-radius: 50%; color: var(--primary); 
+    background: #212529; border-radius: 50%; color: var(--primary); 
     display: flex; align-items: center; justify-content: center; font-size: 24px; 
     box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1200;
 }
@@ -256,8 +248,8 @@ select.c-select.highlight { background-color: var(--bg-warn); border-color: #ffe
 /* MATRIX SCROLL */
 .matrix-scroll-wrap { overflow-x: auto; background: white; border: 1px solid var(--border); margin-bottom: 20px; }
 .summary-table { width: 100%; min-width: 800px; border-collapse: collapse; font-size: 10px; }
-.summary-table th, .summary-table td { border: 1px solid #ddd; padding: 5px; text-align: center; }
-.summary-table th { background: var(--dark); color: white; }
+.summary-table th, .summary-table td { border: 1px solid #eee; padding: 5px; text-align: center; }
+.summary-table th { background: #212529; color: white; }
 
 @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
