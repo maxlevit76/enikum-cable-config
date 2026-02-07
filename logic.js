@@ -1,4 +1,4 @@
-/* logic.js - v17.1 FINAL: Engineering & Art Logic */
+/* logic.js - v18.0: Icons Reborn (Correct Order & Logic) */
 
 window.nav = function(p, btn) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
@@ -23,7 +23,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система готова: v17.1']), 1000);
+        setTimeout(() => this.showToasts(['Система v18.0: Icons Fixed']), 1000);
     },
 
     setCat(cat, btn) {
@@ -62,7 +62,7 @@ const app = {
         this.state.idx[id] = val;
         if (id === 1) {
             if (val === 'Вз') { 
-                if(this.state.idx[8] !== 'з') { this.state.idx[8] = 'з'; this.showToasts(['Вз: добавлено заполнение']); }
+                if(this.state.idx[8] !== 'з') { this.state.idx[8] = 'з'; this.showToasts(['Ex-d: добавлено заполнение']); }
             } else { 
                 if (this.state.idx[8] === 'з') this.state.idx[8] = '';
             }
@@ -220,81 +220,79 @@ const app = {
         const mkSlot = (isActive, html, color, badge) => {
             const div = document.createElement('div');
             div.className = `icon-slot ${isActive?'active':''}`;
-            if(isActive) div.style.background = color; // ВАЖНО: Арт-цвет фона
+            if(isActive) div.style.background = color;
             div.innerHTML = html;
             if(isActive && badge) div.innerHTML += `<div class="slot-badge">${badge}</div>`;
             return div;
         };
         
-        // 1. Категория
+        // 0. Категория (Всегда слева, не в общем зачете, но нужна)
         let catColor = (this.state.cat === 'BUS') ? '#0D6EFD' : ((this.state.cat === 'SIGNAL') ? '#198754' : '#F7941D');
         let catIcon = (this.state.cat === 'BUS') ? '<i class="fas fa-network-wired"></i>' : ((this.state.cat === 'SIGNAL') ? '<i class="fas fa-wave-square"></i>' : '<i class="fas fa-bolt"></i>');
         c.appendChild(mkSlot(true, catIcon, catColor));
         
-        // 2. Ex (Синий i / Оранжевый Вз)
+        // --- 1. Ex / Ex-i (Explosion Proof) ---
         const isEx = (s[21] === 'i' || s[1] === 'Вз');
-        let exColor = '#F7941D'; 
+        let exColor = '#F7941D'; // Вз - Оранжевый
         let exText = 'Ex';
-        if (s[21] === 'i') { exColor = '#0D6EFD'; exText = 'Ex-i'; } 
+        if (s[21] === 'i') { exColor = '#0D6EFD'; exText = 'Ex-i'; } // i - Синий
         c.appendChild(mkSlot(isEx, exText, exColor));
         
-        // 3. Fire (Красный)
+        // --- 2. FR (Fire Resistance) ---
         let isFR = s[11] && s[11].includes('FR');
-        c.appendChild(mkSlot(isFR, '<i class="fas fa-fire"></i>', '#DC3545'));
+        c.appendChild(mkSlot(isFR, '<i class="fas fa-fire"></i>', '#DC3545')); // Красный
         
-        // 4. Thermo (Оранжевый + Бейдж)
-        let isHot = (s[15] && s[15] !== '');
-        let hotBadge = isHot ? s[15].replace('-ТС-', '').replace('-TC-', '') : '';
-        c.appendChild(mkSlot(isHot, '<i class="fas fa-temperature-high"></i>', '#fd7e14', hotBadge));
-
-        // 5. Eco (Зеленый)
+        // --- 3. HF / LTx (Ecology) ---
         let isLTx = (s[11] && s[11].includes('LTx'));
         let isHF = (s[11] && s[11].includes('HF'));
         let ecoActive = isLTx || isHF;
-        let ecoHtml = '<i class="fas fa-leaf"></i>'; // Default Leaf
+        let ecoHtml = '<i class="fas fa-leaf"></i>';
         let ecoBadge = '';
+        if(isLTx) { ecoBadge = 'LTx'; } else if (isHF) { ecoHtml = 'HF'; }
+        c.appendChild(mkSlot(ecoActive, ecoHtml, '#198754', ecoBadge)); // Зеленый
         
-        if(isLTx) {
-            ecoHtml = '<i class="fas fa-leaf"></i>'; // Leaf for LTx
-            ecoBadge = 'LTx';
-        } else if (isHF) {
-            ecoHtml = 'HF'; // Text for HF
-        }
-        c.appendChild(mkSlot(ecoActive, ecoHtml, '#198754', ecoBadge));
-        
-        // 6. Climate (Желтый / Голубой / Синий)
+        // --- 4. Climate (ХЛ/ЭХЛ/Т/М) - БЕЗ БЕЙДЖЕЙ ---
         let climColor = '#0D6EFD'; 
-        let climIcon = '<i class="fas fa-snowflake"></i>'; let climBadge = '';
+        let climIcon = '<i class="fas fa-snowflake"></i>';
         let isClim = (s[12] && s[12] !== '');
-        if (s[12] === '-ЭХЛ') { climColor = '#0D6EFD'; climBadge = 'Ar'; } // Арктика - Синий
-        else if (s[12] === '-Т') { climColor = '#FFC107'; climIcon = '<i class="fas fa-sun"></i>'; climBadge = 'Tr'; } // Тропики - Желтый!
-        else if (s[12] === '-М') { climColor = '#0DCAF0'; climIcon = '<i class="fas fa-water"></i>'; climBadge = 'Sea'; } // Морской - Голубой
-        else if (s[12] === '-ХЛ') { climColor = '#0D6EFD'; climBadge = 'HL'; }
-        c.appendChild(mkSlot(isClim, climIcon, climColor, climBadge));
+        if (s[12] === '-ЭХЛ') { climColor = '#0D6EFD'; } // Арктика - Синий
+        else if (s[12] === '-Т') { climColor = '#FFC107'; climIcon = '<i class="fas fa-sun"></i>'; } // Тропики - Желтый
+        else if (s[12] === '-М') { climColor = '#0DCAF0'; climIcon = '<i class="fas fa-water"></i>'; } // Морской - Голубой
+        else if (s[12] === '-ХЛ') { climColor = '#0D6EFD'; } // ХЛ - Синий
+        c.appendChild(mkSlot(isClim, climIcon, climColor, '')); // BADGE EMPTY!
         
-        // 7. Shield (Серый Металл)
-        let isShield = !!s[10]; let shBadge = ''; if (isShield) { if (s[10] === 'Б') shBadge = 'x2'; if (s[10] === 'КБ') shBadge = 'x3'; }
-        c.appendChild(mkSlot(isShield, '<i class="fas fa-shield-alt"></i>', '#6c757d', shBadge));
+        // --- 5. Oil (МБ) ---
+        c.appendChild(mkSlot(s[13] === '-МБ', '<i class="fas fa-tint"></i>', '#000000')); // Черный
         
-        // 8. Screen (Серый Металл)
+        // --- 6. Chem (ХС) ---
+        c.appendChild(mkSlot(s[14] === '-ХС', '<i class="fas fa-flask"></i>', '#6610f2')); // Фиолетовый
+        
+        // --- 7. Thermo (ТС) ---
+        let isHot = (s[15] && s[15] !== '');
+        let hotBadge = isHot ? s[15].replace('-ТС-', '').replace('-TC-', '') : '';
+        c.appendChild(mkSlot(isHot, '<i class="fas fa-temperature-high"></i>', '#fd7e14', hotBadge)); // Оранжевый + Бейдж
+        
+        // --- 8. UV (УФ) ---
+        const isUV = (s[16] === '-УФ' || s[9] === 'Пэ');
+        c.appendChild(mkSlot(isUV, '<i class="fas fa-sun"></i>', '#212529', 'UV')); // Черное солнце
+        
+        // --- 9. Flex (5/6) - ПАРАБОЛА и РОБОТ ---
+        let flexIcon = '<i class="fas fa-rainbow"></i>'; // Парабола (5 класс)
+        let flexActive = false; 
+        let flexColor = '#F7941D';
+        if (s[19] === '(5)') { flexActive = true; flexColor = '#F7941D'; } 
+        if (s[19] === '(6)') { flexIcon = '<i class="fas fa-robot"></i>'; flexActive = true; flexColor = '#343a40'; } // Робот (6 класс)
+        c.appendChild(mkSlot(flexActive, flexIcon, flexColor));
+        
+        // --- 10. Screen (Экран) ---
         let screenCount = 0; if (s[4]) screenCount++; if (s[6]) screenCount++;
         if (['Эал','Эмо','ЭИал'].includes(s[4]) || ['Эал','Эмо'].includes(s[6])) screenCount = Math.max(screenCount, 2);
         if (['Экл','Экм','ЭИкл'].includes(s[4]) || ['Экл'].includes(s[6])) screenCount = 3;
         c.appendChild(mkSlot(screenCount > 0, '<i class="fas fa-border-all"></i>', '#6c757d', screenCount > 1 ? 'x'+screenCount : ''));
         
-        // 9. Flex (5-Оранжевый, 6-Темный)
-        let flexIcon = '<i class="fas fa-bezier-curve"></i>'; let flexActive = false; let flexColor = '#F7941D';
-        if (s[19] === '(5)') { flexActive = true; flexColor = '#F7941D'; } 
-        if (s[19] === '(6)') { flexIcon = '<i class="fas fa-robot"></i>'; flexActive = true; flexColor = '#343a40'; } // Робот - Темный
-        c.appendChild(mkSlot(flexActive, flexIcon, flexColor));
-        
-        // 10. UV (Черный)
-        const isUV = (s[16] === '-УФ' || s[9] === 'Пэ');
-        c.appendChild(mkSlot(isUV, '<i class="fas fa-sun"></i>', '#212529', 'UV'));
-        
-        // 11. Oil/Chem (Масло-Черное, Химия-Фиолетовая)
-        c.appendChild(mkSlot(s[13] === '-МБ', '<i class="fas fa-tint"></i>', '#000000')); // Масло - черное
-        c.appendChild(mkSlot(s[14] === '-ХС', '<i class="fas fa-flask"></i>', '#6610f2')); // Химия - фиолетовая
+        // --- 11. Armor (Броня) ---
+        let isShield = !!s[10]; let shBadge = ''; if (isShield) { if (s[10] === 'Б') shBadge = 'x2'; if (s[10] === 'КБ') shBadge = 'x3'; }
+        c.appendChild(mkSlot(isShield, '<i class="fas fa-shield-alt"></i>', '#6c757d', shBadge));
     },
 
     renderForm() {
@@ -362,7 +360,6 @@ const app = {
     renderMatrix() {
         const c1 = document.getElementById('summaryTableArea');
         if (c1) {
-            // ВАЖНО: Размер шрифта 11px жестко задан здесь, чтобы соответствовать статье
             let html1 = '<table class="summary-table" style="width:auto; min-width:100%; border-collapse: collapse; font-size: 11px;"><thead><tr>';
             DB.INDICES.forEach(idx => { 
                 html1 += `<th style="background:var(--dark); color:white; padding:6px; border:1px solid var(--text);">${idx.id}</th>`; 
@@ -373,7 +370,7 @@ const app = {
                 idx.opts.forEach(o => {
                     if (o.c) { 
                         const isActive = (app.state.idx[idx.id] === o.c);
-                        const activeStyle = isActive ? 'background:#0D6EFD; color:white; font-weight:bold;' : ''; // СИНИЙ АКТИВ
+                        const activeStyle = isActive ? 'background:#0D6EFD; color:white; font-weight:bold;' : ''; 
                         let colorStyle = 'color:var(--text);';
                         if (!isActive) {
                             if (o.wiki && o.wiki.toLowerCase().includes('огнестойк')) colorStyle = 'color:#F7941D; font-weight:bold;';
