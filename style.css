@@ -1,4 +1,4 @@
-/* style.css - v16.1: Modern Tech & Zebra */
+/* style.css - v16.2: Engineering Tables, Tech Headers, Zebra Lists */
 
 :root {
     /* === ЦВЕТА (SSOT) === */
@@ -10,11 +10,9 @@
     --fire:         #DC3545; 
     --hot:          #fd7e14; 
     --cold:         #0DCAF0; 
-    --yellow:       #FFC107; 
-    --chem:         #6610f2; 
-    --grey:         #6c757d; 
     
     --dark:         #212529; 
+    --header-bg:    #343A40; /* Цвет шапки таблиц */
     --text:         #333333; 
     --text-muted:   #6C757D; 
     --border:       #DEE2E6; 
@@ -22,6 +20,7 @@
     --bg-body:      #E9ECEF;
     --bg-white:     #FFFFFF;
     --bg-light:     #F8F9FA;
+    --bg-zebra:     #F2F4F6; /* Цвет полоски зебры */
     --bg-warn:      #FFF3CD;
 }
 
@@ -36,7 +35,7 @@ body {
     line-height: 1.5;
 }
 
-/* === HEADER === */
+/* === HEADER & NAVIGATION === */
 .app-header { 
     background: var(--dark); 
     color: white; 
@@ -72,9 +71,7 @@ body {
 .icon-dashboard { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
 .icon-slot { 
     width: 28px; height: 28px; border-radius: 4px; 
-    background: #343a40; 
-    color: #6c757d; 
-    opacity: 1; 
+    background: #343a40; color: #6c757d; opacity: 1; 
     display: flex; justify-content: center; align-items: center; 
     font-size: 12px; font-weight: bold; position: relative;
     border: 1px solid rgba(255,255,255,0.1);
@@ -116,7 +113,7 @@ body {
 }
 .cat-btn.active i { color: var(--primary); }
 
-/* === FORM === */
+/* === CONFIGURATOR === */
 .container { padding: 15px; max-width: 800px; margin: 0 auto; }
 
 .acc-group { 
@@ -165,39 +162,42 @@ select.c-select.highlight { background-color: var(--bg-warn); border-color: #ffe
 }
 .sys-alert-block.active { display: block; animation: fadeIn 0.5s; }
 
-/* === СПРАВОЧНИК: MODERN TECH STYLE === */
+/* === СПРАВОЧНИК: ТЕХНИЧЕСКИЙ ДИЗАЙН === */
 .paper-layout {
-    background: transparent; 
-    border: none; box-shadow: none; padding: 0; margin-top: 20px;
+    background: transparent; border: none; box-shadow: none; padding: 0; margin-top: 20px;
     color: var(--text);
-    /* 1. Убили Times New Roman */
-    font-family: 'Roboto', sans-serif; 
+    font-family: 'Roboto', sans-serif; /* 1. Шрифт как в матрице */
     font-size: 14px; 
-    line-height: 1.6; /* Улучшенная читаемость */
-    text-align: left; /* Технический текст лучше не джастифаить в вебе */
+    line-height: 1.6;
+    text-align: left;
 }
 
-/* 3. Заголовки (Clean Technical) */
+/* 3. Заголовки (Tech Literature Style) */
 .paper-layout h1 {
     font-family: 'Oswald', sans-serif; font-weight: 500; font-size: 24px;
-    text-transform: none; /* Убрали КАПС */
+    text-transform: none; /* Убран капс */
     color: var(--dark); 
     margin-bottom: 25px; padding-bottom: 10px;
-    border-bottom: 3px solid var(--primary); /* Акцент бренда */
+    border-bottom: 3px solid var(--primary); 
+    line-height: 1.2;
 }
 
 .paper-layout h2 {
     font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 18px;
-    text-transform: none; /* Убрали КАПС */
+    text-transform: none; /* Убран капс */
     color: var(--dark);
     margin-top: 35px; margin-bottom: 15px;
-    border-left: 4px solid var(--border); /* Технический маркер слева */
-    padding-left: 12px;
+    /* Стиль "Закладка" */
+    background: #E9ECEF;
+    padding: 8px 15px;
+    border-left: 5px solid var(--bus); /* Синий маркер */
+    border-radius: 0 4px 4px 0;
 }
 
 .paper-layout h3 {
-    font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 15px;
+    font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 16px;
     margin-top: 25px; margin-bottom: 10px; color: var(--text);
+    padding-left: 10px; border-left: 3px solid #DEE2E6; /* Легкий маркер */
 }
 
 .paper-layout h4 {
@@ -207,48 +207,54 @@ select.c-select.highlight { background-color: var(--bg-warn); border-color: #ffe
 
 .paper-layout p { margin-bottom: 12px; }
 
-/* 4. Принцип "Зебры" для списков определений (Чтобы не сливалось) */
+/* 4. Принцип ЗЕБРЫ для списков определений (Лонгрид) */
 .paper-layout ul { 
     margin: 15px 0; padding: 0; list-style: none; 
 }
 .paper-layout li { 
-    padding: 10px 15px; 
-    margin-bottom: 2px;
-    border-left: 2px solid transparent;
+    padding: 12px 15px; 
+    margin-bottom: 0;
+    border-bottom: 1px solid #f0f0f0;
 }
-/* Чередование фона для пунктов списка */
-.paper-layout li:nth-child(odd) { background-color: rgba(0,0,0,0.02); }
-.paper-layout li:nth-child(even) { background-color: rgba(0,0,0,0.06); }
-.paper-layout li:hover { border-left-color: var(--primary); background-color: rgba(247,148,29,0.05); }
+/* Чередование строк */
+.paper-layout li:nth-child(odd) { background-color: white; }
+.paper-layout li:nth-child(even) { background-color: var(--bg-zebra); } /* Легкий серый */
 
-.paper-layout b { font-weight: 700; color: var(--dark); }
+/* Акцент на индексе (жирный текст в начале строки) */
+.paper-layout li b { 
+    font-family: 'Roboto Condensed', sans-serif; 
+    color: var(--primary-dark); 
+    font-size: 15px; 
+    margin-right: 5px;
+}
 
 /* 2. Таблицы (Engineering Style) */
 .science-table {
     width: 100%; border-collapse: collapse; margin: 25px 0;
     font-size: 13px; font-family: 'Roboto Condensed', sans-serif;
-    background: white; border: 1px solid var(--border);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    background: white; 
+    border: 1px solid #ced4da;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 .science-table th, .science-table td {
-    border: 1px solid var(--border);
+    border: 1px solid #ced4da; /* Четкие границы */
     padding: 10px 12px; vertical-align: top; text-align: left;
 }
 .science-table th { 
-    background: var(--dark); color: white; 
-    font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; 
-    border-color: var(--dark);
+    background: var(--header-bg); color: white; /* Темная шапка */
+    font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; 
+    border-color: #454d55;
 }
-/* Зебра для строк таблицы */
-.science-table tr:nth-child(even) { background-color: #F8F9FA; }
-.science-table tr:hover { background-color: #FFF9DB; }
+/* Зебра для таблиц */
+.science-table tr:nth-child(even) { background-color: var(--bg-light); }
+.science-table tr:hover { background-color: #e2e6ea; transition: 0.2s; }
 
 /* Формулы */
 .formula {
-    background: white; border-left: 4px solid var(--primary);
+    background: white; border: 1px solid var(--border); border-left: 4px solid var(--primary);
     padding: 15px; margin: 20px 0; 
     font-family: "Times New Roman", serif; font-size: 18px; font-style: italic;
-    color: var(--dark); box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    color: var(--dark); text-align: center;
 }
 
 /* === FOOTER & NAV === */
