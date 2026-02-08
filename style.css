@@ -1,256 +1,314 @@
-/* style.css - v21.1: Black Header, Compact Grid, Zebra Restored */
+/* ==========================================================================
+   PROJECT: ENICUM CONFIGURATOR
+   VERSION: v22.0 (Modular Gold)
+   FILE:    [S] style.css
+   DESC:    Корпоративный стиль: Orange/Black/Milk. Модульная сетка.
+   ========================================================================== */
 
+/* --- [S-01] ПЕРЕМЕННЫЕ И ЦВЕТА (SSOT) --- */
 :root {
-    /* === ЦВЕТА (SSOT) === */
-    --primary:      #F7941D; 
-    --primary-dark: #D67D0F;
+    /* Brand Colors */
+    --brand-orange: #F7931E; /* Твой корпоративный (Pantone/CMYK adapt) */
+    --brand-black:  #111111; /* Глубокий Черный */
+    --brand-milk:   #F7F7F7; /* Молочный (фон страницы) */
     
-    /* Статусы */
+    /* Semantic Colors */
+    --c-active:     #212529; /* Активный элемент (Темно-серый) */
+    --c-text:       #212529;
+    --c-text-mute:  #6C757D;
+    --c-border:     #DEE2E6; /* Мягкие границы */
+    
+    /* Statuses (Сохранили твои цвета для логики) */
     --bus:          #0D6EFD; 
     --signal:       #198754; 
-    --fire:         #DC3545; 
+    --fire:         #DC3545;
     
-    /* Интерфейс */
-    --dark:         #111111; /* Глубокий черный для хэдера */
-    --panel-bg:     #212529; /* Темный фон панелей */
-    --text:         #212529; 
-    --text-light:   #ADB5BD;
-    --border:       #000000; 
-    
-    --bg-body:      #E9ECEF;
-    --bg-tile:      #DEE2E6; /* Темнее, чем фон, для контраста */
-    --bg-white:     #FFFFFF;
-    
-    --bg-active:    #000000; /* Активная кнопка - черная */
-    --text-active:  #FFFFFF; /* Текст на активной - белый */
+    /* Статусы для тостов */
+    --st-bus:       #0D6EFD; 
+    --st-signal:    #198754; 
+    --st-fire:      #DC3545; 
 
-    /* === БРЕНДИНГ (LIVE LINKS) === */
-    --logo-header: url('https://enikum.ru/img/logo_dark.jpg'); 
-    --logo-doc:    url('https://enikum.ru/img/logo_light.jpg');
+    /* Assets */
+    --logo-header:  url('https://enikum.ru/img/logo_dark.jpg'); 
+    --logo-doc:     url('https://enikum.ru/img/logo_light.jpg');
 }
 
+/* --- [S-02] БАЗОВЫЙ СБРОС И ТИПОГРАФИКА --- */
 * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
 body { 
     margin: 0; padding: 0; 
     font-family: 'Roboto Condensed', sans-serif; 
-    background: var(--bg-body); color: var(--text); 
-    padding-bottom: 40px; 
-    font-size: 11px; /* Компактный шрифт для всего */
-    line-height: 1.3;
+    background-color: var(--brand-milk); /* Молочный фон */
+    color: var(--c-text); 
+    padding-bottom: 50px; 
+    font-size: 11px; 
+    line-height: 1.4;
 }
 
-/* === HEADER (СТРОГАЯ СЕТКА 25% | 50% | 25%) === */
+/* --- [S-03] ХЭДЕР (HEADER MODULE) --- */
 .app-header {
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr; /* Четверть - Половина - Четверть */
-    height: 64px;
-    background: var(--dark);
+    /* Сетка: Лого 20% | Артикул 60% | Меню 20% */
+    grid-template-columns: 20% 60% 20%; 
+    min-height: 64px; /* Позволяет расти, если артикул в 2 строки */
+    background: var(--brand-black);
     border-bottom: 1px solid #333;
     position: sticky; top: 0; z-index: 1000;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-/* 1. БРЕНД (ЛЕВО) */
 .brand-zone {
-    background: var(--dark);
-    display: flex; align-items: center; justify-content: flex-start; /* Прижат влево */
-    padding-left: 20px;
-    border-right: 1px solid #333;
+    display: flex; align-items: center; justify-content: center;
+    border-right: 1px solid #222;
+    background: var(--brand-black);
 }
 .brand-logo-header {
     width: 140px; height: 40px;
     background-image: var(--logo-header);
-    background-size: contain; background-repeat: no-repeat; background-position: left center;
+    background-size: contain; background-repeat: no-repeat; background-position: center;
+    opacity: 1.0;
 }
 
-/* 2. АРТИКУЛ (ЦЕНТР) */
 .sku-zone {
     display: flex; flex-direction: column; 
     align-items: center; justify-content: center;
-    background: var(--dark);
-    padding: 0 10px;
-    overflow: hidden; /* Чтобы не вылезал */
+    padding: 5px 15px;
+    background: var(--brand-black);
+    overflow: hidden;
 }
 .sku-val { 
-    font-family: 'Oswald'; 
-    /* Умный шрифт: не меньше 14px, не больше 26px, подстраивается под ширину */
-    font-size: clamp(14px, 1.8vw, 26px); 
-    color: #FFFFFF; /* БЕЛЫЙ */
-    line-height: 1.1; letter-spacing: 0.5px; 
+    font-family: 'Oswald', sans-serif; 
+    font-weight: 500;
+    /* Уменьшили шрифт + разрешили перенос */
+    font-size: clamp(14px, 1.4vw, 20px); 
+    color: #FFFFFF; 
     text-align: center;
-    white-space: nowrap; /* В одну строку */
-}
-.icon-line { display: flex; gap: 4px; margin-top: 4px; justify-content: center; }
-
-/* Иконки в шапке */
-.icon-badge {
-    position: relative;
-    width: 22px; height: 22px; border-radius: 3px;
-    background: #333; color: #666;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; border: 1px solid #444;
-}
-.icon-badge.active { color: #fff; border: 1px solid rgba(255,255,255,0.4); }
-.icon-badge.active[style*="FFC107"] { color: #212529 !important; }
-
-/* Бейджи иконок (x2, UV) - ВНИЗУ СПРАВА (КАК ПРОСИЛ) */
-.icon-sub {
-    position: absolute; bottom: -4px; right: -4px;
-    font-size: 8px; font-weight: 800; color: #000;
-    background: #fff; padding: 0 2px; border-radius: 2px;
-    line-height: 1; box-shadow: 0 1px 2px rgba(0,0,0,0.5);
-    z-index: 2;
+    letter-spacing: 0.5px;
+    white-space: normal; /* Разрешить перенос */
+    word-break: break-word;
+    line-height: 1.2;
 }
 
-/* 3. ИНСТРУМЕНТЫ (ПРАВО) */
 .tools-zone {
     display: flex; flex-direction: column; 
-    align-items: flex-end; justify-content: center; /* Прижат вправо */
-    padding-right: 20px;
-    gap: 8px;
-    background: var(--dark);
-    border-left: 1px solid #333;
+    align-items: center; justify-content: center; gap: 6px;
+    border-left: 1px solid #222;
+    background: var(--brand-black);
 }
 .tool-btn { 
     cursor: pointer; font-size: 16px; color: #888; transition: 0.2s; 
 }
-.tool-btn:hover { color: var(--primary); }
+.tool-btn:hover { color: var(--brand-orange); transform: scale(1.1); }
 .phone-link { 
-    font-size: 12px; font-weight: bold; 
-    text-decoration: none; color: #fff; 
-    font-family: 'Oswald'; letter-spacing: 1px;
+    font-size: 11px; font-weight: bold; text-decoration: none; color: #fff; letter-spacing: 0.5px;
 }
 
-/* === DASHBOARD GRID (РАБОЧЕЕ ПОЛЕ) === */
+/* --- [S-04] ИКОНКИ И БЕЙДЖИ (ICONS) --- */
+.icon-line { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; justify-content: center; }
+
+.icon-badge {
+    position: relative;
+    /* Уменьшили в 2 раза: было 22px -> стало 14px */
+    width: 16px; height: 16px; border-radius: 2px;
+    background: #2a2a2a; color: #555;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; border: 1px solid #333;
+}
+.icon-badge.active { 
+    color: #fff; border-color: rgba(255,255,255,0.3); 
+    /* Оранжевое свечение активных */
+    box-shadow: 0 0 4px rgba(247, 147, 30, 0.3);
+}
+.icon-badge.active[style*="FFC107"] { color: #212529 !important; }
+
+/* Маленькие бейджи (x2, UV) внизу справа */
+.icon-sub {
+    position: absolute; bottom: -3px; right: -3px;
+    font-size: 7px; font-weight: 800; color: #000;
+    background: #fff; padding: 0 1px; border-radius: 2px;
+    line-height: 1; 
+    border: 1px solid #000;
+    z-index: 10;
+}
+
+/* --- [S-05] СЕТКА DASHBOARD (GRID LAYOUT) --- */
 .dashboard-grid {
     display: grid;
-    /* Плитки компактнее: мин 200px */
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1px; 
-    background: #bbb; /* Цвет линий сетки */
-    border-bottom: 1px solid #bbb;
+    /* Плитки от 220px, заполняют ширину */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 6px; /* ВОЗДУХ! */
+    padding: 6px;
 }
 
+/* --- [S-06] ДИЗАЙН ПЛИТКИ (CARD STYLE) --- */
 .param-tile {
-    background: var(--bg-tile); /* СЕРЫЙ ФОН (#DEE2E6) для контраста с белыми кнопками */
+    background: #FFFFFF; /* Белая плитка */
     padding: 10px;
+    border-radius: 4px;
+    /* Легкая тень для объема на молочном фоне */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+    border: 1px solid #E0E0E0;
     display: flex; flex-direction: column;
     height: 100%;
 }
 
-/* Стиль для плитки КАТЕГОРИИ */
-.param-tile.tile-category {
-    background: #CED4DA; /* Еще чуть темнее для акцента */
-    border-left: 4px solid var(--primary);
-}
-
+/* Заголовок плитки */
 .tile-header {
     font-family: 'Oswald'; font-size: 11px; text-transform: uppercase;
-    color: #555; /* Более темный серый заголовок */
-    margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 2px solid var(--primary); padding-bottom: 3px;
+    color: #888; margin-bottom: 8px; 
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 2px solid var(--brand-orange); /* Оранжевое подчеркивание */
+    padding-bottom: 4px;
 }
-.tile-id { font-size: 9px; background: #fff; padding: 1px 4px; border-radius: 2px; color: #000; font-family: monospace; border:1px solid #999; }
+.tile-id { 
+    font-size: 9px; background: #F0F0F0; padding: 1px 4px; 
+    border-radius: 3px; color: #555; font-family: monospace; border: 1px solid #ddd;
+}
 
-/* СПИСОК ОПЦИЙ */
+/* --- [S-07] КНОПКИ ОПЦИЙ (BUTTONS) --- */
 .opt-list {
     display: flex; flex-wrap: wrap; gap: 4px;
 }
 
 .opt-item {
-    border: 1px solid #999; /* Четкие границы */
-    padding: 5px 2px; /* Компактные отступы */
-    font-size: 10px; font-weight: 600;
+    border: 1px solid var(--c-border);
+    padding: 6px 2px;
+    font-size: 10px; font-weight: 500;
     cursor: pointer;
-    border-radius: 2px;
-    flex-grow: 1; 
-    text-align: center;
-    background: #fff; /* Белая кнопка */
-    color: #000; /* Черный текст */
-    transition: all 0.1s;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    border-radius: 3px;
+    flex-grow: 1; text-align: center;
+    background: #fff; color: var(--c-text);
+    transition: all 0.1s ease;
 }
-.opt-item:hover { border-color: var(--primary); transform: translateY(-1px); z-index: 2; }
 
-/* Активная кнопка: Белый текст на Черном фоне */
+/* Ховер - оранжевая рамка */
+.opt-item:hover { 
+    border-color: var(--brand-orange); 
+    color: var(--brand-orange);
+    z-index: 2; transform: translateY(-1px);
+}
+
+/* Активная кнопка - Черная с белым текстом */
 .opt-item.active {
-    background: #000; 
+    background: var(--brand-black); 
     color: #fff;
-    border-color: #000; 
-    box-shadow: inset 0 2px 5px rgba(255,255,255,0.1);
+    border-color: var(--brand-black); 
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
+/* Отключенная кнопка */
 .opt-item.disabled {
-    opacity: 0.3; pointer-events: none; background: #e9ecef; text-decoration: line-through; box-shadow: none; border-color: #ccc;
+    opacity: 0.3; pointer-events: none; 
+    background: #f8f9fa; color: #adb5bd;
+    text-decoration: line-through;
+    border-color: #eee;
+    box-shadow: none;
 }
 
-/* ГЕОМЕТРИЯ */
+/* --- [S-08] СПЕЦ-ПЛИТКА КАТЕГОРИИ --- */
+.param-tile.tile-category {
+    background: #2c2c2c; /* Темная плитка для контраста */
+    border: 1px solid #000;
+}
+.tile-category .tile-header { color: #aaa; border-color: #555; }
+.tile-category .opt-item { 
+    background: #444; color: #DDD; border-color: #555; 
+}
+.tile-category .opt-item:hover {
+    border-color: var(--brand-orange); color: #fff;
+}
+.tile-category .opt-item.active {
+    background: var(--brand-orange); 
+    color: #000; border-color: var(--brand-orange);
+}
+
+/* --- [S-09] ГЕОМЕТРИЯ (INPUTS) --- */
 .geo-box { display: flex; gap: 4px; }
 .geo-col-wrap { display: flex; flex-direction: column; }
-.geo-lbl { font-size: 9px; color: #666; text-transform: uppercase; margin-bottom: 2px; font-weight: bold;}
+.geo-lbl { font-size: 9px; color: #999; margin-bottom: 2px; text-transform: uppercase; font-weight: bold;}
 .geo-select { 
     width: 100%; padding: 4px; font-size: 11px; font-weight: bold;
-    border: 1px solid #999; border-radius: 2px; background: #fff;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    border: 1px solid var(--c-border); border-radius: 3px; 
+    background: #fff; color: var(--c-text);
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
+.geo-select:focus { border-color: var(--brand-orange); }
 
-/* === FOOTER === */
+/* --- [S-10] ФУТЕР (FOOTER) --- */
 .app-footer {
     position: fixed; bottom: 0; left: 0; width: 100%;
-    background: #000; 
+    background: var(--brand-black); 
     color: #888;
     display: flex; justify-content: space-between; align-items: center;
-    padding: 0 20px; height: 30px; font-size: 10px; z-index: 2000;
+    padding: 0 20px; height: 32px; font-size: 10px; z-index: 2000;
     border-top: 1px solid #333;
 }
 .footer-nav { display: flex; gap: 20px; }
 .footer-link { 
-    cursor: pointer; text-transform: uppercase; 
-    font-weight: bold; color: #fff; opacity: 0.5; transition: 0.2s; 
+    cursor: pointer; text-transform: uppercase; font-weight: bold; 
+    color: #AAA; transition: 0.2s; 
 }
-.footer-link:hover { opacity: 1; color: var(--primary); }
+.footer-link:hover { color: var(--brand-orange); opacity: 1;}
 
-/* === PDF & MATRIX (ЗЕБРА ВОССТАНОВЛЕНА) === */
+/* --- [S-11] СТРАНИЦЫ (PDF, MATRIX) --- */
+/* Сохранили твои настройки справочника 1 в 1 */
 .page { display: none; padding: 20px; }
 .page.active { display: block; animation: fadeIn 0.3s; }
-.container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border: 1px solid #ccc; }
+.container { 
+    max-width: 1000px; margin: 0 auto; 
+    background: #fff; padding: 30px; 
+    border: 1px solid #ccc;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.03); 
+}
 
-.section-title { font-family:'Oswald'; font-size:20px; margin-bottom:20px; border-bottom:4px solid var(--primary); padding-bottom:5px; text-transform: uppercase;}
+.section-title { font-family:'Oswald'; font-size:20px; margin-bottom:20px; border-bottom:4px solid var(--brand-orange); padding-bottom:5px; text-transform: uppercase; color: #000; }
 
-/* Стили текста из v17.1 (Зебра и Формулы) */
-.paper-layout { font-family:'Roboto'; font-size:12px; line-height:1.5; color:#212529; }
+/* Типографика текста справочника */
+.paper-layout { font-family:'Roboto', sans-serif; font-size:12px; line-height:1.5; color:#212529; }
 .paper-layout h1 { font-family:'Oswald'; font-size:16px; margin:20px 0 10px; color:#000; border-bottom:1px solid #ddd; padding-bottom:5px; }
-.paper-layout h2 { font-family:'Roboto Condensed'; font-size:14px; background:#E9ECEF; padding:5px 10px; border-left:4px solid var(--bus); margin:20px 0 10px; font-weight:bold; }
+.paper-layout h2 { 
+    font-family:'Roboto Condensed'; font-size:14px; font-weight:bold;
+    background: #E9ECEF; padding: 5px 10px; 
+    border-left: 4px solid var(--bus); margin: 20px 0 10px; 
+}
 .paper-layout h3 { font-size:12px; font-weight:bold; margin-top:15px; border-left:3px solid #dee2e6; padding-left:8px; }
 .paper-layout p { margin-bottom:8px; }
 .paper-layout ul { margin:10px 0; padding:0; list-style:none; }
 .paper-layout li { padding:4px 8px; border-bottom:1px solid #eee; }
 
-/* ЗЕБРА ДЛЯ СПИСКОВ */
+/* Зебра для списков */
 .paper-layout li:nth-child(even) { background-color: #F8F9FA; }
 
-/* ФОРМУЛЫ */
+/* Формулы */
 .formula {
-    background: #fff; border: 1px solid #000; border-left: 4px solid var(--primary);
+    background: #fff; border: 1px solid #000; border-left: 4px solid var(--brand-orange);
     padding: 10px; margin: 15px 0; 
     font-family: "Times New Roman", serif; font-size: 14px; font-style: italic;
     text-align: center;
 }
 
-/* ТАБЛИЦЫ (ЗЕБРА) */
+/* Таблицы (Зебра) */
 .science-table { width:100%; border-collapse:collapse; font-size:11px; margin:15px 0; border:1px solid #000; font-family: 'Roboto Condensed'; }
-.science-table th { background:#343a40; color:#fff; padding:6px; text-transform:uppercase; font-weight:normal; border:1px solid #000; }
-.science-table td { border:1px solid #000; padding:6px; vertical-align: top;}
-.science-table tr:nth-child(even) { background-color: #F1F3F5; } /* Зебра */
+.science-table th { background: #343a40; color:#fff; padding:6px; font-weight:normal; text-transform:uppercase; border:1px solid #000; }
+.science-table td { border:1px solid #000; padding:6px; vertical-align: top; }
+.science-table tr:nth-child(even) { background-color: #F1F3F5; }
 
 .matrix-scroll-wrap { overflow-x:auto; border:1px solid #000; margin-bottom:20px; }
 .summary-table { width:100%; border-collapse:collapse; font-size:10px; }
 .summary-table th { background:#212529; color:#fff; padding:4px; border:1px solid #000; }
 .summary-table td { border:1px solid #000; padding:3px; text-align:center; }
 
+/* --- [S-12] УВЕДОМЛЕНИЯ (TOASTS) --- */
 .toast-container { position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); z-index: 3000; }
-.toast { background: #111; color: #fff; padding: 10px 15px; border-radius: 4px; font-size: 12px; margin-top: 5px; border-left: 3px solid var(--signal); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-.toast.danger { border-left-color: var(--fire); }
+.toast { 
+    background: #111; color: #fff; 
+    padding: 10px 15px; border-radius: 4px; font-size: 12px; 
+    margin-top: 5px; border-left: 3px solid var(--st-signal); 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+}
+.toast.danger { border-left-color: var(--st-fire); }
 
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }

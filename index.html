@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENICUM Configurator v21.2</title>
+    <title>ENICUM Configurator v22.0</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -30,8 +30,7 @@
     </div>
 </div>
 
-<div id="sysAlert" class="sys-alert-block" style="display:none;">
-    </div>
+<div id="sysAlert" class="sys-alert-block" style="display:none;"></div>
 
 <div id="p-conf" class="page active" style="padding-top:0;">
     <div id="dashboardGrid" class="dashboard-grid"></div>
@@ -39,7 +38,7 @@
 
 <div id="p-matrix" class="page">
     <div class="container">
-        <h1 class="section-title" style="color:var(--dark); border-bottom: 3px solid var(--primary); padding-bottom: 10px; margin-bottom: 20px;">Матрица индексов маркообразования кабеля Эникум</h1>
+        <h1 class="section-title">Матрица индексов маркообразования кабеля Эникум</h1>
         
         <div class="matrix-scroll-wrap"><div id="summaryTableArea"></div></div>
         
@@ -473,7 +472,7 @@
     <div class="pdf-preview-wrap" id="pdfExportTarget" style="padding:40px; background:white; max-width:800px; margin:0 auto;">
         <div class="brand-logo" style="width:200px; height:60px; background-image:var(--logo-doc); background-size:contain; margin-bottom:20px;"></div>
         
-        <div style="font-family:'Oswald'; font-size:24px; margin-bottom:20px; border-bottom:2px solid var(--primary); padding-bottom:10px;" id="pdfSkuMain">...</div>
+        <div style="font-family:'Oswald'; font-size:24px; margin-bottom:20px; border-bottom:2px solid var(--brand-orange); padding-bottom:10px;" id="pdfSkuMain">...</div>
         <div id="pdfIcons" style="display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap;"></div>
         
         <table style="width:100%; font-size:12px; border-collapse:collapse; font-family:'Roboto Condensed'; border-top:1px solid #000;">
@@ -481,17 +480,17 @@
         </table>
         
         <div style="margin-top:30px; font-size:10px; color:#999; border-top:1px solid #eee; padding-top:10px;">
-            Сформировано в ENICUM Configurator v21.2
+            Сформировано в ENICUM Configurator
         </div>
     </div>
     
-    <div class="fab-download" onclick="app.downloadPDF()" style="position:fixed; bottom:60px; right:20px; width:50px; height:50px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); cursor:pointer; font-size:20px; z-index: 2500;">
+    <div class="fab-download" onclick="app.downloadPDF()" style="position:fixed; bottom:60px; right:20px; width:50px; height:50px; background:var(--brand-orange); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); cursor:pointer; font-size:20px; z-index: 2500;">
         <i class="fas fa-file-pdf"></i>
     </div>
 </div>
 
 <div class="app-footer">
-    <div style="font-weight:bold; color:#666;">ENICUM v21.2</div>
+    <div style="font-weight:bold; color:#666;">ENICUM v22.0</div>
     <div class="footer-nav">
         <div class="footer-link" onclick="nav('conf')">КОНФИГУРАТОР</div>
         <div class="footer-link" onclick="nav('matrix')">СПРАВКА</div>

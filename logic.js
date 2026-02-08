@@ -1,5 +1,11 @@
-/* logic.js - v21.1: Task Flow + Toggle Logic (Final) */
+/* ==========================================================================
+   PROJECT: ENICUM CONFIGURATOR
+   VERSION: v22.0 (Modular Logic)
+   FILE:    [L] logic.js
+   DESC:    Ядро. Логика v21.1 (Toggle + Task Flow) в структуре v22.0.
+   ========================================================================== */
 
+// --- [L-01] НАВИГАЦИЯ ---
 window.nav = function(p) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
     document.getElementById('p-'+p).classList.add('active');
@@ -9,6 +15,7 @@ window.nav = function(p) {
 }
 
 const app = {
+    // --- [L-02] СОСТОЯНИЕ (STATE) ---
     state: { 
         cat: 'BUS', 
         geo: { N:1, type:'x2x', S:'0.60' }, 
@@ -16,12 +23,13 @@ const app = {
         validIns: [], validJacket: [], msgs: [] 
     },
 
+    // --- [L-03] ИНИЦИАЛИЗАЦИЯ ---
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система готова: v21.1']), 1000);
+        setTimeout(() => this.showToasts(['Система готова: v22.0']), 1000);
     },
 
-    setCat(cat, btn) {
+    setCat(cat) {
         this.state.cat = cat;
         this.doReset(cat);
     },
@@ -29,11 +37,15 @@ const app = {
     resetAll() { this.doReset(this.state.cat); },
 
     doReset(cat) {
+        // Очистка
         for(let i=1; i<=24; i++) this.state.idx[i] = "";
+        
+        // Загрузка дефолтов из [D-02] LIMITS
         const defs = DB.LIMITS[cat].defaults;
         for(const [k,v] of Object.entries(defs)) this.state.idx[k] = v;
         this.state.idx[22] = DB.LIMITS[cat].volt;
         
+        // Дефолты геометрии
         if(cat==='BUS') this.state.geo = {N:1, type:'x2x', S:'0.60'};
         if(cat==='SIGNAL') this.state.geo = {N:2, type:'x2x', S:'0.75'};
         if(cat==='CONTROL') this.state.geo = {N:5, type:'x', S:'1.5'};
@@ -44,6 +56,7 @@ const app = {
         this.updateUI();
     },
 
+    // --- [L-04] ОБРАБОТКА ВВОДА (HANDLERS) ---
     updateVal(id, val) {
         // ЛОГИКА ТУМБЛЕРА (TOGGLE)
         // Если кликнули на то, что уже выбрано -> Сбрасываем в "" (Нет)
@@ -71,12 +84,13 @@ const app = {
         this.updateUI(); 
     },
 
-    // === ЯДРО ЛОГИКИ ===
+    // --- [L-05] ЯДРО ЛОГИКИ (CALCULATE) ---
     calculateState() {
         const s = this.state.idx;
         const cat = this.state.cat;
         let msgs = [];
         
+        // 1. Сбор требований
         const req = { minT: -50, hf: false, fr: false, oil: false, chem: false, uv: false, flex: 1 };
         const fireCode = s[11] || "";
         
@@ -90,6 +104,7 @@ const app = {
         if (s[19] === '(5)') req.flex = 1; 
         if (s[19] === '(6)') req.flex = 2;
 
+        // 2. Правила
         if (cat === 'BUS') {
             if (req.fr) { if (s[3] !== 'Си') s[3] = 'Си'; } 
             else { if (s[3] === 'Си') s[3] = ''; }
@@ -101,28 +116,35 @@ const app = {
             if (['Эа','Эм','ЭИа','ЭИм'].includes(s[4])) s[4] = 'ЭИо';
         }
 
+        // 3. Фильтр Материалов
         const isCompatible = (matCode, type) => {
             let key = (type === 'jacket') ? 'J_' + matCode : matCode;
             let p = DB.MAT_PROPS[key];
             if (!p) return false;
+            
             if (p.minT > req.minT) return false;
             if (req.hf && !p.hf) return false;
             if (req.oil && type === 'jacket' && !p.oil) return false;
             if (req.chem && type === 'jacket' && !p.chem) return false;
+            
             if (req.fr) {
                 const hasBarrier = (s[3] === 'Си');
                 if (!p.fr && !(type === 'ins' && hasBarrier)) return false;
             }
+            
             if (req.flex === 2 && p.flex_grade < 2) return false;
             if (req.flex === 1 && p.flex_grade < 0 && type==='jacket') return false;
+            
             return true;
         };
 
         const allIns = DB.INDICES.find(x => x.id === 2).opts.map(o => o.c);
         const allJacket = DB.INDICES.find(x => x.id === 9).opts.map(o => o.c);
+        
         this.state.validIns = allIns.filter(c => isCompatible(c, 'ins'));
         this.state.validJacket = allJacket.filter(c => isCompatible(c, 'jacket'));
 
+        // 4. Авто-коррекция
         if (!this.state.validIns.includes(s[2]) && this.state.validIns.length > 0) {
              if(cat==='BUS' && this.state.validIns.includes('Пв')) s[2] = 'Пв';
              else s[2] = this.state.validIns[0];
@@ -131,6 +153,7 @@ const app = {
              s[9] = this.state.validJacket[0];
         }
 
+        // 5. Авто-цвет
         if (s[16] === '-УФ' || s[9] === 'Пэ') s[24] = 'Черный';
         else if (req.fr) s[24] = 'Оранжевый';
         else if (s[21] === 'i') s[24] = 'Синий'; 
@@ -162,7 +185,7 @@ const app = {
         if(this.state.msgs.length) { this.showToasts(this.state.msgs); this.state.msgs = []; }
     },
 
-    // === ГЕНЕРАТОР ПЛИТКИ (НОВЫЙ ПОРЯДОК) ===
+    // --- [L-06] РЕНДЕР ПЛИТКИ (DASHBOARD GRID) ---
     renderDashboard() {
         const grid = document.getElementById('dashboardGrid');
         if (!grid) return;
@@ -170,11 +193,11 @@ const app = {
 
         grid.innerHTML += this.getCategoryTile();
 
-        // Порядок "ОТ ЗАДАЧИ" (Твой сценарий)
+        // Порядок "ОТ ЗАДАЧИ" (Task Flow)
         const renderOrder = [
             // 1. СУТЬ
             23, // Протокол
-            18, // ГЕОМЕТРИЯ (Спец)
+            18, // ГЕОМЕТРИЯ
             19, // Гибкость
             
             // 2. БЕЗОПАСНОСТЬ
@@ -210,10 +233,9 @@ const app = {
         let html = '';
         cats.forEach(c => {
             const isActive = (this.state.cat === c.id);
-            // Используем стандартный класс opt-item для единообразия
             html += `<div class="opt-item ${isActive ? 'active' : ''}" onclick="app.setCat('${c.id}')">${c.lbl}</div>`;
         });
-        return `<div class="param-tile tile-category"><div class="tile-header"><span style="font-weight:bold; color:var(--dark);">КАТЕГОРИЯ</span><span class="tile-id">TYPE</span></div><div class="opt-list" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px;">${html}</div></div>`;
+        return `<div class="param-tile tile-category"><div class="tile-header"><span style="font-weight:bold; color:#fff;">КАТЕГОРИЯ</span><span class="tile-id">TYPE</span></div><div class="opt-list" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px;">${html}</div></div>`;
     },
 
     getGeoTile() {
@@ -221,6 +243,7 @@ const app = {
         const lim = DB.LIMITS[cat];
         
         let typesHtml = lim.types.map(t => `<option value="${t}" ${this.state.geo.type===t?'selected':''}>${DB.GEO_TYPES.find(x=>x.c===t).l}</option>`).join('');
+        
         let sList = lim.valid_S;
         if(this.state.geo.type === 'vfd') sList = sList.filter(s => ['1.5','2.5','4.0','6.0'].includes(s));
         if(cat === 'BUS') { const p = this.state.idx[23] || ''; const r = lim.proto[p] || lim.proto['']; sList = r.S; }
@@ -238,23 +261,25 @@ const app = {
     getParamTile(meta) {
         const val = this.state.idx[meta.id];
         
-        // ФИЛЬТРАЦИЯ: Убираем опцию "" (Нет) из визуального списка
-        // Мы оставляем только те опции, у которых есть код (o.c !== "")
+        // ФИЛЬТРАЦИЯ: Убираем опцию "" (Нет)
         let visibleOpts = meta.opts.filter(o => o.c !== "");
 
         let optionsHtml = visibleOpts.map(o => {
             const isActive = (val === o.c);
             let isDisabled = false;
+            // Валидация
             if (meta.id === 2 && !this.state.validIns.includes(o.c)) isDisabled = true;
             if (meta.id === 9 && !this.state.validJacket.includes(o.c)) isDisabled = true;
             
             const classes = `opt-item ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`;
-            return `<div class="${classes}" onclick="app.updateVal(${meta.id}, '${o.c}')" title="${o.l}">${o.c}</div>`;
+            // hint берем из базы (где теперь лежит полный текст wiki)
+            return `<div class="${classes}" onclick="app.updateVal(${meta.id}, '${o.c}')" title="${o.hint || o.l}">${o.c}</div>`;
         }).join('');
 
         return `<div class="param-tile"><div class="tile-header"><span>${meta.n}</span><span class="tile-id">#${meta.id}</span></div><div class="opt-list">${optionsHtml}</div></div>`;
     },
 
+    // --- [L-07] ИКОНКИ ---
     renderIcons() {
         const s = this.state.idx;
         const c = document.getElementById('headerIcons');
@@ -265,7 +290,10 @@ const app = {
             if(!active) return;
             const div = document.createElement('div');
             div.className = 'icon-badge active';
-            div.style.background = color;
+            div.style.background = color; // В CSS перекрывается, но для кастомных цветов оставим
+            // Для совместимости с новым CSS, если color === #000, добавляем border
+            if(color === '#000') div.style.borderColor = '#333';
+            
             div.innerHTML = txt;
             if(badge) div.innerHTML += `<div class="icon-sub">${badge}</div>`;
             c.appendChild(div);
@@ -322,19 +350,21 @@ const app = {
         }
     },
 
+    // --- [L-08] ГЕНЕРАТОРЫ СПРАВОЧНИКА И PDF ---
     renderMatrix() {
         const c1 = document.getElementById('summaryTableArea');
         if (c1) {
             let html1 = '<table class="summary-table" style="width:auto; min-width:100%; border-collapse: collapse; font-size: 11px;"><thead><tr>';
-            DB.INDICES.forEach(idx => { html1 += `<th style="background:var(--dark); color:white; padding:6px; border:1px solid #555;">${idx.id}</th>`; });
+            DB.INDICES.forEach(idx => { html1 += `<th style="background:#111; color:white; padding:6px; border:1px solid #555;">${idx.id}</th>`; });
             html1 += '</tr></thead><tbody><tr>';
             DB.INDICES.forEach(idx => {
-                html1 += `<td style="padding:0; border:1px solid #ccc; vertical-align:top; background:var(--bg-white);">`;
+                html1 += `<td style="padding:0; border:1px solid #ccc; vertical-align:top; background:white;">`;
                 idx.opts.forEach(o => {
                     if (o.c) { 
                         const isActive = (app.state.idx[idx.id] === o.c);
-                        const activeStyle = isActive ? 'background:#0D6EFD; color:white; font-weight:bold;' : ''; 
-                        html1 += `<div style="padding:3px 4px; border-bottom:1px solid var(--bg-light); cursor:default; ${activeStyle}" title="${o.l}">${o.c}</div>`;
+                        // Используем ОРАНЖЕВЫЙ (#F7931E) вместо синего (#0D6EFD) для соответствия новому стилю
+                        const activeStyle = isActive ? 'background:#F7931E; color:black; font-weight:bold;' : ''; 
+                        html1 += `<div style="padding:3px 4px; border-bottom:1px solid #eee; cursor:default; ${activeStyle}" title="${o.hint}">${o.c}</div>`;
                     }
                 });
                 html1 += `</td>`;
@@ -354,7 +384,7 @@ const app = {
             const val = this.state.idx[id]; if(!val && id !== 18) return;
             const meta = DB.INDICES.find(x=>x.id===id); const opt = meta.opts.find(o=>o.c===val);
             const valStr = (id===18) ? this.state.idx[18] : (opt ? opt.l : val);
-            const bg = index % 2 === 0 ? 'var(--bg-white)' : 'var(--bg-light)';
+            const bg = index % 2 === 0 ? '#fff' : '#f9f9f9';
             specHtml += `<tr style="background:${bg}; border-bottom:1px solid #eee;"><td style="padding:8px; color:#666; width:40%;">${meta.n}</td><td style="padding:8px; font-weight:bold; text-align:right;">${valStr}</td></tr>`;
         });
         const tableArea = document.getElementById('pdfSpecsTable');
