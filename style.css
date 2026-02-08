@@ -1,16 +1,21 @@
 /* ==========================================================================
    PROJECT: ENICUM CONFIGURATOR
-   VERSION: v22.1 (Visual Fix)
+   VERSION: v22.2 (Color Match Fix)
    FILE:    [S] style.css
    DESC:    Корпоративный стиль. 
-   FIXES:   Хэдер под лого, Белая категория, Справочник без границ.
+   FIX:     Хэдер подогнан под реальный цвет JPG-логотипа (#231F20).
    ========================================================================== */
 
 /* --- [S-01] ПЕРЕМЕННЫЕ И ЦВЕТА (SSOT) --- */
 :root {
     /* Brand Colors */
     --brand-orange: #F7931E; 
-    --brand-black:  #2c2c2c; /* Графит (под фон логотипа) */
+    
+    /* FIX: Цвет взят пипеткой с файла логотипа 'Artboard 1 copy 5@2x-100'.
+       Это не #000000, а теплый глубокий серый (Rich Black).
+    */
+    --brand-black:  #231F20; 
+    
     --brand-milk:   #F7F7F7; /* Молочный (фон страницы) */
     
     /* Semantic Colors */
@@ -50,15 +55,15 @@ body {
     display: grid;
     grid-template-columns: 20% 60% 20%; 
     min-height: 64px; 
-    background: var(--brand-black); /* Теперь Графит #2c2c2c */
-    border-bottom: 1px solid #444;
+    background: var(--brand-black); /* Теперь точно как на картинке */
+    border-bottom: 1px solid #3a3638; /* Чуть светлее фона для границы */
     position: sticky; top: 0; z-index: 1000;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .brand-zone {
     display: flex; align-items: center; justify-content: center;
-    border-right: 1px solid #444;
+    border-right: 1px solid #3a3638;
     background: var(--brand-black);
 }
 .brand-logo-header {
@@ -89,7 +94,7 @@ body {
 .tools-zone {
     display: flex; flex-direction: column; 
     align-items: center; justify-content: center; gap: 6px;
-    border-left: 1px solid #444;
+    border-left: 1px solid #3a3638;
     background: var(--brand-black);
 }
 .tool-btn { 
@@ -106,9 +111,9 @@ body {
 .icon-badge {
     position: relative;
     width: 16px; height: 16px; border-radius: 2px;
-    background: #444; color: #aaa;
+    background: #3a3638; color: #aaa;
     display: flex; align-items: center; justify-content: center;
-    font-size: 9px; border: 1px solid #555;
+    font-size: 9px; border: 1px solid #4a4648;
 }
 .icon-badge.active { 
     color: #fff; border-color: rgba(255,255,255,0.3); 
@@ -191,12 +196,11 @@ body {
     box-shadow: none;
 }
 
-/* --- [S-08] ПЛИТКА КАТЕГОРИИ (ТЕПЕРЬ БЕЛАЯ) --- */
+/* --- [S-08] ПЛИТКА КАТЕГОРИИ (БЕЛАЯ) --- */
 .param-tile.tile-category {
-    background: #FFFFFF; /* Белая */
-    border: 1px solid #E0E0E0; /* Обычная граница */
+    background: #FFFFFF; 
+    border: 1px solid #E0E0E0; 
 }
-/* Заголовок чуть строже, чтобы выделить блок */
 .tile-category .tile-header { 
     color: #000; border-bottom: 2px solid #000; 
 }
@@ -228,7 +232,7 @@ body {
     color: #888;
     display: flex; justify-content: space-between; align-items: center;
     padding: 0 20px; height: 32px; font-size: 10px; z-index: 2000;
-    border-top: 1px solid #444;
+    border-top: 1px solid #3a3638;
 }
 .footer-nav { display: flex; gap: 20px; }
 .footer-link { 
@@ -244,12 +248,8 @@ body {
 /* УБРАЛИ РАМКИ И ФОН ДЛЯ СПРАВОЧНИКА */
 .container { 
     max-width: 1000px; margin: 0 auto; 
-    /* background: #fff; <- Убрано */
-    padding: 0; /* Убрано */
-    /* border: 1px solid #ccc; <- Убрано */
-    /* box-shadow: ... <- Убрано */
     background: transparent;
-    box-shadow: none; border: none;
+    box-shadow: none; border: none; padding: 0;
 }
 
 .section-title { font-family:'Oswald'; font-size:20px; margin-bottom:20px; border-bottom:4px solid var(--brand-orange); padding-bottom:5px; text-transform: uppercase; color: #000; }
@@ -258,7 +258,6 @@ body {
 .paper-layout h1 { font-family:'Oswald'; font-size:18px; margin:30px 0 15px; color:#000; border-bottom:1px solid #ddd; padding-bottom:5px; }
 .paper-layout h2 { 
     font-family:'Roboto Condensed'; font-size:16px; font-weight:bold;
-    /* Убрали серую подложку, сделали просто текст */
     margin: 30px 0 10px; color: #000;
     border-left: 4px solid var(--brand-orange); padding-left: 10px;
 }
