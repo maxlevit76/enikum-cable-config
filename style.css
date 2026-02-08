@@ -1,9 +1,9 @@
 /* ==========================================================================
    PROJECT: ENICUM CONFIGURATOR
-   VERSION: v22.2 (Color Match Fix)
+   VERSION: v22.3 (Clean Header)
    FILE:    [S] style.css
    DESC:    Корпоративный стиль. 
-   FIX:     Хэдер подогнан под реальный цвет JPG-логотипа (#231F20).
+   FIX:     Цвет хэдера #231F20. Убраны вертикальные разделители в шапке.
    ========================================================================== */
 
 /* --- [S-01] ПЕРЕМЕННЫЕ И ЦВЕТА (SSOT) --- */
@@ -11,9 +11,7 @@
     /* Brand Colors */
     --brand-orange: #F7931E; 
     
-    /* FIX: Цвет взят пипеткой с файла логотипа 'Artboard 1 copy 5@2x-100'.
-       Это не #000000, а теплый глубокий серый (Rich Black).
-    */
+    /* Цвет Rich Black с логотипа (RGB 35, 31, 32) */
     --brand-black:  #231F20; 
     
     --brand-milk:   #F7F7F7; /* Молочный (фон страницы) */
@@ -55,15 +53,15 @@ body {
     display: grid;
     grid-template-columns: 20% 60% 20%; 
     min-height: 64px; 
-    background: var(--brand-black); /* Теперь точно как на картинке */
-    border-bottom: 1px solid #3a3638; /* Чуть светлее фона для границы */
+    background: var(--brand-black); 
+    border-bottom: 1px solid #3a3638; /* Только нижняя граница осталась */
     position: sticky; top: 0; z-index: 1000;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .brand-zone {
     display: flex; align-items: center; justify-content: center;
-    border-right: 1px solid #3a3638;
+    /* border-right убран */
     background: var(--brand-black);
 }
 .brand-logo-header {
@@ -94,7 +92,7 @@ body {
 .tools-zone {
     display: flex; flex-direction: column; 
     align-items: center; justify-content: center; gap: 6px;
-    border-left: 1px solid #3a3638;
+    /* border-left убран */
     background: var(--brand-black);
 }
 .tool-btn { 
