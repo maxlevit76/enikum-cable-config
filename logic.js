@@ -1,4 +1,4 @@
-/* logic.js - v20.0 FULL: Dashboard + Logic Anchors + PDF */
+/* logic.js - v21.2: Scenario-Based Flow (User Logic) */
 
 window.nav = function(p) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
@@ -18,7 +18,7 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система: Dashboard v20.0 Готов']), 1000);
+        setTimeout(() => this.showToasts(['Логика: Сценарий "От Задачи"']), 1000);
     },
 
     setCat(cat, btn) {
@@ -43,13 +43,13 @@ const app = {
         if(cat==='CONTROL') this.state.geo = {N:5, type:'x', S:'1.5'};
         
         if (!this.state.idx[19]) this.state.idx[19] = '(1)'; 
+        
         this.calculateState();
         this.updateUI();
     },
 
     updateVal(id, val) {
         this.state.idx[id] = val;
-        // Логика Ex-d (Вз -> з)
         if (id === 1) {
             if (val === 'Вз' && this.state.idx[8] !== 'з') { 
                 this.state.idx[8] = 'з'; 
@@ -67,7 +67,7 @@ const app = {
         this.updateUI(); 
     },
 
-    // === ЯДРО ЛОГИКИ (Все якоря сохранены) ===
+    // === ЯДРО ЛОГИКИ ===
     calculateState() {
         const s = this.state.idx;
         const cat = this.state.cat;
@@ -86,23 +86,17 @@ const app = {
         if (s[19] === '(5)') req.flex = 1; 
         if (s[19] === '(6)') req.flex = 2;
 
-        // Авто-барьер для BUS FR
         if (cat === 'BUS') {
-            if (req.fr) {
-                if (s[3] !== 'Си') s[3] = 'Си';
-            } else {
-                if (s[3] === 'Си') s[3] = '';
-            }
+            if (req.fr) { if (s[3] !== 'Си') s[3] = 'Си'; } 
+            else { if (s[3] === 'Си') s[3] = ''; }
         }
 
-        // Логика Робототехники (6 класс)
         if (s[19] === '(6)') { 
-            if (s[10] === 'К' || s[10] === 'Б') { s[10] = 'КГ'; msgs.push('Броня -> КГ (для роботов)'); }
+            if (s[10] === 'К' || s[10] === 'Б') { s[10] = 'КГ'; msgs.push('Броня -> КГ (Робот)'); }
             if (['Эа','Эм','ЭИа','ЭИм'].includes(s[6])) s[6] = 'Эо';
             if (['Эа','Эм','ЭИа','ЭИм'].includes(s[4])) s[4] = 'ЭИо';
         }
 
-        // Фильтр Материалов
         const isCompatible = (matCode, type) => {
             let key = (type === 'jacket') ? 'J_' + matCode : matCode;
             let p = DB.MAT_PROPS[key];
@@ -125,19 +119,16 @@ const app = {
         this.state.validIns = allIns.filter(c => isCompatible(c, 'ins'));
         this.state.validJacket = allJacket.filter(c => isCompatible(c, 'jacket'));
 
-        // Авто-коррекция материалов (Упрощенная для скорости)
         if (!this.state.validIns.includes(s[2]) && this.state.validIns.length > 0) {
-             // Пытаемся оставить тот же, если нет - первый валидный
              if(cat==='BUS' && this.state.validIns.includes('Пв')) s[2] = 'Пв';
              else s[2] = this.state.validIns[0];
-             msgs.push(`Изоляция изменена на ${s[2]}`);
+             msgs.push(`Изоляция -> ${s[2]}`);
         }
         if (!this.state.validJacket.includes(s[9]) && this.state.validJacket.length > 0) {
              s[9] = this.state.validJacket[0];
-             msgs.push(`Оболочка изменена на ${s[9]}`);
+             msgs.push(`Оболочка -> ${s[9]}`);
         }
 
-        // Авто-цвет
         if (s[16] === '-УФ' || s[9] === 'Пэ') s[24] = 'Черный';
         else if (req.fr) s[24] = 'Оранжевый';
         else if (s[21] === 'i') s[24] = 'Синий'; 
@@ -162,45 +153,74 @@ const app = {
         if(s[21]) sku += s[21]; if(s[22]) sku += s[22];
         if(s[23]) sku += s[23]; if(s[24]) sku += " " + s[24];
         
-        const elSku = document.getElementById('skuDisplay');
-        if(elSku) elSku.innerText = sku;
+        document.getElementById('skuDisplay').innerText = sku;
         
         this.renderIcons();
         this.renderDashboard(); 
         if(this.state.msgs.length) { this.showToasts(this.state.msgs); this.state.msgs = []; }
     },
 
-    // === ГЕНЕРАТОР ПЛИТКИ (DASHBOARD GRID) ===
+    // === ГЕНЕРАТОР ПЛИТКИ (ПОРЯДОК: СУТЬ -> БЕЗОПАСНОСТЬ -> ЗАЩИТА -> КОНСТРУКТИВ) ===
     renderDashboard() {
         const grid = document.getElementById('dashboardGrid');
         if (!grid) return;
         grid.innerHTML = '';
 
-        grid.innerHTML += this.getGeoTile();
+        // 0. КАТЕГОРИЯ (ВСЕГДА ПЕРВАЯ)
+        grid.innerHTML += this.getCategoryTile();
 
-        // Порядок плиток на экране
-        const priorityIds = [
-            23, // Протокол
-            2,  // Изоляция
-            4, 6, // Экраны
-            9,  // Оболочка
-            10, // Броня
-            11, // Пожарка
-            12, // Климат
-            13, 14, 15, 16, 17, // Среда
+        // ЛОГИЧЕСКИЙ ПОРЯДОК БЛОКОВ
+        const renderOrder = [
+            // 1. СУТЬ: ЧТО ЭТО? (Протокол -> Геометрия -> Гибкость)
+            23, // Протокол (только для BUS)
+            18, // ГЕОМЕТРИЯ (Сердце)
             19, // Гибкость
-            21, // Ex-i
-            1, // Вз
-            24, 22 // Цвет, Вольтаж
+
+            // 2. БЕЗОПАСНОСТЬ: ГДЕ ЛЕЖИТ? (Огонь -> Взрыв -> Ex-i)
+            11, // Пожарная безопасность
+            1,  // Взрывозащита
+            21, // Искробезопасность
+
+            // 3. ЗАЩИТА: ОТ ЧЕГО СПАСАЕМ? (Экраны -> Броня -> Климат -> Агрессия)
+            4,  // Экран Пары
+            6,  // Экран Общий
+            10, // Броня
+            12, // Климат
+            16, // УФ
+            13, // Масло
+            14, // Химия
+            15, // Термостойкость
+            17, // Грызуны
+            7,  // Водоблокировка (тоже защита)
+
+            // 4. КОНСТРУКТИВ: ИЗ ЧЕГО СДЕЛАН? (Материалы -> Вольтаж -> Цвет)
+            2,  // Изоляция
+            9,  // Оболочка
+            3,  // Барьер Пары
+            5,  // Барьер Общий
+            20, // Покрытие жилы
+            8,  // Заполнение
+            22, // Напряжение
+            24  // Цвет
         ];
 
-        priorityIds.forEach(id => {
+        renderOrder.forEach(id => {
             if(id === 23 && this.state.cat !== 'BUS') return; 
+            if(id === 18) { grid.innerHTML += this.getGeoTile(); return; }
+
             const meta = DB.INDICES.find(x => x.id === id);
-            if (meta) {
-                grid.innerHTML += this.getParamTile(meta);
-            }
+            if (meta) grid.innerHTML += this.getParamTile(meta);
         });
+    },
+
+    getCategoryTile() {
+        const cats = [{id:'BUS', lbl:'BUS'}, {id:'SIGNAL', lbl:'SIGNAL'}, {id:'CONTROL', lbl:'CONTROL'}];
+        let html = '';
+        cats.forEach(c => {
+            const isActive = (this.state.cat === c.id);
+            html += `<div class="opt-item ${isActive ? 'active' : ''}" onclick="app.setCat('${c.id}')">${c.lbl}</div>`;
+        });
+        return `<div class="param-tile tile-category"><div class="tile-header"><span style="font-weight:bold; color:var(--dark);">КАТЕГОРИЯ</span><span class="tile-id">TYPE</span></div><div class="opt-list" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px;">${html}</div></div>`;
     },
 
     getGeoTile() {
@@ -220,58 +240,24 @@ const app = {
         else { nList = [1,2,4]; }
         let nHtml = nList.map(n => `<option value="${n}" ${this.state.geo.N==n?'selected':''}>${n}</option>`).join('');
         
-        return `
-        <div class="param-tile" style="grid-column: span 2; border-left: 4px solid var(--primary);">
-            <div class="tile-header">
-                <span>ГЕОМЕТРИЯ КАБЕЛЯ</span>
-                <span class="tile-id">#18</span>
-            </div>
-            <div class="geo-box">
-                <div style="flex:0.5">
-                    <div style="font-size:9px;color:#888;">КОЛ-ВО</div>
-                    <select class="geo-select" onchange="app.updateGeo('N',this.value)">${nHtml}</select>
-                </div>
-                <div style="flex:1">
-                    <div style="font-size:9px;color:#888;">ТИП</div>
-                    <select class="geo-select" onchange="app.updateGeo('type',this.value)">${typesHtml}</select>
-                </div>
-                <div style="flex:0.8">
-                    <div style="font-size:9px;color:#888;">СЕЧЕНИЕ</div>
-                    <select class="geo-select" onchange="app.updateGeo('S',this.value)">${sHtml}</select>
-                </div>
-            </div>
-        </div>`;
+        return `<div class="param-tile"><div class="tile-header"><span>ГЕОМЕТРИЯ</span><span class="tile-id">#18</span></div><div class="geo-box"><div class="geo-col-wrap" style="flex:0.6"><div class="geo-lbl">КОЛ-ВО</div><select class="geo-select" onchange="app.updateGeo('N',this.value)">${nHtml}</select></div><div class="geo-col-wrap" style="flex:1"><div class="geo-lbl">ТИП</div><select class="geo-select" onchange="app.updateGeo('type',this.value)">${typesHtml}</select></div><div class="geo-col-wrap" style="flex:0.8"><div class="geo-lbl">СЕЧЕНИЕ</div><select class="geo-select" onchange="app.updateGeo('S',this.value)">${sHtml}</select></div></div></div>`;
     },
 
     getParamTile(meta) {
         const val = this.state.idx[meta.id];
-        
         let optionsHtml = meta.opts.map(o => {
             const isActive = (val === o.c);
             let isDisabled = false;
-            
             if (meta.id === 2 && !this.state.validIns.includes(o.c)) isDisabled = true;
             if (meta.id === 9 && !this.state.validJacket.includes(o.c)) isDisabled = true;
             
             const classes = `opt-item ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`;
             const label = o.c === "" ? "Нет" : o.c;
-            
             return `<div class="${classes}" onclick="app.updateVal(${meta.id}, '${o.c}')" title="${o.l}">${label}</div>`;
         }).join('');
-
-        return `
-        <div class="param-tile">
-            <div class="tile-header">
-                <span>${meta.n}</span>
-                <span class="tile-id">#${meta.id}</span>
-            </div>
-            <div class="opt-list">
-                ${optionsHtml}
-            </div>
-        </div>`;
+        return `<div class="param-tile"><div class="tile-header"><span>${meta.n}</span><span class="tile-id">#${meta.id}</span></div><div class="opt-list">${optionsHtml}</div></div>`;
     },
 
-    // --- ЛОГИКА ИКОНОК (С ВОССТАНОВЛЕННЫМИ ЯКОРЯМИ) ---
     renderIcons() {
         const s = this.state.idx;
         const c = document.getElementById('headerIcons');
@@ -284,15 +270,13 @@ const app = {
             div.className = 'icon-badge active';
             div.style.background = color;
             div.innerHTML = txt;
-            if(badge) div.innerHTML += `<span style="position:absolute; top:-4px; right:-6px; font-size:8px; color:black; background:white; border-radius:3px; padding:0 2px;">${badge}</span>`;
+            if(badge) div.innerHTML += `<div class="icon-sub">${badge}</div>`;
             c.appendChild(div);
         }
 
-        // 1. Ex (Взрыв)
         const isEx = (s[21] === 'i' || s[1] === 'Вз');
         mkIcon(isEx, s[21]==='i'?'#0D6EFD':'#000', 'Ex', s[21]==='i'?'i':'');
         
-        // 2. Fire (Пламя 1.2)
         let isFR = s[11] && s[11].includes('FR');
         let frBadge = '';
         if (isFR) {
@@ -303,11 +287,9 @@ const app = {
         }
         mkIcon(isFR, '#DC3545', '<i class="fas fa-fire"></i>', frBadge);
 
-        // 3. HF
         let isHF = (s[11] && (s[11].includes('HF') || s[11].includes('LTx')));
         mkIcon(isHF, '#198754', '<i class="fas fa-leaf"></i>', s[11].includes('LTx')?'LTx':'HF');
 
-        // 4. Climate
         let clim = s[12];
         if(clim) {
             let col = '#0D6EFD'; let icon = '<i class="fas fa-snowflake"></i>'; let badge = '';
@@ -317,15 +299,13 @@ const app = {
             mkIcon(true, col, icon, badge);
         }
 
-        // 5. Oil/Chem
         mkIcon(s[13]==='-МБ', '#000', '<i class="fas fa-tint"></i>');
         mkIcon(s[14]==='-ХС', '#6610f2', '<i class="fas fa-flask"></i>');
+        mkIcon(s[16]==='-УФ', '#212529', '<i class="fas fa-sun"></i>', 'UV');
         
-        // 6. Flex
         if(s[19]==='(5)') mkIcon(true, '#6c757d', '<i class="fas fa-rainbow"></i>');
         if(s[19]==='(6)') mkIcon(true, '#343a40', '<i class="fas fa-robot"></i>');
 
-        // 7. Screen (Якорь №2)
         let scrCnt = 0;
         const countL = (val) => {
             if(!val) return 0;
@@ -336,7 +316,6 @@ const app = {
         scrCnt = countL(s[4]) + countL(s[6]);
         if(scrCnt > 0) mkIcon(true, '#6c757d', '<i class="fas fa-border-all"></i>', scrCnt>1?('x'+scrCnt):'');
 
-        // 8. Armor (Якорь №3)
         let arm = s[10];
         if(arm) {
             let badge = '';
@@ -346,15 +325,14 @@ const app = {
         }
     },
 
-    // --- PDF & MATRIX (Старый функционал возвращен) ---
     renderMatrix() {
         const c1 = document.getElementById('summaryTableArea');
         if (c1) {
             let html1 = '<table class="summary-table" style="width:auto; min-width:100%; border-collapse: collapse; font-size: 11px;"><thead><tr>';
-            DB.INDICES.forEach(idx => { html1 += `<th style="background:var(--dark); color:white; padding:6px; border:1px solid var(--text);">${idx.id}</th>`; });
+            DB.INDICES.forEach(idx => { html1 += `<th style="background:var(--dark); color:white; padding:6px; border:1px solid #555;">${idx.id}</th>`; });
             html1 += '</tr></thead><tbody><tr>';
             DB.INDICES.forEach(idx => {
-                html1 += `<td style="padding:0; border:1px solid var(--border); vertical-align:top; background:var(--bg-white);">`;
+                html1 += `<td style="padding:0; border:1px solid #ccc; vertical-align:top; background:var(--bg-white);">`;
                 idx.opts.forEach(o => {
                     if (o.c) { 
                         const isActive = (app.state.idx[idx.id] === o.c);
@@ -372,6 +350,7 @@ const app = {
     renderPDFPreview() {
         const sku = document.getElementById('skuDisplay').innerText;
         document.getElementById('pdfSkuMain').innerText = sku;
+        document.getElementById('pdfIcons').innerHTML = document.getElementById('headerIcons').innerHTML;
         
         let specHtml = '';
         [18, 22, 23, 10, 11, 21].forEach((id, index) => {
@@ -379,7 +358,7 @@ const app = {
             const meta = DB.INDICES.find(x=>x.id===id); const opt = meta.opts.find(o=>o.c===val);
             const valStr = (id===18) ? this.state.idx[18] : (opt ? opt.l : val);
             const bg = index % 2 === 0 ? 'var(--bg-white)' : 'var(--bg-light)';
-            specHtml += `<tr style="background:${bg}; border-bottom:1px solid var(--border);"><td style="padding:8px; color:#666; width:40%;">${meta.n}</td><td style="padding:8px; font-weight:bold; text-align:right;">${valStr}</td></tr>`;
+            specHtml += `<tr style="background:${bg}; border-bottom:1px solid #eee;"><td style="padding:8px; color:#666; width:40%;">${meta.n}</td><td style="padding:8px; font-weight:bold; text-align:right;">${valStr}</td></tr>`;
         });
         const tableArea = document.getElementById('pdfSpecsTable');
         if(tableArea) tableArea.innerHTML = specHtml;
@@ -411,10 +390,5 @@ const app = {
         setTimeout(() => c.innerHTML = '', time);
     }
 };
-
-function toggleAcc(el) {
-    el.classList.toggle('active');
-    el.nextElementSibling.classList.toggle('open');
-}
 
 app.init();

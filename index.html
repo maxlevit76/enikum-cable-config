@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENICUM Configurator v20.0 (Dashboard)</title>
+    <title>ENICUM Configurator v21.0</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,15 +24,9 @@
     </div>
     
     <div class="tools-zone">
-        <div class="tool-btn" onclick="app.resetAll()" title="Сброс конфигурации"><i class="fas fa-undo"></i></div>
-        <a href="tel:+74950000000" class="phone-link"><i class="fas fa-phone"></i> CALL</a>
+        <div class="tool-btn" onclick="app.resetAll()" title="Сброс"><i class="fas fa-undo"></i></div>
+        <a href="tel:+74951234567" class="phone-link"><i class="fas fa-phone"></i> CALL</a>
     </div>
-</div>
-
-<div class="cat-tabs">
-    <div class="cat-btn active" onclick="app.setCat('BUS', this)">BUS (Интерфейс)</div>
-    <div class="cat-btn" onclick="app.setCat('SIGNAL', this)">SIGNAL (Монтаж)</div>
-    <div class="cat-btn" onclick="app.setCat('CONTROL', this)">CONTROL (Сила)</div>
 </div>
 
 <div id="sysAlert" class="sys-alert-block">
@@ -488,17 +482,17 @@
         </table>
         
         <div style="margin-top:30px; font-size:10px; color:#999; border-top:1px solid #eee; padding-top:10px;">
-            Сформировано в ENICUM Configurator v20.0
+            Сформировано в ENICUM Configurator
         </div>
     </div>
     
-    <div class="fab-download" onclick="app.downloadPDF()" style="position:fixed; bottom:50px; right:20px; width:50px; height:50px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); cursor:pointer; font-size:20px;">
+    <div class="fab-download" onclick="app.downloadPDF()" style="position:fixed; bottom:60px; right:20px; width:50px; height:50px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); cursor:pointer; font-size:20px; z-index: 2500;">
         <i class="fas fa-file-pdf"></i>
     </div>
 </div>
 
 <div class="app-footer">
-    <div style="font-weight:bold; color:#ccc;">ENICUM v20.0</div>
+    <div style="font-weight:bold; color:#ccc;">ENICUM v21.0</div>
     <div class="footer-nav">
         <div class="footer-link" onclick="nav('conf')">КОНФИГУРАТОР</div>
         <div class="footer-link" onclick="nav('matrix')">СПРАВКА</div>
