@@ -1,4 +1,4 @@
-/* logic.js - v21.2: Scenario-Based Flow (User Logic) */
+/* logic.js - v21.1: Task Flow + Toggle Logic (Final) */
 
 window.nav = function(p) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
@@ -18,15 +18,11 @@ const app = {
 
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Логика: Сценарий "От Задачи"']), 1000);
+        setTimeout(() => this.showToasts(['Система готова: v21.1']), 1000);
     },
 
     setCat(cat, btn) {
         this.state.cat = cat;
-        if(btn) { 
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); 
-            btn.classList.add('active');
-        }
         this.doReset(cat);
     },
 
@@ -49,13 +45,21 @@ const app = {
     },
 
     updateVal(id, val) {
-        this.state.idx[id] = val;
-        if (id === 1) {
-            if (val === 'Вз' && this.state.idx[8] !== 'з') { 
-                this.state.idx[8] = 'з'; 
-                this.showToasts(['Вз: добавлено заполнение']); 
-            }
+        // ЛОГИКА ТУМБЛЕРА (TOGGLE)
+        // Если кликнули на то, что уже выбрано -> Сбрасываем в "" (Нет)
+        // Но только если это не обязательные поля (Изоляция #2 и Оболочка #9)
+        if (this.state.idx[id] === val && id !== 2 && id !== 9) {
+             this.state.idx[id] = ""; // Выключить
+        } else {
+             this.state.idx[id] = val; // Включить
         }
+
+        // Спец-логика Ex-d (Вз -> з)
+        if (id === 1 && this.state.idx[1] === 'Вз' && this.state.idx[8] !== 'з') {
+             this.state.idx[8] = 'з'; 
+             this.showToasts(['Вз: добавлено заполнение']);
+        }
+        
         this.calculateState();
         this.updateUI();
     },
@@ -122,11 +126,9 @@ const app = {
         if (!this.state.validIns.includes(s[2]) && this.state.validIns.length > 0) {
              if(cat==='BUS' && this.state.validIns.includes('Пв')) s[2] = 'Пв';
              else s[2] = this.state.validIns[0];
-             msgs.push(`Изоляция -> ${s[2]}`);
         }
         if (!this.state.validJacket.includes(s[9]) && this.state.validJacket.length > 0) {
              s[9] = this.state.validJacket[0];
-             msgs.push(`Оболочка -> ${s[9]}`);
         }
 
         if (s[16] === '-УФ' || s[9] === 'Пэ') s[24] = 'Черный';
@@ -160,48 +162,38 @@ const app = {
         if(this.state.msgs.length) { this.showToasts(this.state.msgs); this.state.msgs = []; }
     },
 
-    // === ГЕНЕРАТОР ПЛИТКИ (ПОРЯДОК: СУТЬ -> БЕЗОПАСНОСТЬ -> ЗАЩИТА -> КОНСТРУКТИВ) ===
+    // === ГЕНЕРАТОР ПЛИТКИ (НОВЫЙ ПОРЯДОК) ===
     renderDashboard() {
         const grid = document.getElementById('dashboardGrid');
         if (!grid) return;
         grid.innerHTML = '';
 
-        // 0. КАТЕГОРИЯ (ВСЕГДА ПЕРВАЯ)
         grid.innerHTML += this.getCategoryTile();
 
-        // ЛОГИЧЕСКИЙ ПОРЯДОК БЛОКОВ
+        // Порядок "ОТ ЗАДАЧИ" (Твой сценарий)
         const renderOrder = [
-            // 1. СУТЬ: ЧТО ЭТО? (Протокол -> Геометрия -> Гибкость)
-            23, // Протокол (только для BUS)
-            18, // ГЕОМЕТРИЯ (Сердце)
+            // 1. СУТЬ
+            23, // Протокол
+            18, // ГЕОМЕТРИЯ (Спец)
             19, // Гибкость
-
-            // 2. БЕЗОПАСНОСТЬ: ГДЕ ЛЕЖИТ? (Огонь -> Взрыв -> Ex-i)
-            11, // Пожарная безопасность
-            1,  // Взрывозащита
-            21, // Искробезопасность
-
-            // 3. ЗАЩИТА: ОТ ЧЕГО СПАСАЕМ? (Экраны -> Броня -> Климат -> Агрессия)
-            4,  // Экран Пары
-            6,  // Экран Общий
+            
+            // 2. БЕЗОПАСНОСТЬ
+            11, // Пожарка
+            1,  // Взрыв
+            21, // Ex-i
+            
+            // 3. ЗАЩИТА
+            4, 6, // Экраны
             10, // Броня
             12, // Климат
-            16, // УФ
-            13, // Масло
-            14, // Химия
-            15, // Термостойкость
-            17, // Грызуны
-            7,  // Водоблокировка (тоже защита)
-
-            // 4. КОНСТРУКТИВ: ИЗ ЧЕГО СДЕЛАН? (Материалы -> Вольтаж -> Цвет)
-            2,  // Изоляция
-            9,  // Оболочка
-            3,  // Барьер Пары
-            5,  // Барьер Общий
-            20, // Покрытие жилы
-            8,  // Заполнение
+            13, 14, 15, 16, 17, // Среда
+            7, // Водоблокировка
+            
+            // 4. КОНСТРУКТИВ
+            2, 9, // Материалы
             22, // Напряжение
-            24  // Цвет
+            24, // Цвет
+            3, 5, 8, 20 // Техничка
         ];
 
         renderOrder.forEach(id => {
@@ -218,9 +210,10 @@ const app = {
         let html = '';
         cats.forEach(c => {
             const isActive = (this.state.cat === c.id);
+            // Используем стандартный класс opt-item для единообразия
             html += `<div class="opt-item ${isActive ? 'active' : ''}" onclick="app.setCat('${c.id}')">${c.lbl}</div>`;
         });
-        return `<div class="param-tile tile-category"><div class="tile-header"><span style="font-weight:bold; color:var(--dark);">КАТЕГОРИЯ</span><span class="tile-id">TYPE</span></div><div class="opt-list" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px;">${html}</div></div>`;
+        return `<div class="param-tile tile-category"><div class="tile-header"><span style="font-weight:bold; color:var(--dark);">КАТЕГОРИЯ</span><span class="tile-id">TYPE</span></div><div class="opt-list" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px;">${html}</div></div>`;
     },
 
     getGeoTile() {
@@ -228,7 +221,6 @@ const app = {
         const lim = DB.LIMITS[cat];
         
         let typesHtml = lim.types.map(t => `<option value="${t}" ${this.state.geo.type===t?'selected':''}>${DB.GEO_TYPES.find(x=>x.c===t).l}</option>`).join('');
-        
         let sList = lim.valid_S;
         if(this.state.geo.type === 'vfd') sList = sList.filter(s => ['1.5','2.5','4.0','6.0'].includes(s));
         if(cat === 'BUS') { const p = this.state.idx[23] || ''; const r = lim.proto[p] || lim.proto['']; sList = r.S; }
@@ -245,16 +237,21 @@ const app = {
 
     getParamTile(meta) {
         const val = this.state.idx[meta.id];
-        let optionsHtml = meta.opts.map(o => {
+        
+        // ФИЛЬТРАЦИЯ: Убираем опцию "" (Нет) из визуального списка
+        // Мы оставляем только те опции, у которых есть код (o.c !== "")
+        let visibleOpts = meta.opts.filter(o => o.c !== "");
+
+        let optionsHtml = visibleOpts.map(o => {
             const isActive = (val === o.c);
             let isDisabled = false;
             if (meta.id === 2 && !this.state.validIns.includes(o.c)) isDisabled = true;
             if (meta.id === 9 && !this.state.validJacket.includes(o.c)) isDisabled = true;
             
             const classes = `opt-item ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`;
-            const label = o.c === "" ? "Нет" : o.c;
-            return `<div class="${classes}" onclick="app.updateVal(${meta.id}, '${o.c}')" title="${o.l}">${label}</div>`;
+            return `<div class="${classes}" onclick="app.updateVal(${meta.id}, '${o.c}')" title="${o.l}">${o.c}</div>`;
         }).join('');
+
         return `<div class="param-tile"><div class="tile-header"><span>${meta.n}</span><span class="tile-id">#${meta.id}</span></div><div class="opt-list">${optionsHtml}</div></div>`;
     },
 
