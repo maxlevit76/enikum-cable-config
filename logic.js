@@ -1,12 +1,11 @@
 /* ==========================================================================
    PROJECT: ENICUM CONFIGURATOR
-   VERSION: v22.0 (Modular Logic)
+   VERSION: v23.3 (Dashboard Icons Logic)
    FILE:    [L] logic.js
-   DESC:    Ядро. Логика v21.1 (Toggle + Task Flow) в структуре v22.0.
+   DESC:    Ядро v21.1 + Новая отрисовка иконок (всегда видны).
    ========================================================================== */
 
-// --- [L-01] НАВИГАЦИЯ ---
-window.nav = function(p) {
+   window.nav = function(p) {
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
     document.getElementById('p-'+p).classList.add('active');
     if(p === 'matrix') app.renderMatrix();
@@ -15,7 +14,7 @@ window.nav = function(p) {
 }
 
 const app = {
-    // --- [L-02] СОСТОЯНИЕ (STATE) ---
+    // --- [L-02] STATE ---
     state: { 
         cat: 'BUS', 
         geo: { N:1, type:'x2x', S:'0.60' }, 
@@ -23,10 +22,10 @@ const app = {
         validIns: [], validJacket: [], msgs: [] 
     },
 
-    // --- [L-03] ИНИЦИАЛИЗАЦИЯ ---
+    // --- [L-03] INIT ---
     init() { 
         this.setCat('BUS'); 
-        setTimeout(() => this.showToasts(['Система готова: v22.0']), 1000);
+        setTimeout(() => this.showToasts(['Система готова: v23.3']), 1000);
     },
 
     setCat(cat) {
@@ -37,15 +36,11 @@ const app = {
     resetAll() { this.doReset(this.state.cat); },
 
     doReset(cat) {
-        // Очистка
         for(let i=1; i<=24; i++) this.state.idx[i] = "";
-        
-        // Загрузка дефолтов из [D-02] LIMITS
         const defs = DB.LIMITS[cat].defaults;
         for(const [k,v] of Object.entries(defs)) this.state.idx[k] = v;
         this.state.idx[22] = DB.LIMITS[cat].volt;
         
-        // Дефолты геометрии
         if(cat==='BUS') this.state.geo = {N:1, type:'x2x', S:'0.60'};
         if(cat==='SIGNAL') this.state.geo = {N:2, type:'x2x', S:'0.75'};
         if(cat==='CONTROL') this.state.geo = {N:5, type:'x', S:'1.5'};
@@ -56,18 +51,16 @@ const app = {
         this.updateUI();
     },
 
-    // --- [L-04] ОБРАБОТКА ВВОДА (HANDLERS) ---
+    // --- [L-04] HANDLERS ---
     updateVal(id, val) {
-        // ЛОГИКА ТУМБЛЕРА (TOGGLE)
-        // Если кликнули на то, что уже выбрано -> Сбрасываем в "" (Нет)
-        // Но только если это не обязательные поля (Изоляция #2 и Оболочка #9)
+        // TOGGLE LOGIC (Тумблер из v21.1)
         if (this.state.idx[id] === val && id !== 2 && id !== 9) {
-             this.state.idx[id] = ""; // Выключить
+             this.state.idx[id] = ""; 
         } else {
-             this.state.idx[id] = val; // Включить
+             this.state.idx[id] = val;
         }
 
-        // Спец-логика Ex-d (Вз -> з)
+        // Ex-d logic
         if (id === 1 && this.state.idx[1] === 'Вз' && this.state.idx[8] !== 'з') {
              this.state.idx[8] = 'з'; 
              this.showToasts(['Вз: добавлено заполнение']);
@@ -84,13 +77,12 @@ const app = {
         this.updateUI(); 
     },
 
-    // --- [L-05] ЯДРО ЛОГИКИ (CALCULATE) ---
+    // --- [L-05] CORE CALCULATION (From v21.1) ---
     calculateState() {
         const s = this.state.idx;
         const cat = this.state.cat;
         let msgs = [];
         
-        // 1. Сбор требований
         const req = { minT: -50, hf: false, fr: false, oil: false, chem: false, uv: false, flex: 1 };
         const fireCode = s[11] || "";
         
@@ -104,7 +96,6 @@ const app = {
         if (s[19] === '(5)') req.flex = 1; 
         if (s[19] === '(6)') req.flex = 2;
 
-        // 2. Правила
         if (cat === 'BUS') {
             if (req.fr) { if (s[3] !== 'Си') s[3] = 'Си'; } 
             else { if (s[3] === 'Си') s[3] = ''; }
@@ -116,7 +107,6 @@ const app = {
             if (['Эа','Эм','ЭИа','ЭИм'].includes(s[4])) s[4] = 'ЭИо';
         }
 
-        // 3. Фильтр Материалов
         const isCompatible = (matCode, type) => {
             let key = (type === 'jacket') ? 'J_' + matCode : matCode;
             let p = DB.MAT_PROPS[key];
@@ -144,7 +134,6 @@ const app = {
         this.state.validIns = allIns.filter(c => isCompatible(c, 'ins'));
         this.state.validJacket = allJacket.filter(c => isCompatible(c, 'jacket'));
 
-        // 4. Авто-коррекция
         if (!this.state.validIns.includes(s[2]) && this.state.validIns.length > 0) {
              if(cat==='BUS' && this.state.validIns.includes('Пв')) s[2] = 'Пв';
              else s[2] = this.state.validIns[0];
@@ -153,7 +142,6 @@ const app = {
              s[9] = this.state.validJacket[0];
         }
 
-        // 5. Авто-цвет
         if (s[16] === '-УФ' || s[9] === 'Пэ') s[24] = 'Черный';
         else if (req.fr) s[24] = 'Оранжевый';
         else if (s[21] === 'i') s[24] = 'Синий'; 
@@ -185,7 +173,64 @@ const app = {
         if(this.state.msgs.length) { this.showToasts(this.state.msgs); this.state.msgs = []; }
     },
 
-    // --- [L-06] РЕНДЕР ПЛИТКИ (DASHBOARD GRID) ---
+    // --- [L-07] НОВАЯ ЛОГИКА ИКОНОК (Active/Inactive) ---
+    renderIcons() {
+        const c = document.getElementById('headerIcons');
+        if(!c) return;
+        c.innerHTML = '';
+        const s = this.state.idx;
+
+        // Хелпер для подсчета экранов
+        const countL = (val) => {
+            if(!val) return 0;
+            if(['Экл','Экм','ЭИкл','ЭИкм'].includes(val)) return 3;
+            if(['Эал','Эмо','ЭИал','ЭИмо'].includes(val)) return 2;
+            return 1;
+        };
+        const scrCnt = countL(s[4]) + countL(s[6]);
+
+        // Конфигурация панели (Иконки фиксированы)
+        const dashboard = [
+            { id: 'ex',   active: (s[21]==='i' || s[1]==='Вз'), col: (s[21]==='i'?'#0D6EFD':'#000'), txt: 'Ex', bdg: (s[21]==='i'?'i':'') },
+            { id: 'fire', active: (s[11] && s[11].includes('FR')), col: '#DC3545', ic: 'fa-fire', bdg: (s[5]==='С'||s[3]==='Си'?'x2':'') },
+            { id: 'hf',   active: (s[11] && (s[11].includes('HF') || s[11].includes('LTx'))), col: '#198754', ic: 'fa-leaf', bdg: (s[11].includes('LTx')?'LTx':'HF') },
+            { id: 'clim', active: (s[12]), col: (s[12]==='-Т'?'#FFC107':(s[12]==='-М'?'#0DCAF0':'#0D6EFD')), ic: (s[12]==='-Т'?'fa-sun':(s[12]==='-М'?'fa-water':'fa-snowflake')), bdg: (s[12]==='-ЭХЛ'?'x2':'') },
+            { id: 'oil',  active: (s[13]==='-МБ'), col: '#000', ic: 'fa-tint' },
+            { id: 'chem', active: (s[14]==='-ХС'), col: '#6610f2', ic: 'fa-flask' },
+            { id: 'uv',   active: (s[16]==='-УФ'), col: '#212529', ic: 'fa-sun', bdg: 'UV' },
+            { id: 'flex', active: (s[19]==='(5)'||s[19]==='(6)'), col: (s[19]==='(6)'?'#343a40':'#6c757d'), ic: (s[19]==='(6)'?'fa-robot':'fa-rainbow') },
+            { id: 'scr',  active: (scrCnt > 0), col: '#6c757d', ic: 'fa-border-all', bdg: (scrCnt>1 ? 'x'+scrCnt : '') },
+            { id: 'arm',  active: (s[10]), col: '#6c757d', ic: 'fa-shield-alt', bdg: (s[10]==='КБ'?'x3':(s[10]==='Б'||s[10]==='Кп'?'x2':'')) }
+        ];
+
+        dashboard.forEach(item => {
+            const div = document.createElement('div');
+            // Добавляем класс inactive или active для CSS
+            div.className = `icon-badge ${item.active ? 'active' : 'inactive'}`;
+            
+            // Если иконка активна, применяем её цвет (иначе она будет серой через CSS)
+            if (item.active) {
+                if (item.col && item.col !== '#000') div.style.borderColor = item.col;
+                // Особая логика для желтого цвета (чтобы иконка была темной на желтом)
+                if (item.id === 'clim' && item.col === '#FFC107') div.style.color = '#212529'; 
+            }
+
+            // Контент
+            let inner = item.ic ? `<i class="fas ${item.ic}"></i>` : item.txt;
+            
+            // Если активна, красим саму иконку
+            if(item.active && item.col) div.style.color = (item.col === '#FFC107' ? '#000' : item.col);
+            
+            div.innerHTML = inner;
+            
+            // Бейджик рисуем только если активна
+            if (item.active && item.bdg) {
+                div.innerHTML += `<div class="icon-sub">${item.bdg}</div>`;
+            }
+            c.appendChild(div);
+        });
+    },
+
     renderDashboard() {
         const grid = document.getElementById('dashboardGrid');
         if (!grid) return;
@@ -195,28 +240,10 @@ const app = {
 
         // Порядок "ОТ ЗАДАЧИ" (Task Flow)
         const renderOrder = [
-            // 1. СУТЬ
-            23, // Протокол
-            18, // ГЕОМЕТРИЯ
-            19, // Гибкость
-            
-            // 2. БЕЗОПАСНОСТЬ
-            11, // Пожарка
-            1,  // Взрыв
-            21, // Ex-i
-            
-            // 3. ЗАЩИТА
-            4, 6, // Экраны
-            10, // Броня
-            12, // Климат
-            13, 14, 15, 16, 17, // Среда
-            7, // Водоблокировка
-            
-            // 4. КОНСТРУКТИВ
-            2, 9, // Материалы
-            22, // Напряжение
-            24, // Цвет
-            3, 5, 8, 20 // Техничка
+            23, 18, 19, // Суть
+            11, 1, 21,  // Безопасность
+            4, 6, 10, 12, 13, 14, 15, 16, 17, 7, // Защита
+            2, 9, 22, 24, 3, 5, 8, 20 // Конструктив
         ];
 
         renderOrder.forEach(id => {
@@ -235,134 +262,50 @@ const app = {
             const isActive = (this.state.cat === c.id);
             html += `<div class="opt-item ${isActive ? 'active' : ''}" onclick="app.setCat('${c.id}')">${c.lbl}</div>`;
         });
-        return `<div class="param-tile tile-category"><div class="tile-header"><span style="font-weight:bold; color:#fff;">КАТЕГОРИЯ</span><span class="tile-id">TYPE</span></div><div class="opt-list" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px;">${html}</div></div>`;
+        return `<div class="param-tile tile-category"><div class="tile-header"><span style="font-weight:bold; color:var(--brand-black);">КАТЕГОРИЯ</span><span class="tile-id">TYPE</span></div><div class="opt-list" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px;">${html}</div></div>`;
     },
 
     getGeoTile() {
         const cat = this.state.cat;
         const lim = DB.LIMITS[cat];
-        
         let typesHtml = lim.types.map(t => `<option value="${t}" ${this.state.geo.type===t?'selected':''}>${DB.GEO_TYPES.find(x=>x.c===t).l}</option>`).join('');
-        
         let sList = lim.valid_S;
         if(this.state.geo.type === 'vfd') sList = sList.filter(s => ['1.5','2.5','4.0','6.0'].includes(s));
         if(cat === 'BUS') { const p = this.state.idx[23] || ''; const r = lim.proto[p] || lim.proto['']; sList = r.S; }
         let sHtml = sList.map(s => `<option value="${s}" ${this.state.geo.S===s?'selected':''}>${s} мм²</option>`).join('');
-        
         let nList = [];
         if(cat === 'BUS') { const p = this.state.idx[23] || ''; nList = (lim.proto[p] || lim.proto['']).N; }
         else if(lim.get_valid_N) { nList = lim.get_valid_N(this.state.geo.S, this.state.geo.type); } 
         else { nList = [1,2,4]; }
         let nHtml = nList.map(n => `<option value="${n}" ${this.state.geo.N==n?'selected':''}>${n}</option>`).join('');
-        
         return `<div class="param-tile"><div class="tile-header"><span>ГЕОМЕТРИЯ</span><span class="tile-id">#18</span></div><div class="geo-box"><div class="geo-col-wrap" style="flex:0.6"><div class="geo-lbl">КОЛ-ВО</div><select class="geo-select" onchange="app.updateGeo('N',this.value)">${nHtml}</select></div><div class="geo-col-wrap" style="flex:1"><div class="geo-lbl">ТИП</div><select class="geo-select" onchange="app.updateGeo('type',this.value)">${typesHtml}</select></div><div class="geo-col-wrap" style="flex:0.8"><div class="geo-lbl">СЕЧЕНИЕ</div><select class="geo-select" onchange="app.updateGeo('S',this.value)">${sHtml}</select></div></div></div>`;
     },
 
     getParamTile(meta) {
         const val = this.state.idx[meta.id];
-        
-        // ФИЛЬТРАЦИЯ: Убираем опцию "" (Нет)
         let visibleOpts = meta.opts.filter(o => o.c !== "");
-
         let optionsHtml = visibleOpts.map(o => {
             const isActive = (val === o.c);
             let isDisabled = false;
-            // Валидация
             if (meta.id === 2 && !this.state.validIns.includes(o.c)) isDisabled = true;
             if (meta.id === 9 && !this.state.validJacket.includes(o.c)) isDisabled = true;
-            
             const classes = `opt-item ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`;
-            // hint берем из базы (где теперь лежит полный текст wiki)
             return `<div class="${classes}" onclick="app.updateVal(${meta.id}, '${o.c}')" title="${o.hint || o.l}">${o.c}</div>`;
         }).join('');
-
         return `<div class="param-tile"><div class="tile-header"><span>${meta.n}</span><span class="tile-id">#${meta.id}</span></div><div class="opt-list">${optionsHtml}</div></div>`;
     },
 
-    // --- [L-07] ИКОНКИ ---
-    renderIcons() {
-        const s = this.state.idx;
-        const c = document.getElementById('headerIcons');
-        if(!c) return;
-        c.innerHTML = '';
-        
-        const mkIcon = (active, color, txt, badge) => {
-            if(!active) return;
-            const div = document.createElement('div');
-            div.className = 'icon-badge active';
-            div.style.background = color; // В CSS перекрывается, но для кастомных цветов оставим
-            // Для совместимости с новым CSS, если color === #000, добавляем border
-            if(color === '#000') div.style.borderColor = '#333';
-            
-            div.innerHTML = txt;
-            if(badge) div.innerHTML += `<div class="icon-sub">${badge}</div>`;
-            c.appendChild(div);
-        }
-
-        const isEx = (s[21] === 'i' || s[1] === 'Вз');
-        mkIcon(isEx, s[21]==='i'?'#0D6EFD':'#000', 'Ex', s[21]==='i'?'i':'');
-        
-        let isFR = s[11] && s[11].includes('FR');
-        let frBadge = '';
-        if (isFR) {
-             let dbl = false;
-             if (this.state.cat === 'BUS') { if(s[5]==='С') dbl = true; }
-             else { if(s[5]==='С' || s[3]==='Си' || (s[2]&&s[2].startsWith('Р'))) dbl = true; }
-             if(dbl) frBadge = 'x2';
-        }
-        mkIcon(isFR, '#DC3545', '<i class="fas fa-fire"></i>', frBadge);
-
-        let isHF = (s[11] && (s[11].includes('HF') || s[11].includes('LTx')));
-        mkIcon(isHF, '#198754', '<i class="fas fa-leaf"></i>', s[11].includes('LTx')?'LTx':'HF');
-
-        let clim = s[12];
-        if(clim) {
-            let col = '#0D6EFD'; let icon = '<i class="fas fa-snowflake"></i>'; let badge = '';
-            if(clim==='-Т') { col='#FFC107'; icon='<i class="fas fa-sun"></i>'; }
-            if(clim==='-ЭХЛ') badge='x2';
-            if(clim==='-М') { col='#0DCAF0'; icon='<i class="fas fa-water"></i>'; }
-            mkIcon(true, col, icon, badge);
-        }
-
-        mkIcon(s[13]==='-МБ', '#000', '<i class="fas fa-tint"></i>');
-        mkIcon(s[14]==='-ХС', '#6610f2', '<i class="fas fa-flask"></i>');
-        mkIcon(s[16]==='-УФ', '#212529', '<i class="fas fa-sun"></i>', 'UV');
-        
-        if(s[19]==='(5)') mkIcon(true, '#6c757d', '<i class="fas fa-rainbow"></i>');
-        if(s[19]==='(6)') mkIcon(true, '#343a40', '<i class="fas fa-robot"></i>');
-
-        let scrCnt = 0;
-        const countL = (val) => {
-            if(!val) return 0;
-            if(['Экл','Экм','ЭИкл','ЭИкм'].includes(val)) return 3;
-            if(['Эал','Эмо','ЭИал','ЭИмо'].includes(val)) return 2;
-            return 1;
-        };
-        scrCnt = countL(s[4]) + countL(s[6]);
-        if(scrCnt > 0) mkIcon(true, '#6c757d', '<i class="fas fa-border-all"></i>', scrCnt>1?('x'+scrCnt):'');
-
-        let arm = s[10];
-        if(arm) {
-            let badge = '';
-            if(arm==='Б' || arm==='Кп') badge = 'x2';
-            if(arm==='КБ') badge = 'x3';
-            mkIcon(true, '#6c757d', '<i class="fas fa-shield-alt"></i>', badge);
-        }
-    },
-
-    // --- [L-08] ГЕНЕРАТОРЫ СПРАВОЧНИКА И PDF ---
     renderMatrix() {
         const c1 = document.getElementById('summaryTableArea');
         if (c1) {
             let html1 = '<table class="summary-table" style="width:auto; min-width:100%; border-collapse: collapse; font-size: 11px;"><thead><tr>';
-            DB.INDICES.forEach(idx => { html1 += `<th style="background:#111; color:white; padding:6px; border:1px solid #555;">${idx.id}</th>`; });
+            DB.INDICES.forEach(idx => { html1 += `<th style="background:#231F20; color:white; padding:6px; border:1px solid #555;">${idx.id}</th>`; });
             html1 += '</tr></thead><tbody><tr>';
             DB.INDICES.forEach(idx => {
                 html1 += `<td style="padding:0; border:1px solid #ccc; vertical-align:top; background:white;">`;
                 idx.opts.forEach(o => {
                     if (o.c) { 
                         const isActive = (app.state.idx[idx.id] === o.c);
-                        // Используем ОРАНЖЕВЫЙ (#F7931E) вместо синего (#0D6EFD) для соответствия новому стилю
                         const activeStyle = isActive ? 'background:#F7931E; color:black; font-weight:bold;' : ''; 
                         html1 += `<div style="padding:3px 4px; border-bottom:1px solid #eee; cursor:default; ${activeStyle}" title="${o.hint}">${o.c}</div>`;
                     }
@@ -378,7 +321,6 @@ const app = {
         const sku = document.getElementById('skuDisplay').innerText;
         document.getElementById('pdfSkuMain').innerText = sku;
         document.getElementById('pdfIcons').innerHTML = document.getElementById('headerIcons').innerHTML;
-        
         let specHtml = '';
         [18, 22, 23, 10, 11, 21].forEach((id, index) => {
             const val = this.state.idx[id]; if(!val && id !== 18) return;
