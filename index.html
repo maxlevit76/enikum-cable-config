@@ -3,30 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENICUM Configurator v22.0</title>
+    <title>ENICUM Configurator v23.1</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
     <link rel="stylesheet" href="style.css">
+    
+    <style>
+        :root { --img-cable: url('кабель в шапку.jpg'); } 
+    </style>
 </head>
 <body>
 
 <div class="app-header">
-    <div class="brand-zone">
-        <div class="brand-logo-header"></div>
+    <div class="header-cable-art"></div>
+    <div class="header-logo-zone">
+        <div class="brand-logo-img"></div>
     </div>
+</div>
+
+<div id="heroBlock" class="hero-section">
+    <div class="hero-title">Конфигуратор кабеля для промышленной автоматизации "ЭНИКУМ"</div>
     
-    <div class="sku-zone">
-        <div class="sku-val" id="skuDisplay">...</div>
-        <div class="icon-line" id="headerIcons"></div>
+    <div class="hero-text">
+        <p>В отличие от складских марок, ЭНИКУМ является универсальным кабелем и изготавливается под конкретные проектные требования заказчика, чем обуславливается его назначение, конструктив, технические характеристики и свойства.</p>
+        
+        <p>Вместо того, чтобы сравнивать и выбирать из каталогов подходящую модель, мы предлагаем Вам создать ее под конкретные требования Вашего проекта.</p>
+        
+        <p>Выбирая необходимые параметры в фильтрах, вы создаете как в конструкторе свой продукт, свое уникальное техническое решение.</p>
+        
+        <p>Для удобства и систематизации подбора и во избежание проектных ошибок, продуктовая матрица "Эникум" условно разделена на три фундаментальные категории: <b>Bus</b> (Интерфейсные), <b>Signal</b> (Монтажные) и <b>Control</b> (Контроль и Управление).</p>
+        
+        <p>Выбрав необходимую Вам категорию, вы увидите базовый артикул (в минимальной комплектации). Используйте фильтры, выбирая параметры под свои потребности. Артикул автоматически генерируется, так что Вы можете наблюдать изменения в реальном времени.</p>
+        
+        <p>Используйте кнопку сброс, если Вам необходимо вернуться в базовый артикул. После завершения подбора Вы можете открыть страницу с техническими параметрами сформированного Вами проектного решения, а также направить запрос в техническую службу "Эникум" для получения разъяснений или коммерческого предложения.</p>
+        
+        <p><b>Надеемся, наш инструмент подбора будет удобным и полезным для Вас! Команда разработки кабельных решений "Эникум".</b></p>
     </div>
-    
-    <div class="tools-zone">
-        <div class="tool-btn" onclick="app.resetAll()" title="Сброс конфигурации"><i class="fas fa-undo"></i></div>
-        <a href="tel:+74950000000" class="phone-link"><i class="fas fa-phone"></i> CALL</a>
+</div>
+
+<div class="sku-panel-wrapper">
+    <div class="sku-flex-container">
+        <div style="width:40px;"></div>
+        
+        <div class="sku-center-block">
+            <div class="sku-main-val" id="skuDisplay">...</div>
+            <div class="icon-line" id="headerIcons"></div>
+        </div>
+        
+        <div class="reset-zone">
+            <div class="btn-reset-round" onclick="app.resetAll()" title="Сброс к базовому">
+                <i class="fas fa-undo"></i>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -490,7 +520,7 @@
 </div>
 
 <div class="app-footer">
-    <div style="font-weight:bold; color:#666;">ENICUM v22.0</div>
+    <div style="font-weight:bold; color:#666;">ENICUM v23.1</div>
     <div class="footer-nav">
         <div class="footer-link" onclick="nav('conf')">КОНФИГУРАТОР</div>
         <div class="footer-link" onclick="nav('matrix')">СПРАВКА</div>
