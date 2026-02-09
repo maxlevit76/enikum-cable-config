@@ -1,0 +1,295 @@
+/* ==========================================================================
+   PROJECT: ENICUM CONFIGURATOR
+   VERSION: v22.3 (Clean Header)
+   FILE:    [S] style.css
+   DESC:    Корпоративный стиль. 
+   FIX:     Цвет хэдера #231F20. Убраны вертикальные разделители в шапке.
+   ========================================================================== */
+
+/* --- [S-01] ПЕРЕМЕННЫЕ И ЦВЕТА (SSOT) --- */
+:root {
+    /* Brand Colors */
+    --brand-orange: #F7931E; 
+    
+    /* Цвет Rich Black с логотипа (RGB 35, 31, 32) */
+    --brand-black:  #231F20; 
+    
+    --brand-milk:   #F7F7F7; /* Молочный (фон страницы) */
+    
+    /* Semantic Colors */
+    --c-active:     #212529; 
+    --c-text:       #212529;
+    --c-text-mute:  #6C757D;
+    --c-border:     #DEE2E6; 
+    
+    /* Statuses */
+    --st-bus:       #0D6EFD; 
+    --st-signal:    #198754; 
+    --st-fire:      #DC3545; 
+
+    /* Assets */
+    --logo-header:  url('https://enikum.ru/img/logo_dark.jpg'); 
+    --logo-doc:     url('https://enikum.ru/img/logo_light.jpg');
+    
+    /* Legacy Compat */
+    --bus: #0D6EFD; --signal: #198754; --fire: #DC3545;
+}
+
+/* --- [S-02] БАЗОВЫЙ СБРОС И ТИПОГРАФИКА --- */
+* { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
+body { 
+    margin: 0; padding: 0; 
+    font-family: 'Roboto Condensed', sans-serif; 
+    background-color: var(--brand-milk); 
+    color: var(--c-text); 
+    padding-bottom: 50px; 
+    font-size: 11px; 
+    line-height: 1.4;
+}
+
+/* --- [S-03] ХЭДЕР (HEADER MODULE) --- */
+.app-header {
+    display: grid;
+    grid-template-columns: 20% 60% 20%; 
+    min-height: 64px; 
+    background: var(--brand-black); 
+    border-bottom: 1px solid #3a3638; /* Только нижняя граница осталась */
+    position: sticky; top: 0; z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.brand-zone {
+    display: flex; align-items: center; justify-content: center;
+    /* border-right убран */
+    background: var(--brand-black);
+}
+.brand-logo-header {
+    width: 140px; height: 40px;
+    background-image: var(--logo-header);
+    background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+
+.sku-zone {
+    display: flex; flex-direction: column; 
+    align-items: center; justify-content: center;
+    padding: 5px 15px;
+    background: var(--brand-black);
+    overflow: hidden;
+}
+.sku-val { 
+    font-family: 'Oswald', sans-serif; 
+    font-weight: 500;
+    font-size: clamp(14px, 1.4vw, 20px); 
+    color: #FFFFFF; 
+    text-align: center;
+    letter-spacing: 0.5px;
+    white-space: normal; 
+    word-break: break-word;
+    line-height: 1.2;
+}
+
+.tools-zone {
+    display: flex; flex-direction: column; 
+    align-items: center; justify-content: center; gap: 6px;
+    /* border-left убран */
+    background: var(--brand-black);
+}
+.tool-btn { 
+    cursor: pointer; font-size: 16px; color: #888; transition: 0.2s; 
+}
+.tool-btn:hover { color: var(--brand-orange); transform: scale(1.1); }
+.phone-link { 
+    font-size: 11px; font-weight: bold; text-decoration: none; color: #fff; letter-spacing: 0.5px;
+}
+
+/* --- [S-04] ИКОНКИ И БЕЙДЖИ (ICONS) --- */
+.icon-line { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; justify-content: center; }
+
+.icon-badge {
+    position: relative;
+    width: 16px; height: 16px; border-radius: 2px;
+    background: #3a3638; color: #aaa;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; border: 1px solid #4a4648;
+}
+.icon-badge.active { 
+    color: #fff; border-color: rgba(255,255,255,0.3); 
+    box-shadow: 0 0 4px rgba(247, 147, 30, 0.3);
+}
+.icon-badge.active[style*="FFC107"] { color: #212529 !important; }
+
+.icon-sub {
+    position: absolute; bottom: -3px; right: -3px;
+    font-size: 7px; font-weight: 800; color: #000;
+    background: #fff; padding: 0 1px; border-radius: 2px;
+    line-height: 1; 
+    border: 1px solid #000;
+    z-index: 10;
+}
+
+/* --- [S-05] СЕТКА DASHBOARD (GRID LAYOUT) --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 6px; 
+    padding: 6px;
+}
+
+/* --- [S-06] ДИЗАЙН ПЛИТКИ (CARD STYLE) --- */
+.param-tile {
+    background: #FFFFFF; 
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+    border: 1px solid #E0E0E0;
+    display: flex; flex-direction: column;
+    height: 100%;
+}
+
+.tile-header {
+    font-family: 'Oswald'; font-size: 11px; text-transform: uppercase;
+    color: #888; margin-bottom: 8px; 
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 2px solid var(--brand-orange); 
+    padding-bottom: 4px;
+}
+.tile-id { 
+    font-size: 9px; background: #F0F0F0; padding: 1px 4px; 
+    border-radius: 3px; color: #555; font-family: monospace; border: 1px solid #ddd;
+}
+
+/* --- [S-07] КНОПКИ ОПЦИЙ (BUTTONS) --- */
+.opt-list {
+    display: flex; flex-wrap: wrap; gap: 4px;
+}
+
+.opt-item {
+    border: 1px solid var(--c-border);
+    padding: 6px 2px;
+    font-size: 10px; font-weight: 500;
+    cursor: pointer;
+    border-radius: 3px;
+    flex-grow: 1; text-align: center;
+    background: #fff; color: var(--c-text);
+    transition: all 0.1s ease;
+}
+.opt-item:hover { 
+    border-color: var(--brand-orange); 
+    color: var(--brand-orange);
+    z-index: 2; transform: translateY(-1px);
+}
+.opt-item.active {
+    background: var(--brand-black); 
+    color: #fff;
+    border-color: var(--brand-black); 
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.opt-item.disabled {
+    opacity: 0.3; pointer-events: none; 
+    background: #f8f9fa; color: #adb5bd;
+    text-decoration: line-through;
+    border-color: #eee;
+    box-shadow: none;
+}
+
+/* --- [S-08] ПЛИТКА КАТЕГОРИИ (БЕЛАЯ) --- */
+.param-tile.tile-category {
+    background: #FFFFFF; 
+    border: 1px solid #E0E0E0; 
+}
+.tile-category .tile-header { 
+    color: #000; border-bottom: 2px solid #000; 
+}
+.tile-category .opt-item { 
+    font-weight: bold; border-color: #ccc;
+}
+.tile-category .opt-item.active {
+    background: var(--brand-orange); 
+    color: #000; border-color: var(--brand-orange);
+}
+
+/* --- [S-09] ГЕОМЕТРИЯ (INPUTS) --- */
+.geo-box { display: flex; gap: 4px; }
+.geo-col-wrap { display: flex; flex-direction: column; }
+.geo-lbl { font-size: 9px; color: #999; margin-bottom: 2px; text-transform: uppercase; font-weight: bold;}
+.geo-select { 
+    width: 100%; padding: 4px; font-size: 11px; font-weight: bold;
+    border: 1px solid var(--c-border); border-radius: 3px; 
+    background: #fff; color: var(--c-text);
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.geo-select:focus { border-color: var(--brand-orange); }
+
+/* --- [S-10] ФУТЕР (FOOTER) --- */
+.app-footer {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: var(--brand-black); 
+    color: #888;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 20px; height: 32px; font-size: 10px; z-index: 2000;
+    border-top: 1px solid #3a3638;
+}
+.footer-nav { display: flex; gap: 20px; }
+.footer-link { 
+    cursor: pointer; text-transform: uppercase; font-weight: bold; 
+    color: #AAA; transition: 0.2s; 
+}
+.footer-link:hover { color: var(--brand-orange); opacity: 1;}
+
+/* --- [S-11] СТРАНИЦЫ (PDF, MATRIX) --- */
+.page { display: none; padding: 20px; }
+.page.active { display: block; animation: fadeIn 0.3s; }
+
+/* УБРАЛИ РАМКИ И ФОН ДЛЯ СПРАВОЧНИКА */
+.container { 
+    max-width: 1000px; margin: 0 auto; 
+    background: transparent;
+    box-shadow: none; border: none; padding: 0;
+}
+
+.section-title { font-family:'Oswald'; font-size:20px; margin-bottom:20px; border-bottom:4px solid var(--brand-orange); padding-bottom:5px; text-transform: uppercase; color: #000; }
+
+.paper-layout { font-family:'Roboto', sans-serif; font-size:13px; line-height:1.6; color:#212529; }
+.paper-layout h1 { font-family:'Oswald'; font-size:18px; margin:30px 0 15px; color:#000; border-bottom:1px solid #ddd; padding-bottom:5px; }
+.paper-layout h2 { 
+    font-family:'Roboto Condensed'; font-size:16px; font-weight:bold;
+    margin: 30px 0 10px; color: #000;
+    border-left: 4px solid var(--brand-orange); padding-left: 10px;
+}
+.paper-layout h3 { font-size:14px; font-weight:bold; margin-top:20px; color: #333; }
+.paper-layout p { margin-bottom:10px; text-align: justify; }
+.paper-layout ul { margin:10px 0; padding-left: 20px; }
+.paper-layout li { margin-bottom: 5px; }
+
+/* Таблицы (Без фона контейнера им нужен белый фон) */
+.science-table { width:100%; border-collapse:collapse; font-size:12px; margin:20px 0; border:1px solid #000; font-family: 'Roboto Condensed'; background: #fff; }
+.science-table th { background: var(--brand-black); color:#fff; padding:8px; font-weight:normal; text-transform:uppercase; border:1px solid #000; }
+.science-table td { border:1px solid #000; padding:8px; vertical-align: top; }
+.science-table tr:nth-child(even) { background-color: #F1F3F5; }
+
+.formula {
+    background: #fff; border: 1px solid #000; border-left: 4px solid var(--brand-orange);
+    padding: 15px; margin: 20px 0; 
+    font-family: "Times New Roman", serif; font-size: 16px; font-style: italic;
+    text-align: center;
+}
+
+.matrix-scroll-wrap { overflow-x:auto; border:1px solid #000; margin-bottom:30px; background: #fff; }
+.summary-table { width:100%; border-collapse:collapse; font-size:11px; }
+.summary-table th { background:var(--brand-black); color:#fff; padding:6px; border:1px solid #000; }
+.summary-table td { border:1px solid #000; padding:4px; text-align:center; }
+
+/* --- [S-12] УВЕДОМЛЕНИЯ (TOASTS) --- */
+.toast-container { position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); z-index: 3000; }
+.toast { 
+    background: var(--brand-black); color: #fff; 
+    padding: 10px 15px; border-radius: 4px; font-size: 12px; 
+    margin-top: 5px; border-left: 3px solid var(--st-signal); 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+}
+.toast.danger { border-left-color: var(--st-fire); }
+
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }

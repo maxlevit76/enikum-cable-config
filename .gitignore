@@ -1,9 +1,0 @@
-# Backup files
-_BACKUPS/
-
-# Log files
-*.log
-firebase-debug.log
-
-# VS Code settings
-.vscode/
