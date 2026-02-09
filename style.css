@@ -57,8 +57,7 @@ body {
     width: 75%; height: 100%;
     background-image: var(--img-cable); 
     background-size: cover; background-position: left center; background-repeat: no-repeat;
-    mask-image: linear-gradient(to right, black 80%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
+    
 }
 
 .header-logo-zone {
