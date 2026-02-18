@@ -54,7 +54,7 @@ body {
 }
 
 .header-cable-art {
-    width: 75%; height: 100%;
+    width: 75%; height: 50%;
     background-image: var(--img-cable); 
     background-size: auto 10%; background-position: left center; background-repeat: no-repeat;
     
